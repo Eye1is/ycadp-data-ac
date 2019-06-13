@@ -67,7 +67,6 @@
 			<name>maven-releases</name>
 			<url>https://nexus.broadtext.cn/repository/maven-releases/</url>
 		</repository>
-
 	</distributionManagement>
 
 </project>

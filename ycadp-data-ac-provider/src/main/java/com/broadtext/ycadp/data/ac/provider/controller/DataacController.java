@@ -127,6 +127,60 @@ public class DataacController {
         }
         return respEntity;
     }
+    
+    
+    
+    /**
+              * 查询数据源明细信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/data/datasource/{id}")
+    public RespEntity getDatasource(@PathVariable("id") String id){
+        try {
+            TBDatasourceConfig datasource = dataacService.findById(id);
+            RespEntity respEntity = null;
+            if(datasource != null) {
+            	respEntity = new RespEntity(RespCode.SUCCESS, datasource);
+            }else {
+            	respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+            }
+            return respEntity;
+        }catch (Exception e){
+            e.printStackTrace();
+            RespEntity respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE,e.getMessage());
+            return respEntity;
+        }
+    }
+    
+    /**
+              * 编辑数据源
+     * @param id
+     * @param datasourceConfig
+     * @return
+     */
+    @PutMapping("/data/datasource/{id}")
+    public RespEntity updateDatasource(@PathVariable("id") String id,@RequestBody TBDatasourceConfigVo datasourceConfig){
+        RespEntity respEntity=null;
+        TBDatasourceConfig dasource=dataacService.findById(id);
+        if(dasource != null) {
+        	 dasource.setDatasourceName(datasourceConfig.getDatasourceName());
+             dasource.setDatasourceType(datasourceConfig.getDatasourceType());
+             dasource.setConnectionIp(datasourceConfig.getConnectionIp());
+             dasource.setConnectionPort(datasourceConfig.getConnectionPort());
+             dasource.setDatasourceUserName(datasourceConfig.getDatasourceUserName());
+             dasource.setDatasourcePasswd(datasourceConfig.getDatasourcePasswd());
+             dasource.setDictSql(datasourceConfig.getDictSql());
+             dasource.setRemark(datasourceConfig.getRemark());
+             dasource.setSchemaDesc(datasourceConfig.getSchemaDesc());
+             dataacService.updateOne(dasource);
+             datasourceConfig.setId(id);
+             respEntity=new RespEntity(RespCode.SUCCESS,datasourceConfig);
+        }else {
+        	respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        }
+        return respEntity;
+    }
 
 
 }

@@ -10,7 +10,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 
-public class DataInfoForMySQLImpl extends DaoFactory implements DataInfoInterface{
+public class DataInfoForMySQLImpl extends DaoFactory {
     private final static String driverClass = "com.mysql.cj.jdbc.Driver";
     private TBDatasourceConfigVo dsConfigVo;
     private PreparedStatement ps;
@@ -47,7 +47,7 @@ public class DataInfoForMySQLImpl extends DaoFactory implements DataInfoInterfac
     }
 
     @Override
-    public List getAllData(TBDatasourceConfigVo dsConfigVo,String sql) {
+    public List<Map<String, Object>> getAllData(TBDatasourceConfigVo dsConfigVo,String sql) {
         System.out.println(" === " + sql);
         JdbcUtils.closeResultSet(this.rs);
         JdbcUtils.closeStatement(this.ps);

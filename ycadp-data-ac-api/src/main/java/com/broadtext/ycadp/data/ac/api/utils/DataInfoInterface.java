@@ -3,6 +3,7 @@ package com.broadtext.ycadp.data.ac.api.utils;
 import com.broadtext.ycadp.data.ac.api.vo.TBDatasourceConfigVo;
 
 import java.util.List;
+import java.util.Map;
 
 public interface DataInfoInterface {
 
@@ -10,7 +11,7 @@ public interface DataInfoInterface {
     public List<String> getAllTables(TBDatasourceConfigVo dsConfigVo);
 
     //根据信息获取所有该表下的数据
-    public List getAllData(TBDatasourceConfigVo dsConfigVo,String sql);
+    public List<Map<String, Object>> getAllData(TBDatasourceConfigVo dsConfigVo, String sql);
 
     //获取数据数量
     public Integer getDataCount(TBDatasourceConfigVo dsConfigVo,String sql);

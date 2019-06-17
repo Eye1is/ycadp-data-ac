@@ -25,7 +25,7 @@ public class TBDatasourceConfigVo {
     /** 连接ip地址 */
     private String connectionIp;
     /** 连接端口号 */
-    private String connectionPort;
+    private Integer connectionPort;
     /** 表数量 */
     private String tableCount;
     /** 文件ID */

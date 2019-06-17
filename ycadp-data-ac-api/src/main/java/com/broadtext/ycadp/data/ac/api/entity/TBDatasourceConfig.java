@@ -46,7 +46,7 @@ public class TBDatasourceConfig extends AbstractBaseEntity{
     private String connectionIp;
     /** 连接端口号 */
     @Column(name = "CONNECTION_PORT")
-    private String connectionPort;
+    private Integer connectionPort;
     /** 表数量 */
     @Column(name = "TABLE_COUNT")
     private String tableCount;

@@ -1,7 +1,7 @@
 package com.broadtext.ycadp.data.ac.api.utils;
 
 import com.alibaba.druid.pool.DruidPooledConnection;
-import com.broadtext.ycadp.data.ac.api.vo.TBDatasourceConfigVo;
+import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import java.sql.PreparedStatement;
@@ -12,24 +12,24 @@ import java.util.*;
 
 public class DataInfoForMySQLImpl extends DaoFactory {
     private final static String driverClass = "com.mysql.cj.jdbc.Driver";
-    private TBDatasourceConfigVo dsConfigVo;
+    private TBDatasourceConfig tbDatasourceConfig;
     private PreparedStatement ps;
     private ResultSet rs;
 
-    DataInfoForMySQLImpl(TBDatasourceConfigVo dsConfigVo){
-        this.dsConfigVo = dsConfigVo;
+    DataInfoForMySQLImpl(TBDatasourceConfig tbDatasourceConfig){
+        this.tbDatasourceConfig = tbDatasourceConfig;
     }
 
     @Override
-    public List<String> getAllTables(TBDatasourceConfigVo dsConfigVo) {
-        String url = "jdbc:mysql://" + this.dsConfigVo.getConnectionIp() + ":" + this.dsConfigVo.getConnectionPort() + "/"
-                + this.dsConfigVo.getDatasourceName()
+    public List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig) {
+        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
+                + this.tbDatasourceConfig.getDatasourceName()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
         try {
             DruidPooledConnection dsConnection =
                     dataSource.getDataSourceConnection(driverClass, url,
-                            this.dsConfigVo.getDatasourceUserName(), this.dsConfigVo.getDatasourcePasswd());
+                            this.tbDatasourceConfig.getDatasourceUserName(), this.tbDatasourceConfig.getDatasourcePasswd());
             this.ps = dsConnection.prepareStatement("SHOW TABLES;");
             this.rs = this.ps.executeQuery();
             List<String> _list = new ArrayList<String>();
@@ -47,18 +47,18 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     }
 
     @Override
-    public List<Map<String, Object>> getAllData(TBDatasourceConfigVo dsConfigVo,String sql) {
+    public List<Map<String, Object>> getAllData(TBDatasourceConfig tbDatasourceConfig,String sql) {
         System.out.println(" === " + sql);
         JdbcUtils.closeResultSet(this.rs);
         JdbcUtils.closeStatement(this.ps);
-        String url = "jdbc:mysql://" + this.dsConfigVo.getConnectionIp() + ":" + this.dsConfigVo.getConnectionPort() + "/"
-                + this.dsConfigVo.getDatasourceName()
+        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
+                + this.tbDatasourceConfig.getDatasourceName()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
         try {
             DruidPooledConnection dsConnection =
                     dataSource.getDataSourceConnection(driverClass, url,
-                            this.dsConfigVo.getDatasourceUserName(), this.dsConfigVo.getDatasourcePasswd());
+                            this.tbDatasourceConfig.getDatasourceUserName(), this.tbDatasourceConfig.getDatasourcePasswd());
             this.ps = dsConnection.prepareStatement(sql);
             this.rs = this.ps.executeQuery();
             if (this.rs == null) return Collections.EMPTY_LIST;
@@ -89,15 +89,15 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     }
 
     @Override
-    public Integer getDataCount(TBDatasourceConfigVo dsConfigVo, String sql) {
-        String url = "jdbc:mysql://" + this.dsConfigVo.getConnectionIp() + ":" + this.dsConfigVo.getConnectionPort() + "/"
-                + this.dsConfigVo.getDatasourceName()
+    public Integer getDataCount(TBDatasourceConfig tbDatasourceConfig, String sql) {
+        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
+                + this.tbDatasourceConfig.getDatasourceName()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
         try {
             DruidPooledConnection dsConnection =
                     dataSource.getDataSourceConnection(driverClass, url,
-                            this.dsConfigVo.getDatasourceUserName(), this.dsConfigVo.getDatasourcePasswd());
+                            this.tbDatasourceConfig.getDatasourceUserName(), this.tbDatasourceConfig.getDatasourcePasswd());
             this.ps = dsConnection.prepareStatement("SELECT COUNT(1) RECORD FROM (" + sql + ") DATACOUNT");
             this.rs = this.ps.executeQuery();
             if (this.rs == null) {
@@ -118,27 +118,32 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     }
 
     @Override
-    public void crateTable(TBDatasourceConfigVo dsConfigVo, String sql) {
+    public void crateTable(TBDatasourceConfig tbDatasourceConfig, String sql) {
 
     }
 
     @Override
-    public void update(TBDatasourceConfigVo dsConfigVo, String sql) {
+    public void update(TBDatasourceConfig tbDatasourceConfig, String sql) {
 
     }
 
     @Override
-    public void insert(TBDatasourceConfigVo dsConfigVo, String sql) {
+    public void insert(TBDatasourceConfig tbDatasourceConfig, String sql) {
 
     }
 
     @Override
-    public String query(TBDatasourceConfigVo dsConfigVo, String sql) {
+    public String query(TBDatasourceConfig tbDatasourceConfig, String sql) {
         return null;
     }
 
     @Override
-    public String delete(TBDatasourceConfigVo dsConfigVo, String sql) {
+    public String delete(TBDatasourceConfig tbDatasourceConfig, String sql) {
+        return null;
+    }
+
+    @Override
+    public Map<Boolean, String> check(TBDatasourceConfig tbDatasourceConfig) {
         return null;
     }
 }

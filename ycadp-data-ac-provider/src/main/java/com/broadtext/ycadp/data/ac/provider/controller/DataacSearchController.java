@@ -8,6 +8,7 @@ import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.utils.DataInfoForMySQLImpl;
 import com.broadtext.ycadp.data.ac.provider.service.DataacService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,7 @@ import java.util.Map;
 @Slf4j
 public class DataacSearchController {
     /**服务层依赖注入*/
+    @Autowired
     private DataacService dataacService;
 
     /**
@@ -32,7 +34,7 @@ public class DataacSearchController {
      * @param id
      * @return
      */
-    @GetMapping("data/datatable")
+    @GetMapping("/data/datatable/{id}")
     public RespEntity searchTables(@PathVariable(value="id") String id) {
         TBDatasourceConfig datasource=dataacService.findById(id);
         List<String> list=new ArrayList<String>();
@@ -51,8 +53,8 @@ public class DataacSearchController {
      * @param tableName
      * @return
      */
-    @GetMapping("data/datatables")
-    public RespEntity searchDataTable(@PathVariable(value="id") String id,@PathVariable(value="tableName") String tableName) {
+    @GetMapping("data/datatables/{id}")
+    public RespEntity searchDataTable(@PathVariable(value="id") String id,String tableName) {
         TBDatasourceConfig datasource=dataacService.findById(id);
         List<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
         String sql="select * from "+tableName;

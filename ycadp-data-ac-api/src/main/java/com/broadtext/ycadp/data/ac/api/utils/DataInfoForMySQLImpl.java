@@ -23,7 +23,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     @Override
     public List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig) {
         String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
-                + this.tbDatasourceConfig.getDatasourceName()
+                + this.tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
         try {
@@ -52,7 +52,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         JdbcUtils.closeResultSet(this.rs);
         JdbcUtils.closeStatement(this.ps);
         String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
-                + this.tbDatasourceConfig.getDatasourceName()
+                + this.tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
         try {
@@ -91,7 +91,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     @Override
     public Integer getDataCount(TBDatasourceConfig tbDatasourceConfig, String sql) {
         String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
-                + this.tbDatasourceConfig.getDatasourceName()
+                + this.tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
         try {
@@ -143,7 +143,29 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     }
 
     @Override
-    public Map<Boolean, String> check(TBDatasourceConfig tbDatasourceConfig) {
-        return null;
+    public Map<Boolean, String> check(TBDatasourceConfig tbDatasourceConfig){
+        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":"
+                + this.tbDatasourceConfig.getConnectionPort() + "/"
+                + this.tbDatasourceConfig.getSchemaDesc()
+                + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
+        DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
+        DruidPooledConnection dsConnection =
+                null;
+        try {
+            dsConnection = dataSource.getDataSourceConnection(driverClass, url,
+                    this.tbDatasourceConfig.getDatasourceUserName(),
+                    this.tbDatasourceConfig.getDatasourcePasswd());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        Map<Boolean, String> checkMap = new HashMap<>();
+        try {
+            if (!dsConnection.isClosed()) {
+                checkMap.put(true, "success");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return checkMap;
     }
 }

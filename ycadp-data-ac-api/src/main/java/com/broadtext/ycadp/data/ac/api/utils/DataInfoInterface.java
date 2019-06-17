@@ -3,7 +3,6 @@ package com.broadtext.ycadp.data.ac.api.utils;
 
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -34,5 +33,5 @@ public interface DataInfoInterface {
     public String delete(TBDatasourceConfig tbDatasourceConfig,String sql);
 
     //测试连接是否成功
-    public Map<Boolean,String> check(TBDatasourceConfig tbDatasourceConfig) throws SQLException, Exception;
+    public Map<Boolean,String> check(TBDatasourceConfig tbDatasourceConfig);
 }

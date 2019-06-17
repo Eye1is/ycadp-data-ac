@@ -143,29 +143,36 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     }
 
     @Override
-    public Map<Boolean, String> check(TBDatasourceConfig tbDatasourceConfig){
-        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":"
+    public Map<Boolean, String> check(TBDatasourceConfig tbDatasourceConfig) {
+        Map<Boolean, String> checkMap = new HashMap<>();
+        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" 
                 + this.tbDatasourceConfig.getConnectionPort() + "/"
                 + this.tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
-        DruidPooledConnection dsConnection =
-                null;
         try {
-            dsConnection = dataSource.getDataSourceConnection(driverClass, url,
+            dataSource.getDataSourceConnection(driverClass, url,
                     this.tbDatasourceConfig.getDatasourceUserName(),
                     this.tbDatasourceConfig.getDatasourcePasswd());
+            checkMap.put(true,"连接成功");
+            return checkMap;
         } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        Map<Boolean, String> checkMap = new HashMap<>();
-        try {
-            if (!dsConnection.isClosed()) {
-                checkMap.put(true, "success");
+            int errorCode = e.getErrorCode();
+            if (errorCode == 0) {
+                checkMap.put(false, "网络异常,IP地址或者端口有误");
+            } else if (errorCode == 1049) {
+                checkMap.put(false, "连接失败,错误的数据库名");
+            } else if (errorCode == 1045) {
+                checkMap.put(false, "连接失败,用户名或密码错误");
+            } else if (errorCode == 1142) {
+                checkMap.put(false, "连接失败,无权访问");
+            } else {
+                checkMap.put(false, "连接失败,系统错误");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+            return checkMap;
+        } finally {
+            JdbcUtils.closeResultSet(this.rs);
+            JdbcUtils.closeStatement(this.ps);
         }
-        return checkMap;
     }
 }

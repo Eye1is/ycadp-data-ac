@@ -35,13 +35,27 @@ public class DataacSearchController {
      * @return
      */
     @GetMapping("/data/datatable/{id}")
-    public RespEntity searchTables(@PathVariable(value="id") String id) {
+    public RespEntity searchTables(@PathVariable(value="id") String id,String tableName) {
         TBDatasourceConfig datasource=dataacService.findById(id);
         List<String> list=new ArrayList<String>();
+        List<String> listContains=new ArrayList<String>();
         try {
-            list= DataInfoForMySQLImpl.getDaoFactory(datasource).getAllTables(datasource);
-            //list=getResultTable(datasource);
-            return new RespEntity(RespCode.SUCCESS,list);
+            if (tableName==null){//无筛选条件查询所有
+                list= DataInfoForMySQLImpl.getDaoFactory(datasource).getAllTables(datasource);
+                return new RespEntity(RespCode.SUCCESS,list);
+            }else if (!"".equals(tableName)){//有筛选条件
+                list= DataInfoForMySQLImpl.getDaoFactory(datasource).getAllTables(datasource);
+                for (String str : list) {
+                    if(str.contains(tableName)){
+                        listContains.add(str);
+                    }
+                }
+                return new RespEntity(RespCode.SUCCESS,listContains);
+
+            }else {//无筛选条件查询所有
+                list= DataInfoForMySQLImpl.getDaoFactory(datasource).getAllTables(datasource);
+                return new RespEntity(RespCode.SUCCESS,list);
+            }
         } catch (Exception e) {
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }

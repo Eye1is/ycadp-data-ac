@@ -1,5 +1,7 @@
 package com.broadtext.ycadp.data.ac.provider;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,8 +13,14 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @WebAppConfiguration
 public class YcadpDataAcProviderApplicationTests {
 
-	@Test
-	public void contextLoads() {
-	}
+    @Before
+    public void init(){
+
+    }
+
+    @After
+    public void after(){
+
+    }
 
 }

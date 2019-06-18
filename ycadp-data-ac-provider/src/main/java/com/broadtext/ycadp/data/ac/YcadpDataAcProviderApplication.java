@@ -13,9 +13,7 @@ import org.springframework.kafka.annotation.EnableKafka;
  *
  * @author xuchenglong
  */
-@EnableCircuitBreaker
 @EnableFeignClients
-@EnableHystrix
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableKafka

@@ -86,12 +86,12 @@ public class DataacController {
     public RespEntity getDatasources(HttpServletRequest request, ListPager<DataSourceListVo> pager){
         RespEntity respEntity=null;
         String ispage=request.getParameter("isPage");
-        String dataSourceName=request.getParameter("dataSourceName");
+        String datasourceName=request.getParameter("datasourceName");
         List<TBDatasourceConfig> datas=new ArrayList<>();
-        if (dataSourceName==null){//无筛选条件查询所有
+        if (datasourceName==null){//无筛选条件查询所有
             datas=dataacService.getList();
-        }else if (!"".equals(dataSourceName)){//有筛选条件
-            datas=dataacService.getListByDatasourceName(dataSourceName);
+        }else if (!"".equals(datasourceName)){//有筛选条件
+            datas=dataacService.getListByDatasourceName(datasourceName);
         }else {//无筛选条件查询所有
             datas=dataacService.getList();
         }
@@ -113,6 +113,7 @@ public class DataacController {
                 pager.setList(voDatas);
                 pager.setPageNum(Integer.parseInt(pageNum));
                 pager.setPageSize(Integer.parseInt(pageSize));
+                pager.setTotal(voDatas.size());
                 if (sort!=null||!"".equals(sort)){
                     pager.setSort(sort);
                 }
@@ -122,7 +123,7 @@ public class DataacController {
             //不分页
             pager.setList(voDatas);
             pager.setPageNum(1);
-            pager.setTotal(datas.size());//所有行记录数
+            pager.setTotal(voDatas.size());//所有行记录数
             respEntity=new RespEntity(RespCode.SUCCESS,pager);
         }
         return respEntity;

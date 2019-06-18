@@ -26,7 +26,7 @@ public class DataacServiceImpl extends BaseServiceImpl<TBDatasourceConfig,String
 
     @Override
     public List<TBDatasourceConfig> getListByDatasourceName(String datasourceName) {
-        return dataacRepository.findAllByDatasourceName(datasourceName);
+        return dataacRepository.findByDatasourceName(datasourceName);
     }
     
     @Override

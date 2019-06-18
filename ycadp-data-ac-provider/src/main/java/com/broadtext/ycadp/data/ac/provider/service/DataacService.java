@@ -12,6 +12,17 @@ import java.util.Map;
  * @author xuchenglong
  */
 public interface DataacService extends BaseService<TBDatasourceConfig,String>{
+    /**
+     * 根据数据源名称查找数据源实体
+     * @param datasourceName
+     * @return
+     */
     List<TBDatasourceConfig> getListByDatasourceName(String datasourceName);
+
+    /**
+     *
+     * @param config
+     * @return
+     */
     Map<Boolean,String> getConnectResult(TBDatasourceConfig config);
 }

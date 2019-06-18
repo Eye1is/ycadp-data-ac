@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,10 +41,11 @@ public class DataacSearchController {
         TBDatasourceConfig datasource=dataacService.findById(id);
         List<String> list=new ArrayList<String>();
         List<String> listContains=new ArrayList<String>();
+        Map map =new HashMap();
         try {
             if (tableName==null){//无筛选条件查询所有
                 list= DataInfoForMySQLImpl.getDaoFactory(datasource).getAllTables(datasource);
-                return new RespEntity(RespCode.SUCCESS,list);
+                map.put("list",list);
             }else if (!"".equals(tableName)){//有筛选条件
                 list= DataInfoForMySQLImpl.getDaoFactory(datasource).getAllTables(datasource);
                 for (String str : list) {
@@ -50,16 +53,15 @@ public class DataacSearchController {
                         listContains.add(str);
                     }
                 }
-                return new RespEntity(RespCode.SUCCESS,listContains);
-
+                map.put("list",listContains);
             }else {//无筛选条件查询所有
                 list= DataInfoForMySQLImpl.getDaoFactory(datasource).getAllTables(datasource);
-                return new RespEntity(RespCode.SUCCESS,list);
+                map.put("list",list);
             }
+            return new RespEntity(RespCode.SUCCESS,map);
         } catch (Exception e) {
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
-
     }
     /**
      * 查询数据库表数据
@@ -68,14 +70,26 @@ public class DataacSearchController {
      * @return
      */
     @GetMapping("data/datatables/{id}")
-    public RespEntity searchDataTable(@PathVariable(value="id") String id,String tableName) {
+    public RespEntity searchDataTable(HttpServletRequest request, @PathVariable(value="id") String id, String tableName) {
         TBDatasourceConfig datasource=dataacService.findById(id);
+        String ispage=request.getParameter("isPage");
         List<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
-        String sql="select * from "+tableName;
+        String sql="";
+        Map map =new HashMap();
+        if (ispage==null||"true".equals(ispage)){
+            //分页
+            String pageNum=request.getParameter("pageNum");
+            String pageSize=request.getParameter("pageSize");
+            sql="select * from "+tableName+" limit " +Integer.parseInt(pageSize)*(Integer.parseInt(pageNum)-1)+","+Integer.parseInt(pageSize);
+        }else {
+            //不分页
+            sql="select * from "+tableName;
+        }
         try {
             list=DataInfoForMySQLImpl.getDaoFactory(datasource).getAllData(datasource,sql);
             String str = JSON.toJSONString(list);
-            return new RespEntity(RespCode.SUCCESS,str);
+            map.put("list",str);
+            return new RespEntity(RespCode.SUCCESS,map);
         } catch (Exception e) {
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }

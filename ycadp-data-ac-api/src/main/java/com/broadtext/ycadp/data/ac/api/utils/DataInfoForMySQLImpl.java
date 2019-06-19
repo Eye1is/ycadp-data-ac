@@ -166,7 +166,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
         try {
-            dataSource.getDataSourceConnection(driverClass, url,
+            this.dsConnection = dataSource.getDataSourceConnection(driverClass, url,
                     this.tbDatasourceConfig.getDatasourceUserName(),
                     this.tbDatasourceConfig.getDatasourcePasswd());
             checkMap.put(true,"连接成功");

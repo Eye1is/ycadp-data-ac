@@ -33,7 +33,7 @@ public class DataacTestConnectController {
      * @return
      */
     @PostMapping("/data/connecttest")
-    public RespEntity deleteDatasource(@RequestBody TBDatasourceConfig datasourceConfig){
+    public RespEntity connectDatasource(@RequestBody TBDatasourceConfig datasourceConfig){
         try {
         	RespEntity respEntity = null;
             boolean result = false;

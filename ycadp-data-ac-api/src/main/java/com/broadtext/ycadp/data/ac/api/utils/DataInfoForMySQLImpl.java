@@ -44,6 +44,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
             JdbcUtils.closeStatement(this.ps);
             try {
                 this.dsConnection.close();
+                JdbcUtils.closeConnection(this.dsConnection);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -91,6 +92,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
             JdbcUtils.closeStatement(this.ps);
             try {
                 this.dsConnection.close();
+                JdbcUtils.closeConnection(this.dsConnection);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -125,6 +127,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
             JdbcUtils.closeStatement(this.ps);
             try {
                 this.dsConnection.close();
+                JdbcUtils.closeConnection(this.dsConnection);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -190,6 +193,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
             JdbcUtils.closeStatement(this.ps);
             try {
                 this.dsConnection.close();
+                JdbcUtils.closeConnection(this.dsConnection);
             } catch (SQLException e) {
                 e.printStackTrace();
             }

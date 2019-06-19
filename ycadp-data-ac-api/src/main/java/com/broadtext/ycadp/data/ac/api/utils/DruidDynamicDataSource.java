@@ -42,7 +42,6 @@ public class DruidDynamicDataSource extends AbstractDynamicDataSource{
 
     /*
      * 创建数据源，这里创建的数据源是带有连接池属性的
-     * @see com.cdelabcare.pubservice.datasource.IDynamicDataSource#createDataSource(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public DruidDataSource createDataSource(String driverClassName, String url, String username,

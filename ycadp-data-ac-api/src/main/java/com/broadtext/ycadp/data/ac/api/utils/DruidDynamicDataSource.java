@@ -18,7 +18,7 @@ public class DruidDynamicDataSource extends AbstractDynamicDataSource{
     // 是否打开连接泄露自动检测
     private boolean removeAbandoned = true;
     // 连接长时间没有使用，被认为发生泄露时长
-    private long removeAbandonedTimeoutMillis = 3000;
+    private long removeAbandonedTimeoutMillis = 3000 * 100;
     // 发生泄露时是否需要输出 log，建议在开启连接泄露检测时开启，方便排错
     private boolean logAbandoned = true;
 
@@ -53,9 +53,9 @@ public class DruidDynamicDataSource extends AbstractDynamicDataSource{
         ds.setPassword(password);
         ds.setDriverClassName(driverClassName);
         //配置初始化大小、最小、最大
-        ds.setInitialSize(2);
-        ds.setMinIdle(3);
-        ds.setMaxActive(15);
+        ds.setInitialSize(5);
+        ds.setMinIdle(2);
+        ds.setMaxActive(20);
         //配置获取连接等待超时的时间
         ds.setMaxWait(10000);
         //配置间隔多久才进行一次检测,检测连接错误的连接,单位是毫秒

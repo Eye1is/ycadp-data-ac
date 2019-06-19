@@ -53,9 +53,9 @@ public class DruidDynamicDataSource extends AbstractDynamicDataSource{
         ds.setPassword(password);
         ds.setDriverClassName(driverClassName);
         //配置初始化大小、最小、最大
-        ds.setInitialSize(5);
-        ds.setMinIdle(2);
-        ds.setMaxActive(20);
+        ds.setInitialSize(1);
+        ds.setMinIdle(10);
+        ds.setMaxActive(150);
         //配置获取连接等待超时的时间
         ds.setMaxWait(10000);
         //配置间隔多久才进行一次检测,检测连接错误的连接,单位是毫秒

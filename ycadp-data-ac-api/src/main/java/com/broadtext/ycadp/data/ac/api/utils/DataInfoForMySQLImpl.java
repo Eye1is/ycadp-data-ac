@@ -195,11 +195,13 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         } finally {
             JdbcUtils.closeResultSet(this.rs);
             JdbcUtils.closeStatement(this.ps);
-            try {
-                this.dsConnection.close();
-                JdbcUtils.closeConnection(this.dsConnection);
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if(dsConnection != null) {
+            	try {
+                    this.dsConnection.close();
+                    JdbcUtils.closeConnection(this.dsConnection);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

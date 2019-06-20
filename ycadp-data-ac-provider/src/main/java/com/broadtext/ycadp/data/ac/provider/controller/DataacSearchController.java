@@ -75,6 +75,7 @@ public class DataacSearchController {
         String ispage=request.getParameter("isPage");
         List<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
         String sql="";
+        int count=0;
         Map map =new HashMap();
         if (ispage==null||"true".equals(ispage)){
             //分页
@@ -87,7 +88,10 @@ public class DataacSearchController {
         }
         try {
             list=DataInfoForMySQLImpl.getDaoFactory(datasource).getAllData(datasource,sql);
+            String sqlTotal="select * from "+tableName;
             String str = JSON.toJSONString(list);
+            count=DataInfoForMySQLImpl.getDaoFactory(datasource).getDataCount(datasource,sqlTotal);
+            map.put("total",count);
             map.put("list",str);
             return new RespEntity(RespCode.SUCCESS,map);
         } catch (Exception e) {

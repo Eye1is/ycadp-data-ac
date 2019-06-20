@@ -172,6 +172,10 @@ public class DataInfoForMySQLImpl extends DaoFactory {
             this.dsConnection = dataSource.getDataSourceConnection(driverClass, url,
                     this.tbDatasourceConfig.getDatasourceUserName(),
                     this.tbDatasourceConfig.getDatasourcePasswd());
+            if(dsConnection == null) {
+            	checkMap.put(false,"连接失败,系统错误");
+            	return checkMap;
+            }
             checkMap.put(true,"连接成功");
             return checkMap;
         } catch (SQLException e) {
@@ -191,13 +195,11 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         } finally {
             JdbcUtils.closeResultSet(this.rs);
             JdbcUtils.closeStatement(this.ps);
-            if(dsConnection != null) {
-            	try {
-                    this.dsConnection.close();
-                    JdbcUtils.closeConnection(this.dsConnection);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            try {
+                this.dsConnection.close();
+                JdbcUtils.closeConnection(this.dsConnection);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }

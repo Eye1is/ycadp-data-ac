@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class DruidDynamicDataSource extends AbstractDynamicDataSource{
+    private DruidDataSource ds;
     private DruidDynamicDataSource(){}
     private boolean testWhileIdle = true;
     //检测连接池中连接的可用性,这里建议配置为TRUE，防止取到的连接不可用
@@ -46,25 +47,25 @@ public class DruidDynamicDataSource extends AbstractDynamicDataSource{
     @Override
     public DruidDataSource createDataSource(String driverClassName, String url, String username,
                                             String password) {
-        DruidDataSource ds = new DruidDataSource();
+        ds = new DruidDataSource();
         ds.setUrl(url);
         ds.setUsername(username);
         ds.setPassword(password);
         ds.setDriverClassName(driverClassName);
         //配置初始化大小、最小、最大
         ds.setInitialSize(1);
-        ds.setMinIdle(10);
-        ds.setMaxActive(150);
+        ds.setMinIdle(1);
+        ds.setMaxActive(20);
         //配置获取连接等待超时的时间
-        ds.setMaxWait(10000);
+        ds.setMaxWait(60000);
         //配置间隔多久才进行一次检测,检测连接错误的连接,单位是毫秒
         ds.setTimeBetweenConnectErrorMillis(30000);
         //配置间隔多久才进行一次检测,检测需要关闭的空闲连接,单位是毫秒
-        ds.setTimeBetweenEvictionRunsMillis(30000);
+        ds.setTimeBetweenEvictionRunsMillis(60000);
         //配置一个连接在池中最小生存的时间,单位是毫秒
-        ds.setMinEvictableIdleTimeMillis(100000);
+        ds.setMinEvictableIdleTimeMillis(30000);
         //验证连接有效与否的SQL，不同的数据配置不同
-        ds.setValidationQuery("select 1 ");
+        ds.setValidationQuery("select 1");
         ds.setTestWhileIdle(testWhileIdle);
         ds.setTestOnBorrow(testOnBorrow);
         ds.setTestOnReturn(testOnReturn);
@@ -110,6 +111,12 @@ public class DruidDynamicDataSource extends AbstractDynamicDataSource{
                 if (!found)
                     targetList.add(add);
             }
+        }
+    }
+
+    public void close(){
+        if (ds!=null) {
+            this.ds.close();
         }
     }
 }

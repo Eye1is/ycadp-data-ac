@@ -16,6 +16,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     private PreparedStatement ps;
     private ResultSet rs;
     private DruidPooledConnection dsConnection;
+    private DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
     DataInfoForMySQLImpl(TBDatasourceConfig tbDatasourceConfig){
         this.tbDatasourceConfig = tbDatasourceConfig;
     }
@@ -25,7 +26,6 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
                 + this.tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
-        DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
         try {
             this.dsConnection =
                     dataSource.getDataSourceConnection(driverClass, url,
@@ -42,12 +42,8 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         } finally {
             JdbcUtils.closeResultSet(this.rs);
             JdbcUtils.closeStatement(this.ps);
-            try {
-                this.dsConnection.close();
-                JdbcUtils.closeConnection(this.dsConnection);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            JdbcUtils.closeConnection(this.dsConnection);
+            dataSource.close();
         }
         return null;
     }
@@ -60,7 +56,6 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
                 + this.tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
-        DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
         try {
             this.dsConnection =
                     dataSource.getDataSourceConnection(driverClass, url,
@@ -90,12 +85,8 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         } finally {
             JdbcUtils.closeResultSet(this.rs);
             JdbcUtils.closeStatement(this.ps);
-            try {
-                this.dsConnection.close();
-                JdbcUtils.closeConnection(this.dsConnection);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            JdbcUtils.closeConnection(this.dsConnection);
+            dataSource.close();
         }
         return null;
     }
@@ -105,7 +96,6 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
                 + this.tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
-        DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
         try {
             this.dsConnection =
                     dataSource.getDataSourceConnection(driverClass, url,
@@ -163,11 +153,10 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     @Override
     public Map<Boolean, String> check(TBDatasourceConfig tbDatasourceConfig) {
         Map<Boolean, String> checkMap = new HashMap<>();
-        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" 
+        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":"
                 + this.tbDatasourceConfig.getConnectionPort() + "/"
                 + this.tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
-        DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
         try {
             this.dsConnection = dataSource.getDataSourceConnection(driverClass, url,
                     this.tbDatasourceConfig.getDatasourceUserName(),
@@ -195,14 +184,8 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         } finally {
             JdbcUtils.closeResultSet(this.rs);
             JdbcUtils.closeStatement(this.ps);
-            if(dsConnection != null) {
-            	try {
-                    this.dsConnection.close();
-                    JdbcUtils.closeConnection(this.dsConnection);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+            JdbcUtils.closeConnection(this.dsConnection);
+            dataSource.close();
         }
     }
 }

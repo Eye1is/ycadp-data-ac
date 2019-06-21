@@ -47,12 +47,12 @@ public class DataacTestConnectController {
             if(result) {
             	respEntity=new RespEntity(RespCode.SUCCESS,resultMessage);
             }else {
-            	respEntity=new RespEntity(RespCode.SYSTEM_ERROR,resultMessage);
+            	respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE,resultMessage);
             }
             return respEntity;
         }catch (Exception e){
             e.printStackTrace();
-            RespEntity respEntity=new RespEntity(RespCode.SYSTEM_ERROR,e.getMessage());
+            RespEntity respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE,e.getMessage());
             return respEntity;
         }
     }

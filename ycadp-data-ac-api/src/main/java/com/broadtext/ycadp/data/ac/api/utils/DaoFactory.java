@@ -11,7 +11,7 @@ public abstract class DaoFactory implements DataInfoInterface{
      * @return 工厂连接对象
      */
     public static DaoFactory getDaoFactory(TBDatasourceConfig tbDatasourceConfig) {
-        if (DataSourceType.DATASOURCE_TYPE_IS_MYSQL.equals(tbDatasourceConfig.getDatasourceType())) {
+        if (DataSourceType.MYSQL.equals(tbDatasourceConfig.getDatasourceType())) {
             return new DataInfoForMySQLImpl(tbDatasourceConfig);
         } else {
             return null;

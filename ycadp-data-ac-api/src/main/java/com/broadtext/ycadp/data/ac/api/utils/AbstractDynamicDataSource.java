@@ -1,16 +1,10 @@
 package com.broadtext.ycadp.data.ac.api.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 
-public abstract class AbstractDynamicDataSource<T extends DataSource>
-        {
-    /** 日志 */
-    protected Logger logger = LoggerFactory.getLogger(getClass());
 
-
+public abstract class AbstractDynamicDataSource<T extends DataSource> {
     /**
      * 创建数据源
      * @param driverClassName 数据库驱动名称

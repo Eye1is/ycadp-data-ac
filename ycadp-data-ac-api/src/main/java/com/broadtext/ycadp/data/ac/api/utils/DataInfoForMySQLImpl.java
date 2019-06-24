@@ -1,6 +1,7 @@
 package com.broadtext.ycadp.data.ac.api.utils;
 
 import com.alibaba.druid.pool.DruidPooledConnection;
+import com.broadtext.ycadp.data.ac.api.constants.CheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import org.springframework.jdbc.support.JdbcUtils;
 
@@ -8,10 +9,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Collections;
 
 public class DataInfoForMySQLImpl extends DaoFactory {
-    private final static String driverClass = "com.mysql.cj.jdbc.Driver";
+    private final String driverClass = "com.mysql.cj.jdbc.Driver";
     private TBDatasourceConfig tbDatasourceConfig;
     private PreparedStatement ps;
     private ResultSet rs;
@@ -28,15 +34,15 @@ public class DataInfoForMySQLImpl extends DaoFactory {
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         try {
             this.dsConnection =
-                    dataSource.getDataSourceConnection(driverClass, url,
+                    dataSource.getConnection(driverClass, url,
                             this.tbDatasourceConfig.getDatasourceUserName(), this.tbDatasourceConfig.getDatasourcePasswd());
             this.ps = this.dsConnection.prepareStatement("SHOW TABLES;");
             this.rs = this.ps.executeQuery();
-            List<String> _list = new ArrayList<String>();
+            List<String> list = new ArrayList<String>();
             while (this.rs.next()) {
-                _list.add(this.rs.getString(1));
+                list.add(this.rs.getString(1));
             }
-            return _list;
+            return list;
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -49,7 +55,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     }
 
     @Override
-    public List<Map<String, Object>> getAllData(TBDatasourceConfig tbDatasourceConfig,String sql) {
+    public List<Map<String, Object>> getAllData(TBDatasourceConfig tbDatasourceConfig, String sql) {
         System.out.println(" === " + sql);
         JdbcUtils.closeResultSet(this.rs);
         JdbcUtils.closeStatement(this.ps);
@@ -58,11 +64,13 @@ public class DataInfoForMySQLImpl extends DaoFactory {
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         try {
             this.dsConnection =
-                    dataSource.getDataSourceConnection(driverClass, url,
+                    dataSource.getConnection(driverClass, url,
                             this.tbDatasourceConfig.getDatasourceUserName(), this.tbDatasourceConfig.getDatasourcePasswd());
             this.ps = this.dsConnection.prepareStatement(sql);
             this.rs = this.ps.executeQuery();
-            if (this.rs == null) return Collections.EMPTY_LIST;
+            if (this.rs == null) {
+                return Collections.EMPTY_LIST;
+            }
             ResultSetMetaData md = this.rs.getMetaData(); //得到结果集(rs)的结构信息，比如字段数、字段名等
             int columnCount = md.getColumnCount(); //返回此 ResultSet 对象中的列数
             List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -98,7 +106,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         try {
             this.dsConnection =
-                    dataSource.getDataSourceConnection(driverClass, url,
+                    dataSource.getConnection(driverClass, url,
                             this.tbDatasourceConfig.getDatasourceUserName(), this.tbDatasourceConfig.getDatasourcePasswd());
             this.ps = this.dsConnection.prepareStatement("SELECT COUNT(1) RECORD FROM (" + sql + ") DATACOUNT");
             this.rs = this.ps.executeQuery();
@@ -158,7 +166,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
                 + this.tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         try {
-            this.dsConnection = dataSource.getDataSourceConnection(driverClass, url,
+            this.dsConnection = dataSource.getConnection(driverClass, url,
                     this.tbDatasourceConfig.getDatasourceUserName(),
                     this.tbDatasourceConfig.getDatasourcePasswd());
             if(dsConnection == null) {
@@ -169,13 +177,13 @@ public class DataInfoForMySQLImpl extends DaoFactory {
             return checkMap;
         } catch (SQLException e) {
             int errorCode = e.getErrorCode();
-            if (errorCode == 0) {
+            if (errorCode == CheckErrorCode.ERROR_CONNECTION) {
                 checkMap.put(false, "网络异常,IP地址或者端口有误");
-            } else if (errorCode == 1049) {
+            } else if (errorCode == CheckErrorCode.ERROR_DATASOURCE) {
                 checkMap.put(false, "连接失败,错误的数据库名");
-            } else if (errorCode == 1045) {
+            } else if (errorCode == CheckErrorCode.ERROR_USERORPW) {
                 checkMap.put(false, "连接失败,用户名或密码错误");
-            } else if (errorCode == 1142) {
+            } else if (errorCode == CheckErrorCode.ERROR_ACCESS) {
                 checkMap.put(false, "连接失败,无权访问");
             } else {
                 checkMap.put(false, "连接失败,系统错误");

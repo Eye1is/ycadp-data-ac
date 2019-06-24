@@ -5,6 +5,8 @@ import com.broadtext.ycadp.data.ac.api.constants.CheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import org.springframework.jdbc.support.JdbcUtils;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -166,13 +168,21 @@ public class DataInfoForMySQLImpl extends DaoFactory {
                 + this.tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         try {
-            this.dsConnection = dataSource.getConnection(driverClass, url,
-                    this.tbDatasourceConfig.getDatasourceUserName(),
+            Class.forName(driverClass);
+        }
+        catch(ClassNotFoundException e) {
+            checkMap.put(false,"连接失败,缺少驱动");
+            return checkMap;
+        }
+        Connection connection = null;
+        try {
+            connection = DriverManager.getConnection(url, this.tbDatasourceConfig.getDatasourceUserName(),
                     this.tbDatasourceConfig.getDatasourcePasswd());
-            if(dsConnection == null) {
-            	checkMap.put(false,"连接失败,系统错误");
-            	return checkMap;
-            }
+
+//            if(connection == null) {
+//            	checkMap.put(false,"连接失败,系统错误");
+//            	return checkMap;
+//            }
             checkMap.put(true,"连接成功");
             return checkMap;
         } catch (SQLException e) {
@@ -192,8 +202,15 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         } finally {
             JdbcUtils.closeResultSet(this.rs);
             JdbcUtils.closeStatement(this.ps);
-            JdbcUtils.closeConnection(this.dsConnection);
-            dataSource.close();
+
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+            }
         }
     }
 }

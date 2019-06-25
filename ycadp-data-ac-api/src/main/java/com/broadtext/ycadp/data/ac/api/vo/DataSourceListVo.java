@@ -8,4 +8,6 @@ public class DataSourceListVo {
     private String id;
     /** 数据源名称 */
     private String datasourceName;
+    /** 数据源名称 */
+    private String datasourceType;
 }

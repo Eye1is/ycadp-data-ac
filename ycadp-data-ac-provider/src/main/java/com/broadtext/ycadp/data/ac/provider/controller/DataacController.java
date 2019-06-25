@@ -100,6 +100,7 @@ public class DataacController {
             DataSourceListVo vo=new DataSourceListVo();
             vo.setId(daSource.getId());
             vo.setDatasourceName(daSource.getDatasourceName());
+            vo.setDatasourceType(daSource.getDatasourceType());
             voDatas.add(vo);
         }
         if (ispage==null||"true".equals(ispage)){

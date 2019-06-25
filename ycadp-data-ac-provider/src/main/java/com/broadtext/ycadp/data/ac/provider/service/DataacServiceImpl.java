@@ -32,8 +32,13 @@ public class DataacServiceImpl extends BaseServiceImpl<TBDatasourceConfig,String
     @Override
     public Map<Boolean,String> getConnectResult(TBDatasourceConfig config) {
     	boolean result = false;
-    	DaoFactory daoFactory = DaoFactory.getDaoFactory(config);
-    	Map<Boolean,String> map = new HashMap<Boolean,String>();
+        DaoFactory daoFactory = null;
+        try {
+            daoFactory = DaoFactory.getDaoFactory(config);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Map<Boolean,String> map = new HashMap<Boolean,String>();
     	map = daoFactory.check(config);
     	return map;
     }

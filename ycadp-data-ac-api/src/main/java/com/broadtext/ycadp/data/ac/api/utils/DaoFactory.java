@@ -10,11 +10,11 @@ public abstract class DaoFactory implements DataInfoInterface{
      * @param tbDatasourceConfig 数据源信息
      * @return 工厂连接对象
      */
-    public static DaoFactory getDaoFactory(TBDatasourceConfig tbDatasourceConfig) {
+    public static DaoFactory getDaoFactory(TBDatasourceConfig tbDatasourceConfig) throws Exception {
         if (DataSourceType.MYSQL.equals(tbDatasourceConfig.getDatasourceType())) {
             return new DataInfoForMySQLImpl(tbDatasourceConfig);
         } else {
-            return null;
+            throw new Exception("不支持该类型数据源");
         }
     }
 }

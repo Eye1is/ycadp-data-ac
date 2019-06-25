@@ -12,7 +12,7 @@ public interface DataInfoInterface {
     public List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig);
 
     //根据信息获取所有该表下的数据
-    public List<Map<String, Object>> getAllData(TBDatasourceConfig tbDatasourceConfig, String sql);
+    public List getAllData(TBDatasourceConfig tbDatasourceConfig, String sql);
 
     //获取数据数量
     public Integer getDataCount(TBDatasourceConfig tbDatasourceConfig,String sql);

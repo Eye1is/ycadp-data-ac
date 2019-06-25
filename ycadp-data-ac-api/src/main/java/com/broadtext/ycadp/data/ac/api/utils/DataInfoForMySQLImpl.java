@@ -1,6 +1,5 @@
 package com.broadtext.ycadp.data.ac.api.utils;
 
-import com.alibaba.druid.pool.DruidPooledConnection;
 import com.broadtext.ycadp.data.ac.api.constants.CheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -19,71 +18,63 @@ import java.util.Map;
 import java.util.Collections;
 
 public class DataInfoForMySQLImpl extends DaoFactory {
-    private final String driverClass = "com.mysql.cj.jdbc.Driver";
     private TBDatasourceConfig tbDatasourceConfig;
-    private PreparedStatement ps;
-    private ResultSet rs;
-    private DruidPooledConnection dsConnection;
-    private DruidDynamicDataSource dataSource = DruidDynamicDataSource.getInstance();
     DataInfoForMySQLImpl(TBDatasourceConfig tbDatasourceConfig){
         this.tbDatasourceConfig = tbDatasourceConfig;
     }
 
     @Override
     public List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig) {
-        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
-                + this.tbDatasourceConfig.getSchemaDesc()
-                + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
+        //获取当前正在执行的线程的名字
+        System.out.println(Thread.currentThread().getName());
+        JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
-            this.dsConnection =
-                    dataSource.getConnection(driverClass, url,
-                            this.tbDatasourceConfig.getDatasourceUserName(), this.tbDatasourceConfig.getDatasourcePasswd());
-            this.ps = this.dsConnection.prepareStatement("SHOW TABLES;");
-            this.rs = this.ps.executeQuery();
+            connection = jdbcUtils.getConnection();
+            ps = connection.prepareStatement("SHOW TABLES;");
+            rs = ps.executeQuery();
             List<String> list = new ArrayList<String>();
-            while (this.rs.next()) {
-                list.add(this.rs.getString(1));
+            while (rs.next()) {
+                list.add(rs.getString(1));
             }
             return list;
         } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            JdbcUtils.closeResultSet(this.rs);
-            JdbcUtils.closeStatement(this.ps);
-            JdbcUtils.closeConnection(this.dsConnection);
-            dataSource.close();
-        }
+        e.printStackTrace();
+    } finally {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(ps);
+            jdbcUtils.close();
+    }
         return null;
     }
 
     @Override
     public List<Map<String, Object>> getAllData(TBDatasourceConfig tbDatasourceConfig, String sql) {
         System.out.println(" === " + sql);
-        JdbcUtils.closeResultSet(this.rs);
-        JdbcUtils.closeStatement(this.ps);
-        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
-                + this.tbDatasourceConfig.getSchemaDesc()
-                + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
+        JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
-            this.dsConnection =
-                    dataSource.getConnection(driverClass, url,
-                            this.tbDatasourceConfig.getDatasourceUserName(), this.tbDatasourceConfig.getDatasourcePasswd());
-            this.ps = this.dsConnection.prepareStatement(sql);
-            this.rs = this.ps.executeQuery();
-            if (this.rs == null) {
+            connection = jdbcUtils.getConnection();
+            ps = connection.prepareStatement(sql);
+            rs = ps.executeQuery();
+            if (rs == null) {
                 return Collections.EMPTY_LIST;
             }
-            ResultSetMetaData md = this.rs.getMetaData(); //得到结果集(rs)的结构信息，比如字段数、字段名等
+            ResultSetMetaData md = rs.getMetaData(); //得到结果集(rs)的结构信息，比如字段数、字段名等
             int columnCount = md.getColumnCount(); //返回此 ResultSet 对象中的列数
-            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> list = new ArrayList<>();
             Map<String, Object> rowData;
-            while (this.rs.next()) {
-                rowData = new LinkedHashMap<String, Object>(columnCount);
+            while (rs.next()) {
+                rowData = new LinkedHashMap<>(columnCount);
                 for (int i = 1; i <= columnCount; i++) {
-                    if (this.rs.getObject(i) == null) {
+                    if (rs.getObject(i) == null) {
                         rowData.put(md.getColumnLabel(i), "");
                     } else {
-                        rowData.put(md.getColumnLabel(i), this.rs.getObject(i));
+                        rowData.put(md.getColumnLabel(i), rs.getObject(i));
                     }
 
                 }
@@ -93,26 +84,24 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            JdbcUtils.closeResultSet(this.rs);
-            JdbcUtils.closeStatement(this.ps);
-            JdbcUtils.closeConnection(this.dsConnection);
-            dataSource.close();
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(ps);
+            jdbcUtils.close();
         }
         return null;
     }
 
     @Override
     public Integer getDataCount(TBDatasourceConfig tbDatasourceConfig, String sql) {
-        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":" + this.tbDatasourceConfig.getConnectionPort() + "/"
-                + this.tbDatasourceConfig.getSchemaDesc()
-                + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
+        JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
-            this.dsConnection =
-                    dataSource.getConnection(driverClass, url,
-                            this.tbDatasourceConfig.getDatasourceUserName(), this.tbDatasourceConfig.getDatasourcePasswd());
-            this.ps = this.dsConnection.prepareStatement("SELECT COUNT(1) RECORD FROM (" + sql + ") DATACOUNT");
-            this.rs = this.ps.executeQuery();
-            if (this.rs == null) {
+            connection = jdbcUtils.getConnection();
+            ps = connection.prepareStatement("SELECT COUNT(1) RECORD FROM (" + sql + ") DATACOUNT");
+            rs = ps.executeQuery();
+            if (rs == null) {
                 return 0;
             }
             int rowCount = 0;
@@ -123,14 +112,9 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         } catch (Exception e){
             e.printStackTrace();
         } finally {
-            JdbcUtils.closeResultSet(this.rs);
-            JdbcUtils.closeStatement(this.ps);
-            try {
-                this.dsConnection.close();
-                JdbcUtils.closeConnection(this.dsConnection);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(ps);
+            jdbcUtils.close();
         }
         return null;
     }
@@ -162,12 +146,15 @@ public class DataInfoForMySQLImpl extends DaoFactory {
 
     @Override
     public Map<Boolean, String> check(TBDatasourceConfig tbDatasourceConfig) {
+        //获取当前正在执行的线程的名字
+        System.out.println(Thread.currentThread().getName());
         Map<Boolean, String> checkMap = new HashMap<>();
         String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":"
                 + this.tbDatasourceConfig.getConnectionPort() + "/"
                 + this.tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         try {
+            String driverClass = "com.mysql.cj.jdbc.Driver";
             Class.forName(driverClass);
         }
         catch(ClassNotFoundException e) {
@@ -178,11 +165,6 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         try {
             connection = DriverManager.getConnection(url, this.tbDatasourceConfig.getDatasourceUserName(),
                     this.tbDatasourceConfig.getDatasourcePasswd());
-
-//            if(connection == null) {
-//            	checkMap.put(false,"连接失败,系统错误");
-//            	return checkMap;
-//            }
             checkMap.put(true,"连接成功");
             return checkMap;
         } catch (SQLException e) {
@@ -200,9 +182,6 @@ public class DataInfoForMySQLImpl extends DaoFactory {
             }
             return checkMap;
         } finally {
-            JdbcUtils.closeResultSet(this.rs);
-            JdbcUtils.closeStatement(this.ps);
-
             if (connection != null) {
                 try {
                     connection.close();

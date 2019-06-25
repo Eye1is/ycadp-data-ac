@@ -73,7 +73,7 @@ public class DataacSearchController {
     public RespEntity searchDataTable(HttpServletRequest request, @PathVariable(value="id") String id, String tableName) {
         TBDatasourceConfig datasource=dataacService.findById(id);
         String ispage=request.getParameter("isPage");
-        List<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
+//        List<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
         String sql="";
         int count=0;
         Map map =new HashMap();
@@ -87,9 +87,9 @@ public class DataacSearchController {
             sql="select * from "+tableName;
         }
         try {
-            list=DataInfoForMySQLImpl.getDaoFactory(datasource).getAllData(datasource,sql);
+            List allData = DataInfoForMySQLImpl.getDaoFactory(datasource).getAllData(datasource, sql);
             String sqlTotal="select * from "+tableName;
-            String str = JSON.toJSONString(list);
+            String str = JSON.toJSONString(allData);
             count=DataInfoForMySQLImpl.getDaoFactory(datasource).getDataCount(datasource,sqlTotal);
             map.put("total",count);
             map.put("list",str);

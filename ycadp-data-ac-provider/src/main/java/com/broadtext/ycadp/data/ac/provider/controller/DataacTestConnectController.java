@@ -24,18 +24,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DataacTestConnectController {
 
-	@Autowired
+    @Autowired
     private DataacService dataacService;
-	
-	
-	/**
+
+
+    /**
      * 测试数据源连接
-     * @return
+     * @param datasourceConfig
+     * @return RespEntity
      */
     @PostMapping("/data/connecttest")
     public RespEntity connectDatasource(@RequestBody TBDatasourceConfig datasourceConfig){
         try {
-        	RespEntity respEntity = null;
+            RespEntity respEntity = null;
             boolean result = false;
             String resultMessage = "";
             Map<Boolean,String> map = dataacService.getConnectResult(datasourceConfig);

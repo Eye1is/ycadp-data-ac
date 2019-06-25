@@ -56,9 +56,9 @@ public class JDBCUtils {
         dataSource.setRemoveAbandonedTimeout(80);
         //关闭abandoned连接时输出错误日志,这样出现连接泄露时可以通过错误日志定位忘记关闭连接的位置
         dataSource.setLogAbandoned(true);
-        //打开PSCache,并且指定每个连接上PSCache的大小
-        //只要maxPoolPreparedStatementPerConnectionSize>0,poolPreparedStatements就会被自动设定为true,参照druid的源码
-        dataSource.setMaxPoolPreparedStatementPerConnectionSize(20);
+//        //打开PSCache,并且指定每个连接上PSCache的大小
+//        //只要maxPoolPreparedStatementPerConnectionSize>0,poolPreparedStatements就会被自动设定为true,参照druid的源码
+//        dataSource.setMaxPoolPreparedStatementPerConnectionSize(20);
     }
 
     private static DruidDataSource dataSource  = new DruidDataSource();

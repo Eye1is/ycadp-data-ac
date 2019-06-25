@@ -51,7 +51,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     }
 
     @Override
-    public List getAllData(TBDatasourceConfig tbDatasourceConfig, String sql) {
+    public List<Map<String,Object>> getAllData(TBDatasourceConfig tbDatasourceConfig, String sql) {
         System.out.println(" === " + sql);
         JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
         Connection connection;

@@ -48,9 +48,11 @@ public class DataacSearchController {
                 map.put("list",list);
             }else if (!"".equals(tableName)){//有筛选条件
                 list= DataInfoForMySQLImpl.getDaoFactory(datasource).getAllTables(datasource);
-                for (String str : list) {
-                    if(str.contains(tableName)){
-                        listContains.add(str);
+                if(list.size()>0){
+                    for (String str : list) {
+                        if(str.contains(tableName)){
+                            listContains.add(str);
+                        }
                     }
                 }
                 map.put("list",listContains);
@@ -60,6 +62,7 @@ public class DataacSearchController {
             }
             return new RespEntity(RespCode.SUCCESS,map);
         } catch (Exception e) {
+            e.printStackTrace();
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
     }
@@ -95,6 +98,7 @@ public class DataacSearchController {
             map.put("list",str);
             return new RespEntity(RespCode.SUCCESS,map);
         } catch (Exception e) {
+            e.printStackTrace();
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
     }

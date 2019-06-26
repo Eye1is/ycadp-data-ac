@@ -15,7 +15,6 @@ import java.sql.SQLException;
 
 public class JDBCUtils {
     JDBCUtils(TBDatasourceConfig tbDatasourceConfig){
-        dataSource  = new DruidDataSource();
         //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
         dataSource.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp() + ":" + tbDatasourceConfig.getConnectionPort() + "/"
                 + tbDatasourceConfig.getSchemaDesc()
@@ -61,7 +60,6 @@ public class JDBCUtils {
         //只要maxPoolPreparedStatementPerConnectionSize>0,poolPreparedStatements就会被自动设定为true,参照druid的源码
         dataSource.setMaxPoolPreparedStatementPerConnectionSize(20);
     }
-
     private static DruidDataSource dataSource  = new DruidDataSource();
     //声明线程共享变量
     public static ThreadLocal<Connection> container = new ThreadLocal<Connection>();

@@ -16,53 +16,54 @@ import java.sql.SQLException;
 public class JDBCUtils {
     JDBCUtils(TBDatasourceConfig tbDatasourceConfig){
         //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
-        dataSource.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp() + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+        datasourceInner.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp() + ":" + tbDatasourceConfig.getConnectionPort() + "/"
                 + tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC");//url
-        dataSource.setUsername(tbDatasourceConfig.getDatasourceUserName());//用户名
-        dataSource.setPassword(tbDatasourceConfig.getDatasourcePasswd());//密码
+        datasourceInner.setUsername(tbDatasourceConfig.getDatasourceUserName());//用户名
+        datasourceInner.setPassword(tbDatasourceConfig.getDatasourcePasswd());//密码
         //配置初始化大小、最小、最大
-        dataSource.setInitialSize(2);
-        dataSource.setMaxActive(20);
-        dataSource.setMinIdle(0);
+        datasourceInner.setInitialSize(2);
+        datasourceInner.setMaxActive(20);
+        datasourceInner.setMinIdle(0);
         //配置从连接池获取连接等待超时的时间
-        dataSource.setMaxWait(10000);
-        dataSource.setValidationQuery("SELECT 1");
+        datasourceInner.setMaxWait(10000);
+        datasourceInner.setValidationQuery("SELECT 1");
         //设置从连接池获取连接时是否检查连接有效性,true时,每次都检查;false时,不检查
-        dataSource.setTestOnBorrow(false);
+        datasourceInner.setTestOnBorrow(false);
         //设置从连接池获取连接时是否检查连接有效性,
         //true时,如果连接空闲时间超过minEvictableIdleTimeMillis进行检查,否则不检查;false时,不检查
-        dataSource.setTestWhileIdle(true);
+        datasourceInner.setTestWhileIdle(true);
         //设置往连接池归还连接时是否检查连接有效性,true时,每次都检查;false时,不检查
-        dataSource.setTestOnReturn(false);
-        dataSource.setPoolPreparedStatements(false);
+        datasourceInner.setTestOnReturn(false);
+        datasourceInner.setPoolPreparedStatements(false);
         //配置间隔多久启动一次DestroyThread,对连接池内的连接才进行一次检测,单位是毫秒
         //检测时:1.如果连接空闲并且超过minIdle以外的连接,
         //如果空闲时间超过minEvictableIdleTimeMillis设置的值则直接物理关闭。2.在minIdle以内的不处理
-        dataSource.setTimeBetweenEvictionRunsMillis(600000);
+        datasourceInner.setTimeBetweenEvictionRunsMillis(600000);
         //配置一个连接在池中最小生存的时间,单位是毫秒
-        dataSource.setMinEvictableIdleTimeMillis(300000);
+        datasourceInner.setMinEvictableIdleTimeMillis(300000);
         //验证连接有效与否的SQL,不同的数据配置不同
         //检验连接是否有效的查询语句。如果数据库Driver支持ping()方法,
         //则优先使用ping()方法进行检查,否则使用validationQuery查询进行检查。(Oracle jdbc Driver目前不支持ping方法)
-        dataSource.setValidationQuery("select 1");
+        datasourceInner.setValidationQuery("select 1");
 
         //连接泄露检查,打开removeAbandoned功能,
         //连接从连接池借出后,长时间不归还,将触发强制回连接.
         //回收周期随timeBetweenEvictionRunsMillis进行,如果连接为从连接池借出状态,并且未执行任何sql,
         //并且从借出时间起已超过removeAbandonedTimeout时间,则强制归还连接到连接池中
-        dataSource.setRemoveAbandoned(true);
+        datasourceInner.setRemoveAbandoned(true);
         //超时时间,秒
-        dataSource.setRemoveAbandonedTimeout(80);
+        datasourceInner.setRemoveAbandonedTimeout(80);
         //关闭abandoned连接时输出错误日志,这样出现连接泄露时可以通过错误日志定位忘记关闭连接的位置
-        dataSource.setLogAbandoned(true);
+        datasourceInner.setLogAbandoned(true);
         //打开PSCache,并且指定每个连接上PSCache的大小
         //只要maxPoolPreparedStatementPerConnectionSize>0,poolPreparedStatements就会被自动设定为true,参照druid的源码
-        dataSource.setMaxPoolPreparedStatementPerConnectionSize(20);
+        datasourceInner.setMaxPoolPreparedStatementPerConnectionSize(20);
     }
-    private static DruidDataSource dataSource  = new DruidDataSource();
+    private DruidDataSource datasourceInner  = new DruidDataSource();
     //声明线程共享变量
     public static ThreadLocal<Connection> container = new ThreadLocal<Connection>();
+    public static ThreadLocal<DruidDataSource> container1 = new ThreadLocal<DruidDataSource>();
     //配置说明,参考官方网址
 
     /**
@@ -72,9 +73,10 @@ public class JDBCUtils {
     public  Connection getConnection(){
         Connection conn =null;
         try{
-            conn = dataSource.getConnection();
+            conn = datasourceInner.getConnection();
             System.out.println(Thread.currentThread().getName()+"连接已经开启......");
             container.set(conn);
+            container1.set(datasourceInner);
         }catch(Exception e){
             System.out.println("连接获取失败");
             e.printStackTrace();
@@ -126,9 +128,11 @@ public class JDBCUtils {
     /***关闭连接*/
     public void close() {
         try {
+            DruidDataSource druidDataSource = container1.get();
             Connection conn = container.get();
-            if (conn != null) {
+            if (conn != null && datasourceInner!=null) {
                 conn.close();
+                druidDataSource.close();
                 System.out.println(Thread.currentThread().getName() + "连接关闭");
             }
         } catch (SQLException e) {

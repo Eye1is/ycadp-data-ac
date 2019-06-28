@@ -33,8 +33,9 @@ public class DataacSearchController {
 
     /**
      * 查找数据库表列表
-     * @param id
-     * @return
+     * @param id 对象id
+     * @param tableName 表名
+     * @return  返回接口数据
      */
     @GetMapping("/data/datatable/{id}")
     public RespEntity searchTables(@PathVariable(value="id") String id,String tableName) {
@@ -68,9 +69,10 @@ public class DataacSearchController {
     }
     /**
      * 查询数据库表数据
-     * @param id
-     * @param tableName
-     * @return
+     * @param id 对象id
+     * @param tableName 表名
+     * @param request 请求request
+     * @return 返回接口数据
      */
     @GetMapping("data/datatables/{id}")
     public RespEntity searchDataTable(HttpServletRequest request, @PathVariable(value="id") String id, String tableName) {

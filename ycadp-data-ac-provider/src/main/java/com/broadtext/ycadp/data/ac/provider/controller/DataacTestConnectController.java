@@ -23,14 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 public class DataacTestConnectController {
-
+    /**注入依赖*/
     @Autowired
     private DataacService dataacService;
 
 
     /**
      * 测试数据源连接
-     * @param datasourceConfig
+     * @param datasourceConfig 数据源对象
      * @return RespEntity
      */
     @PostMapping("/data/connecttest")

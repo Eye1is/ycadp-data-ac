@@ -102,7 +102,6 @@ public class JDBCUtils {
      * 声明连接池线程共享变量
      */
     private static ThreadLocal<DruidDataSource> dsContainer = new ThreadLocal<DruidDataSource>();
-    //配置说明,参考官方网址
 
     /**
      * 获取数据连接

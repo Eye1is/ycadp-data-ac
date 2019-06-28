@@ -2,6 +2,10 @@ package com.broadtext.ycadp.data.ac.api.vo;
 
 import lombok.Data;
 
+/**
+ * 数据源配置业务类
+ * @author PC-Xuchenglong
+ */
 @Data
 public class TBDatasourceConfigVo {
     /** 主键id */

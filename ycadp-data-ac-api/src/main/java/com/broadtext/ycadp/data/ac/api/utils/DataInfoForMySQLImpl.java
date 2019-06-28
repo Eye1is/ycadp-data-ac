@@ -17,7 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Collections;
 
+/**
+ * MYSQL数据源连接的具体实现
+ * @author ouhaoliang
+ */
 public class DataInfoForMySQLImpl extends DaoFactory {
+    /**
+     *
+     */
     private TBDatasourceConfig tbDatasourceConfig;
     DataInfoForMySQLImpl(TBDatasourceConfig tbDatasourceConfig){
         this.tbDatasourceConfig = tbDatasourceConfig;
@@ -41,12 +48,12 @@ public class DataInfoForMySQLImpl extends DaoFactory {
             }
             return list;
         } catch (SQLException e) {
-        e.printStackTrace();
-    } finally {
+            e.printStackTrace();
+        } finally {
             JdbcUtils.closeResultSet(rs);
             JdbcUtils.closeStatement(ps);
             jdbcUtils.close();
-    }
+        }
         return null;
     }
 

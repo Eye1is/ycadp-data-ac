@@ -70,14 +70,14 @@ public class DataacSearchController {
     /**
      * 查询数据库表数据
      * @param id 对象id
-     * @param tableName 表名
      * @param request 请求request
      * @return 返回接口数据
      */
     @GetMapping("data/datatables/{id}")
-    public RespEntity searchDataTable(HttpServletRequest request, @PathVariable(value="id") String id, String tableName) {
+    public RespEntity searchDataTable(HttpServletRequest request, @PathVariable(value="id") String id) {
         TBDatasourceConfig datasource=dataacService.findById(id);
         String ispage=request.getParameter("isPage");
+        String tableName=request.getParameter("tableName");
 //        List<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
         String sql="";
         int count=0;

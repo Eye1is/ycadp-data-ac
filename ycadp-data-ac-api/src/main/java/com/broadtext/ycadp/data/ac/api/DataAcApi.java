@@ -75,7 +75,7 @@ public interface DataAcApi {
      * @return 返回接口数据
      */
     @GetMapping("data/datatables/{id}")
-    RespEntity<Map> searchDataTable(HttpServletRequest request,@PathVariable(value="id") String id, String tableName);
+    RespEntity<Map> searchDataTable(@PathVariable(value="id") String id, String tableName);
 
     /**
      * 测试数据源连接

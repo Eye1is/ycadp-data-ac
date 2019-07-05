@@ -9,6 +9,7 @@ package com.broadtext.ycadp.data.ac.api.utils;
 
 
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
+import com.broadtext.ycadp.data.ac.api.vo.FieldInfoVo;
 
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,13 @@ public interface DataInfoInterface {
      * @return Integer
      */
     public Integer getDataCount(TBDatasourceConfig tbDatasourceConfig,String sql);
+
+    /**
+     * 获取数据接入表信息
+     * @param table
+     * @return
+     */
+    public List<FieldInfoVo> getAllFields(String table);
 
     /**
      * 建表

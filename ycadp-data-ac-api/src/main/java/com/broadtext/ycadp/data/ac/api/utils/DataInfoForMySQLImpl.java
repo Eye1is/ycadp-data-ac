@@ -2,6 +2,7 @@ package com.broadtext.ycadp.data.ac.api.utils;
 
 import com.broadtext.ycadp.data.ac.api.constants.CheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
+import com.broadtext.ycadp.data.ac.api.vo.FieldInfoVo;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import java.sql.Connection;
@@ -116,6 +117,36 @@ public class DataInfoForMySQLImpl extends DaoFactory {
                 rowCount = rs.getInt("RECORD");
             }
             return rowCount;
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(ps);
+            jdbcUtils.close();
+        }
+        return null;
+    }
+
+    @Override
+    public List<FieldInfoVo> getAllFields(String table) {
+        JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            connection = jdbcUtils.getConnection();
+            ps = connection.prepareStatement("SHOW FULL FIELDS FROM " + table);
+            rs = ps.executeQuery();
+            List<FieldInfoVo> list = new ArrayList<FieldInfoVo>();
+            FieldInfoVo field;
+            while (rs.next()) {
+                field = new FieldInfoVo();
+                field.setFieldName(rs.getString(1));
+                field.setFieldType(rs.getString(2));
+                field.setFieldDesign(rs.getString(9));
+                list.add(field);
+            }
+            return list;
         } catch (Exception e){
             e.printStackTrace();
         } finally {

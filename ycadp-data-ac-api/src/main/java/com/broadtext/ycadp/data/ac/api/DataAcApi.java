@@ -3,19 +3,22 @@ package com.broadtext.ycadp.data.ac.api;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.hystrix.DataAcFallbackFactor;
+import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.TBDatasourceConfigVo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author PC-Xuchenglong
  */
-@FeignClient(name = "${dataacService}",fallbackFactory = DataAcFallbackFactor.class)
+@FeignClient(name = "${dataacService}", fallbackFactory = DataAcFallbackFactor.class)
 public interface DataAcApi {
     /**
      * 新增数据源
+     *
      * @param datasourceConfig
      * @return
      */
@@ -24,6 +27,7 @@ public interface DataAcApi {
 
     /**
      * 删除数据源
+     *
      * @param id
      * @return
      */
@@ -32,14 +36,16 @@ public interface DataAcApi {
 
     /**
      * 查询数据源列表
+     *
      * @param
      * @return
      */
     @GetMapping("/data/datasource")
-    RespEntity getDatasources(@RequestParam(value = "pageNum") String pageNum,@RequestParam(value = "pageSize") String pageSize);
+    RespEntity getDatasources(@RequestParam(value = "pageNum") String pageNum, @RequestParam(value = "pageSize") String pageSize);
 
     /**
      * 查询数据源明细信息
+     *
      * @param id
      * @return
      */
@@ -48,33 +54,37 @@ public interface DataAcApi {
 
     /**
      * 编辑数据源
+     *
      * @param id
      * @param datasourceConfig
      * @return
      */
     @PutMapping("/data/datasource/{id}")
-    RespEntity<TBDatasourceConfig> updateDatasource(@PathVariable("id") String id,@RequestBody TBDatasourceConfigVo datasourceConfig);
+    RespEntity<TBDatasourceConfig> updateDatasource(@PathVariable("id") String id, @RequestBody TBDatasourceConfigVo datasourceConfig);
 
     /**
      * 查找数据库表列表
-     * @param id 对象id
+     *
+     * @param id        对象id
      * @param tableName 表名
-     * @return  返回接口数据
+     * @return 返回接口数据
      */
     @GetMapping("/data/datatable/{id}")
-    RespEntity<Map> searchTables(@PathVariable(value="id") String id, @RequestParam(value="tableName") String tableName);
+    RespEntity<Map> searchTables(@PathVariable(value = "id") String id, @RequestParam(value = "tableName") String tableName);
 
     /**
      * 查询数据库表数据
-     * @param id 对象id
+     *
+     * @param id        对象id
      * @param tableName 表名
      * @return 返回接口数据
      */
     @GetMapping("data/datatables/{id}")
-    RespEntity<Map> searchDataTable(@PathVariable(value="id") String id, @RequestParam(value = "tableName") String tableName,@RequestParam(value = "pageNum") String pageNum,@RequestParam(value = "pageSize") String pageSize);
+    RespEntity<Map> searchDataTable(@PathVariable(value = "id") String id, @RequestParam(value = "tableName") String tableName, @RequestParam(value = "pageNum") String pageNum, @RequestParam(value = "pageSize") String pageSize);
 
     /**
      * 测试数据源连接
+     *
      * @param datasourceConfig 数据源对象
      * @return RespEntity
      */
@@ -83,10 +93,31 @@ public interface DataAcApi {
 
     /**
      * 获取数据接入表信息
-     * @param id datasourceId
+     *
+     * @param id        datasourceId
      * @param tableName 表名
      * @return
      */
     @GetMapping("/data/datasourceInfo/{id}")
-    RespEntity getAllFieldsById(@PathVariable(value="id") String id, @RequestParam(value="tableName") String tableName);
+    RespEntity getAllFieldsById(@PathVariable(value = "id") String id, @RequestParam(value = "tableName") String tableName);
+
+    /**
+     * 根据信息获取所有该表下的数据(包括字典转换),建议在填写字典key的预览中使用
+     * @param datasourceId
+     * @param sql
+     * @param dictMap
+     * @return
+     */
+    @GetMapping("/data/datasourceDictDataByMap/{id}")
+    RespEntity getAllDataWithDict(@PathVariable(value = "id") String datasourceId, @RequestParam String sql, @RequestParam Map<String, List<FieldDictVo>> dictMap);
+
+    /**
+     * 根据信息获取所有该表下的数据(包括字典转换),建议在数据接入输入字典sql使用
+     * @param datasourceId
+     * @param dictSql
+     * @param dictKey
+     * @return
+     */
+    @GetMapping("/data/datasourceDictDataByMap/{id}")
+    RespEntity getDictData(@PathVariable(value="id")String datasourceId, @RequestParam String dictSql, @RequestParam String dictKey);
 }

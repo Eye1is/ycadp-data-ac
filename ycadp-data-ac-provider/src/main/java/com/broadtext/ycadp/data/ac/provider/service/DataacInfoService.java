@@ -30,7 +30,7 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig,String
     List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig);
 
     /**
-     * 根据信息获取所有该表下的数据
+     * 根据信息获取所有该表下的数据,只允许在数据接入的查询中使用
      * @param tbDatasourceConfig
      * @param sql
      * @return list集合
@@ -38,7 +38,7 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig,String
     List getAllData(TBDatasourceConfig tbDatasourceConfig, String sql);
 
     /**
-     * 根据信息获取所有该表下的数据(包括字典转换)
+     * 根据信息获取所有该表下的数据(包括字典转换),建议在填写字典key的预览中使用
      * @param datasourceId
      * @param sql
      * @param dictMap
@@ -47,7 +47,7 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig,String
     List<Map<String, Object>> getAllDataWithDict(String datasourceId, String sql, Map<String, List<FieldDictVo>> dictMap);
 
     /**
-     * 根据信息获取所有该表下的数据(包括字典转换)
+     * 根据信息获取所有该表下的数据(包括字典转换),建议在数据接入输入字典sql使用
      * @param datasourceId
      * @param dictSql
      * @param key

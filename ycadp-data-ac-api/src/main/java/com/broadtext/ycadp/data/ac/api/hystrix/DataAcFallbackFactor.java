@@ -1,10 +1,9 @@
 package com.broadtext.ycadp.data.ac.api.hystrix;
 
-import com.broadtext.ycadp.base.entity.ListPager;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.DataAcApi;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
-import com.broadtext.ycadp.data.ac.api.vo.DataSourceListVo;
+import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.TBDatasourceConfigVo;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
@@ -67,6 +66,16 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi>{
 
             @Override
             public RespEntity getAllFieldsById(String id, String tableName) {
+                return null;
+            }
+
+            @Override
+            public RespEntity getAllDataWithDict(String datasourceId, String sql, Map<String, List<FieldDictVo>> dictMap) {
+                return null;
+            }
+
+            @Override
+            public RespEntity getDictData(String datasourceId, String dictSql, String dictKey) {
                 return null;
             }
         };

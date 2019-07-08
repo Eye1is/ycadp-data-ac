@@ -66,7 +66,7 @@ public interface DataAcApi {
      * @return  返回接口数据
      */
     @GetMapping("/data/datatable/{id}")
-    RespEntity<Map> searchTables(@PathVariable(value="id") String id, String tableName);
+    RespEntity<Map> searchTables(@PathVariable(value="id") String id, @RequestParam(value="tableName") String tableName);
 
     /**
      * 查询数据库表数据

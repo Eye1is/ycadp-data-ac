@@ -36,7 +36,7 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi>{
             }
 
             @Override
-            public RespEntity<List<TBDatasourceConfig>> getDatasources(ListPager<DataSourceListVo> pager) {
+            public RespEntity getDatasources(String pageNum,String pageSize) {
                 return null;
             }
 
@@ -56,7 +56,7 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi>{
             }
 
             @Override
-            public RespEntity<Map> searchDataTable(String id, String tableName) {
+            public RespEntity<Map> searchDataTable(String id, String tableName,String pageNum,String pageSize) {
                 return null;
             }
 

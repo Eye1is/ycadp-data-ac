@@ -36,11 +36,11 @@ public interface DataAcApi {
 
     /**
      * 查询数据源列表
-     * @param pager
+     * @param
      * @return
      */
     @GetMapping("/data/datasource")
-    RespEntity<List<TBDatasourceConfig>> getDatasources(ListPager<DataSourceListVo> pager);
+    RespEntity getDatasources(@RequestParam(value = "pageNum") String pageNum,@RequestParam(value = "pageSize") String pageSize);
 
     /**
      * 查询数据源明细信息
@@ -75,7 +75,7 @@ public interface DataAcApi {
      * @return 返回接口数据
      */
     @GetMapping("data/datatables/{id}")
-    RespEntity<Map> searchDataTable(@PathVariable(value="id") String id, String tableName);
+    RespEntity<Map> searchDataTable(@PathVariable(value="id") String id, @RequestParam(value = "tableName") String tableName,@RequestParam(value = "pageNum") String pageNum,@RequestParam(value = "pageSize") String pageSize);
 
     /**
      * 测试数据源连接

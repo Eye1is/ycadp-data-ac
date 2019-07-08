@@ -1,16 +1,12 @@
 package com.broadtext.ycadp.data.ac.api;
 
-import com.broadtext.ycadp.base.entity.ListPager;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.hystrix.DataAcFallbackFactor;
-import com.broadtext.ycadp.data.ac.api.vo.DataSourceListVo;
 import com.broadtext.ycadp.data.ac.api.vo.TBDatasourceConfigVo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -84,4 +80,13 @@ public interface DataAcApi {
      */
     @PostMapping("/data/connecttest")
     RespEntity<String> connectDatasource(@RequestBody TBDatasourceConfig datasourceConfig);
+
+    /**
+     * 获取数据接入表信息
+     * @param id datasourceId
+     * @param tableName 表名
+     * @return
+     */
+    @GetMapping("/data/datasourceInfo/{id}")
+    RespEntity getAllFieldsById(@PathVariable(value="id") String id, @RequestParam(value="tableName") String tableName);
 }

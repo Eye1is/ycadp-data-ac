@@ -18,11 +18,4 @@ public interface DataacService extends BaseService<TBDatasourceConfig,String>{
      * @return
      */
     List<TBDatasourceConfig> getListByDatasourceName(String datasourceName);
-
-    /**
-     *
-     * @param config
-     * @return
-     */
-    Map<Boolean,String> getConnectResult(TBDatasourceConfig config);
 }

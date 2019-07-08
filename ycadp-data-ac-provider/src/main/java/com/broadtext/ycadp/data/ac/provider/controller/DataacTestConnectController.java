@@ -2,6 +2,7 @@ package com.broadtext.ycadp.data.ac.provider.controller;
 
 import java.util.Map;
 
+import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DataacTestConnectController {
     /**注入依赖*/
     @Autowired
-    private DataacService dataacService;
+    private DataacInfoService dataacInfoService;
 
 
     /**
@@ -39,7 +40,7 @@ public class DataacTestConnectController {
             RespEntity respEntity = null;
             boolean result = false;
             String resultMessage = "";
-            Map<Boolean,String> map = dataacService.getConnectResult(datasourceConfig);
+            Map<Boolean,String> map = dataacInfoService.check(datasourceConfig);
             for(boolean key : map.keySet()) {
             	result = key;
             	resultMessage = map.get(key);

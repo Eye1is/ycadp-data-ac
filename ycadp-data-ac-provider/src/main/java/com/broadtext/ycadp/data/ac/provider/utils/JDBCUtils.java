@@ -5,9 +5,10 @@
  * Copyright (C) 2019 Broadtext, All rights reserved
  */
 
-package com.broadtext.ycadp.data.ac.api.utils;
+package com.broadtext.ycadp.data.ac.provider.utils;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 
 import java.sql.Connection;
@@ -43,11 +44,15 @@ public class JDBCUtils {
      */
     private final Integer maxPoolPsPerConnSize = 20;
 
-    JDBCUtils(TBDatasourceConfig tbDatasourceConfig){
+    public JDBCUtils(TBDatasourceConfig tbDatasourceConfig){
         //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
-        datasourceInner.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp() + ":" + tbDatasourceConfig.getConnectionPort() + "/"
-                + tbDatasourceConfig.getSchemaDesc()
-                + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC");//url
+        if (tbDatasourceConfig.getDatasourceType().equals(DataSourceType.MYSQL)) {
+            datasourceInner.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp() + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                    + tbDatasourceConfig.getSchemaDesc()
+                    + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC");//url
+        }else {
+            datasourceInner.setUrl(null);
+        }
         datasourceInner.setUsername(tbDatasourceConfig.getDatasourceUserName());//用户名
         datasourceInner.setPassword(tbDatasourceConfig.getDatasourcePasswd());//密码
         //配置初始化大小、最小、最大

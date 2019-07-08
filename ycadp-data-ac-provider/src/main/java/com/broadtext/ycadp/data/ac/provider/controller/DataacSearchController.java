@@ -5,8 +5,7 @@ import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
-import com.broadtext.ycadp.data.ac.api.utils.DataInfoForMySQLImpl;
-import com.broadtext.ycadp.data.ac.provider.service.DataacService;
+import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +28,7 @@ import java.util.Map;
 public class DataacSearchController {
     /**服务层依赖注入*/
     @Autowired
-    private DataacService dataacService;
+    private DataacInfoService dataacInfoService;
 
     /**
      * 查找数据库表列表
@@ -39,16 +38,16 @@ public class DataacSearchController {
      */
     @GetMapping("/data/datatable/{id}")
     public RespEntity searchTables(@PathVariable(value="id") String id,String tableName) {
-        TBDatasourceConfig datasource=dataacService.findById(id);
+        TBDatasourceConfig datasource=dataacInfoService.findById(id);
         List<String> list=new ArrayList<String>();
         List<String> listContains=new ArrayList<String>();
         Map map =new HashMap();
         try {
             if (tableName==null){//无筛选条件查询所有
-                list= DataInfoForMySQLImpl.getDaoFactory(datasource).getAllTables(datasource);
+                list= dataacInfoService.getAllTables(datasource);
                 map.put("list",list);
             }else if (!"".equals(tableName)){//有筛选条件
-                list= DataInfoForMySQLImpl.getDaoFactory(datasource).getAllTables(datasource);
+                list= dataacInfoService.getAllTables(datasource);
                 if(list.size()>0){
                     for (String str : list) {
                         if(str.contains(tableName)){
@@ -58,7 +57,7 @@ public class DataacSearchController {
                 }
                 map.put("list",listContains);
             }else {//无筛选条件查询所有
-                list= DataInfoForMySQLImpl.getDaoFactory(datasource).getAllTables(datasource);
+                list= dataacInfoService.getAllTables(datasource);
                 map.put("list",list);
             }
             return new RespEntity(RespCode.SUCCESS,map);
@@ -75,7 +74,7 @@ public class DataacSearchController {
      */
     @GetMapping("data/datatables/{id}")
     public RespEntity searchDataTable(HttpServletRequest request, @PathVariable(value="id") String id) {
-        TBDatasourceConfig datasource=dataacService.findById(id);
+        TBDatasourceConfig datasource=dataacInfoService.findById(id);
         String ispage=request.getParameter("isPage");
         String tableName=request.getParameter("tableName");
 //        List<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
@@ -92,10 +91,10 @@ public class DataacSearchController {
             sql="select * from "+tableName;
         }
         try {
-            List allData = DataInfoForMySQLImpl.getDaoFactory(datasource).getAllData(datasource, sql);
+            List allData = dataacInfoService.getAllData(datasource, sql);
             String sqlTotal="select * from "+tableName;
             String str = JSON.toJSONString(allData);
-            count=DataInfoForMySQLImpl.getDaoFactory(datasource).getDataCount(datasource,sqlTotal);
+            count=dataacInfoService.getDataCount(datasource,sqlTotal);
             map.put("total",count);
             map.put("list",str);
             return new RespEntity(RespCode.SUCCESS,map);

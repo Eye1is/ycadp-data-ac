@@ -8,7 +8,7 @@ spring:
         enabled: true
         service-id: spring-cloud-config-server
   application: 
-    name: dataac-service-001
+    name:  ou-dataac-service-001
 
 eureka:
   instance:

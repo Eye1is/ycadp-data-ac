@@ -1,10 +1,18 @@
-package com.broadtext.ycadp.data.ac.api.utils;
+package com.broadtext.ycadp.data.ac.provider.service.impl;
 
+import com.broadtext.ycadp.core.common.service.BaseServiceImpl;
 import com.broadtext.ycadp.data.ac.api.constants.CheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
+import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldInfoVo;
+import com.broadtext.ycadp.data.ac.provider.repository.DataacRepository;
+import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
+import com.broadtext.ycadp.data.ac.provider.utils.JDBCUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,24 +20,23 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
+import java.util.Optional;
 
 /**
  * MYSQL数据源连接的具体实现
+ *
  * @author ouhaoliang
  */
-public class DataInfoForMySQLImpl extends DaoFactory {
-    /**
-     *
-     */
-    private TBDatasourceConfig tbDatasourceConfig;
-    DataInfoForMySQLImpl(TBDatasourceConfig tbDatasourceConfig){
-        this.tbDatasourceConfig = tbDatasourceConfig;
-    }
+@Service
+@Transactional
+public class DataacInfoForMySQLImpl extends BaseServiceImpl<TBDatasourceConfig, String, DataacRepository> implements DataacInfoService {
+    @Autowired
+    private DataacRepository dataacRepository;
 
     @Override
     public List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig) {
@@ -59,7 +66,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     }
 
     @Override
-    public List<Map<String,Object>> getAllData(TBDatasourceConfig tbDatasourceConfig, String sql) {
+    public List<Map<String, Object>> getAllData(TBDatasourceConfig tbDatasourceConfig, String sql) {
         System.out.println(" === " + sql);
         JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
         Connection connection;
@@ -100,6 +107,75 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     }
 
     @Override
+    public List<Map<String, Object>> getAllDataWithDict(String datasourceId, String sql, Map<String, List<FieldDictVo>> dictMap) {
+        System.out.println(" === " + sql);
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull) {
+            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                ps = connection.prepareStatement(sql);
+                rs = ps.executeQuery();
+                if (rs == null) {
+                    return Collections.EMPTY_LIST;
+                }
+                ResultSetMetaData md = rs.getMetaData(); //得到结果集(rs)的结构信息，比如字段数、字段名等
+                int columnCount = md.getColumnCount(); //返回此 ResultSet 对象中的列数
+                List<Map<String, Object>> list = new ArrayList<>();
+                Map<String, Object> rowData;
+                while (rs.next()) {
+                    rowData = new LinkedHashMap<String, Object>(columnCount);
+                    for (int i = 1; i <= columnCount; i++) {
+                        if (rs.getObject(i) == null) {
+                            rowData.put(md.getColumnLabel(i), "");
+                        } else {
+                            if (null != dictMap && 0 < dictMap.size()) {
+                                if (dictMap.containsKey(md.getColumnLabel(i))) {
+                                    List<FieldDictVo> dicts = dictMap.get(md.getColumnLabel(i));
+                                    for (FieldDictVo dict : dicts) {
+                                        if (dict.getDictValue().equals(rs.getString(i))) {
+                                            rowData.put(md.getColumnLabel(i), dict.getDictText());
+                                        }
+                                    }
+                                } else {
+                                    rowData.put(md.getColumnLabel(i), rs.getObject(i));
+                                }
+                            } else {
+                                rowData.put(md.getColumnLabel(i), rs.getObject(i));
+                            }
+                        }
+
+                    }
+                    list.add(rowData);
+                }
+                return list;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        }
+        return null;
+    }
+
+    public List<FieldDictVo> getDictData(String datasourceId, String dictSql, String key) {
+        List<FieldDictVo> list = new ArrayList<>();
+        List<Map<String, Object>> data = getAllDataWithDict(datasourceId,dictSql.replace("?", key), null);
+        for (Map<String, Object> map : data) {
+            list.add(new FieldDictVo(map.get("_value").toString(),
+                    map.get("_text").toString()));
+        }
+        return list;
+    }
+
+    @Override
     public Integer getDataCount(TBDatasourceConfig tbDatasourceConfig, String sql) {
         JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
         Connection connection;
@@ -117,7 +193,7 @@ public class DataInfoForMySQLImpl extends DaoFactory {
                 rowCount = rs.getInt("RECORD");
             }
             return rowCount;
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             JdbcUtils.closeResultSet(rs);
@@ -128,31 +204,37 @@ public class DataInfoForMySQLImpl extends DaoFactory {
     }
 
     @Override
-    public List<FieldInfoVo> getAllFields(String table) {
-        JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
-        Connection connection;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            connection = jdbcUtils.getConnection();
-            ps = connection.prepareStatement("SHOW FULL FIELDS FROM " + table);
-            rs = ps.executeQuery();
-            List<FieldInfoVo> list = new ArrayList<FieldInfoVo>();
-            FieldInfoVo field;
-            while (rs.next()) {
-                field = new FieldInfoVo();
-                field.setFieldName(rs.getString(1));
-                field.setFieldType(rs.getString(2));
-                field.setFieldDesign(rs.getString(9));
-                list.add(field);
+    public List<FieldInfoVo> getAllFields(String datasourceId, String table) {
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull) {
+            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
+
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                ps = connection.prepareStatement("SHOW FULL FIELDS FROM " + table);
+                rs = ps.executeQuery();
+                List<FieldInfoVo> list = new ArrayList<FieldInfoVo>();
+                FieldInfoVo field;
+                while (rs.next()) {
+                    field = new FieldInfoVo();
+                    field.setFieldName(rs.getString(1));
+                    field.setFieldType(rs.getString(2));
+                    field.setFieldDesign(rs.getString(9));
+                    list.add(field);
+                }
+                return list;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
             }
-            return list;
-        } catch (Exception e){
-            e.printStackTrace();
-        } finally {
-            JdbcUtils.closeResultSet(rs);
-            JdbcUtils.closeStatement(ps);
-            jdbcUtils.close();
         }
         return null;
     }
@@ -187,23 +269,22 @@ public class DataInfoForMySQLImpl extends DaoFactory {
         //获取当前正在执行的线程的名字
         System.out.println(Thread.currentThread().getName());
         Map<Boolean, String> checkMap = new HashMap<>();
-        String url = "jdbc:mysql://" + this.tbDatasourceConfig.getConnectionIp() + ":"
-                + this.tbDatasourceConfig.getConnectionPort() + "/"
-                + this.tbDatasourceConfig.getSchemaDesc()
+        String url = "jdbc:mysql://" + tbDatasourceConfig.getConnectionIp() + ":"
+                + tbDatasourceConfig.getConnectionPort() + "/"
+                + tbDatasourceConfig.getSchemaDesc()
                 + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
         try {
             String driverClass = "com.mysql.cj.jdbc.Driver";
             Class.forName(driverClass);
-        }
-        catch(ClassNotFoundException e) {
-            checkMap.put(false,"连接失败,缺少驱动");
+        } catch (ClassNotFoundException e) {
+            checkMap.put(false, "连接失败,缺少驱动");
             return checkMap;
         }
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(url, this.tbDatasourceConfig.getDatasourceUserName(),
-                    this.tbDatasourceConfig.getDatasourcePasswd());
-            checkMap.put(true,"连接成功");
+            connection = DriverManager.getConnection(url, tbDatasourceConfig.getDatasourceUserName(),
+                    tbDatasourceConfig.getDatasourcePasswd());
+            checkMap.put(true, "连接成功");
             return checkMap;
         } catch (SQLException e) {
             int errorCode = e.getErrorCode();

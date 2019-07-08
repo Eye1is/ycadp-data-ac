@@ -64,6 +64,11 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi>{
             public RespEntity<String> connectDatasource(TBDatasourceConfig datasourceConfig) {
                 return null;
             }
+
+            @Override
+            public RespEntity getAllFieldsById(String id, String tableName) {
+                return null;
+            }
         };
     }
 }

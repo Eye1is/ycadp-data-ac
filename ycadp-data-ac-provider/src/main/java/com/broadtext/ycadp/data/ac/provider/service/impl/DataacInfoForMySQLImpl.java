@@ -200,7 +200,40 @@ public class DataacInfoForMySQLImpl extends BaseServiceImpl<TBDatasourceConfig, 
             JdbcUtils.closeStatement(ps);
             jdbcUtils.close();
         }
-        return null;
+        return 0;
+    }
+
+    @Override
+    public Integer getDataCount(String datasourceId, String sql) {
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull) {
+            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                ps = connection.prepareStatement("SELECT COUNT(1) RECORD FROM (" + sql + ") DATACOUNT");
+                rs = ps.executeQuery();
+                if (rs == null) {
+                    return 0;
+                }
+                int rowCount = 0;
+                if (rs.next()) {
+                    rowCount = rs.getInt("RECORD");
+                }
+                return rowCount;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        }
+        return 0;
     }
 
     @Override

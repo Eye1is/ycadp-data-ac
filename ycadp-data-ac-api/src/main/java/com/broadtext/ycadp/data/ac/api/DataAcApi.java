@@ -109,7 +109,7 @@ public interface DataAcApi {
      * @return
      */
     @PostMapping("/data/datasourceDictDataByMap")
-    RespEntity getAllDataWithDict(@RequestBody FieldDictMapVo dictMapVo);
+    RespEntity<List<Map<String, Object>>> getAllDataWithDict(@RequestBody FieldDictMapVo dictMapVo);
 
     /**
      * 根据信息获取所有该表下的数据(包括字典转换),建议在数据接入输入字典sql使用
@@ -117,5 +117,14 @@ public interface DataAcApi {
      * @return
      */
     @GetMapping("/data/datasourceDictDataByMap")
-    RespEntity getDictData(@RequestBody DatasourceDictVo datasourceDictVo);
+    RespEntity<List<FieldDictVo>> getDictData(@RequestBody DatasourceDictVo datasourceDictVo);
+
+    /**
+     * 获取数据源某张表数据的数量(参数id)
+     * @param id 数据源id
+     * @param sql
+     * @return
+     */
+    @GetMapping("/data/datasourceDataCount/{id}")
+    RespEntity<Integer> getDataCount(@PathVariable(value="id") String id, String sql);
 }

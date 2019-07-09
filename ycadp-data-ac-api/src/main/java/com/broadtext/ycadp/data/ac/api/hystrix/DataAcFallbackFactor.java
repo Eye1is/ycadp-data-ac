@@ -15,10 +15,11 @@ import java.util.Map;
 
 /**
  * 熔断回退类
+ *
  * @author PC-Xuchenglong
  */
 @Component
-public class DataAcFallbackFactor implements FallbackFactory<DataAcApi>{
+public class DataAcFallbackFactor implements FallbackFactory<DataAcApi> {
 
     @Override
     public DataAcApi create(Throwable cause) {
@@ -37,7 +38,7 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi>{
             }
 
             @Override
-            public RespEntity getDatasources(String pageNum,String pageSize) {
+            public RespEntity getDatasources(String pageNum, String pageSize) {
                 return null;
             }
 
@@ -57,7 +58,7 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi>{
             }
 
             @Override
-            public RespEntity<Map> searchDataTable(String id, String tableName,String pageNum,String pageSize) {
+            public RespEntity<Map> searchDataTable(String id, String tableName, String pageNum, String pageSize) {
                 return null;
             }
 
@@ -72,12 +73,17 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi>{
             }
 
             @Override
-            public RespEntity getAllDataWithDict(FieldDictMapVo dictMapVo) {
+            public RespEntity<List<Map<String, Object>>> getAllDataWithDict(FieldDictMapVo dictMapVo) {
                 return null;
             }
 
             @Override
-            public RespEntity getDictData(DatasourceDictVo datasourceDictVo) {
+            public RespEntity<List<FieldDictVo>> getDictData(DatasourceDictVo datasourceDictVo) {
+                return null;
+            }
+
+            @Override
+            public RespEntity<Integer> getDataCount(String id, String sql) {
                 return null;
             }
         };

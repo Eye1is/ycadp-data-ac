@@ -9,6 +9,7 @@ package com.broadtext.ycadp.data.ac.provider.controller;
 
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
+import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
@@ -29,54 +30,74 @@ import java.util.Map;
 @RestController
 @Slf4j
 public class DataacInfoController {
-    /**服务层依赖注入*/
+    /**
+     * 服务层依赖注入
+     */
     @Autowired
     private DataacInfoService dataacInfoService;
 
     /**
-     *
      * @param id
      * @param tableName
      * @return
      */
     @GetMapping("/data/datasourceInfo/{id}")
-    public RespEntity getAllFieldsById(@PathVariable(value="id") String id, String tableName){
+    public RespEntity getAllFieldsById(@PathVariable(value = "id") String id, String tableName) {
         RespEntity respEntity;
         List<FieldInfoVo> allFields = dataacInfoService.getAllFields(id, tableName);
-        if (null != allFields && allFields.size() !=0 ){
-            respEntity=new RespEntity(RespCode.SUCCESS,allFields);
-        }else {
-            respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        if (null != allFields && allFields.size() != 0) {
+            respEntity = new RespEntity(RespCode.SUCCESS, allFields);
+        } else {
+            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
         return respEntity;
     }
 
     @GetMapping("/data/datasourceDictData")
-    public RespEntity getDictData(@RequestBody DatasourceDictVo datasourceDictVo){
+    public RespEntity getDictData(@RequestBody DatasourceDictVo datasourceDictVo) {
         RespEntity respEntity;
         String datasourceId = datasourceDictVo.getDatasourceId();
         String dictSql = datasourceDictVo.getDictSql();
         String dictKey = datasourceDictVo.getDictKey();
-        List<FieldDictVo> dictFields = dataacInfoService.getDictData(datasourceId, dictSql,dictKey);
-        if (null != dictFields && dictFields.size() !=0 ){
-            respEntity=new RespEntity(RespCode.SUCCESS,dictFields);
-        }else {
-            respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        List<FieldDictVo> dictFields = dataacInfoService.getDictData(datasourceId, dictSql, dictKey);
+        if (null != dictFields && dictFields.size() != 0) {
+            respEntity = new RespEntity(RespCode.SUCCESS, dictFields);
+        } else {
+            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
         return respEntity;
     }
 
     @PostMapping("/data/datasourceDictDataByMap")
-    public RespEntity getAllDataWithDict(@RequestBody FieldDictMapVo dictMapVo){
+    public RespEntity getAllDataWithDict(@RequestBody FieldDictMapVo dictMapVo) {
         RespEntity respEntity;
         String datasourceId = dictMapVo.getDatasourceId();
         String sql = dictMapVo.getSql();
         Map<String, List<FieldDictVo>> dictMap = dictMapVo.getDictMap();
-        List<Map<String, Object>> dictMapFields = dataacInfoService.getAllDataWithDict(datasourceId, sql,dictMap);
-        if (null != dictMapFields && dictMapFields.size() !=0 ){
-            respEntity=new RespEntity(RespCode.SUCCESS,dictMapFields);
-        }else {
-            respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        List<Map<String, Object>> dictMapFields = dataacInfoService.getAllDataWithDict(datasourceId, sql, dictMap);
+        if (null != dictMapFields && dictMapFields.size() != 0) {
+            respEntity = new RespEntity(RespCode.SUCCESS, dictMapFields);
+        } else {
+            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        }
+        return respEntity;
+    }
+
+    /**
+     * @param id
+     * @param sql
+     * @return
+     */
+    @GetMapping("/data/datasourceDataCount/{id}")
+    public RespEntity getDataCount(@PathVariable(value = "id") String id, String sql) {
+        RespEntity respEntity;
+        Integer dataCount = dataacInfoService.getDataCount(id, sql);
+        if (null == dataCount) {
+            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        } else if (dataCount == 0) {
+            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "无数据");
+        } else {
+            respEntity = new RespEntity(RespCode.SUCCESS, dataCount);
         }
         return respEntity;
     }

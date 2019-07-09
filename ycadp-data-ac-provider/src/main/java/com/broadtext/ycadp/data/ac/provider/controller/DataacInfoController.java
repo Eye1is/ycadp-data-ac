@@ -53,7 +53,7 @@ public class DataacInfoController {
         return respEntity;
     }
 
-    @GetMapping("/data/datasourceDictData")
+    @GetMapping("/data/datasourceDictDataBySql")
     public RespEntity getDictData(@RequestBody DatasourceDictVo datasourceDictVo) {
         RespEntity respEntity;
         String datasourceId = datasourceDictVo.getDatasourceId();

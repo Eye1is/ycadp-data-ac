@@ -116,7 +116,7 @@ public interface DataAcApi {
      * @param datasourceDictVo
      * @return
      */
-    @GetMapping("/data/datasourceDictDataByMap")
+    @GetMapping("/data/datasourceDictDataBySql")
     RespEntity<List<FieldDictVo>> getDictData(@RequestBody DatasourceDictVo datasourceDictVo);
 
     /**

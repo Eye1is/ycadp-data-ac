@@ -3,6 +3,8 @@ package com.broadtext.ycadp.data.ac.api.hystrix;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.DataAcApi;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
+import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
+import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.TBDatasourceConfigVo;
 import feign.hystrix.FallbackFactory;
@@ -70,12 +72,12 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi>{
             }
 
             @Override
-            public RespEntity getAllDataWithDict(String datasourceId, String sql, Map<String, List<FieldDictVo>> dictMap) {
+            public RespEntity getAllDataWithDict(FieldDictMapVo dictMapVo) {
                 return null;
             }
 
             @Override
-            public RespEntity getDictData(String datasourceId, String dictSql, String dictKey) {
+            public RespEntity getDictData(DatasourceDictVo datasourceDictVo) {
                 return null;
             }
         };

@@ -46,8 +46,10 @@ public class JDBCUtils {
 
     public JDBCUtils(TBDatasourceConfig tbDatasourceConfig){
         //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
-        if (tbDatasourceConfig.getDatasourceType().equals(DataSourceType.MYSQL)) {
-            datasourceInner.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp() + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+        if (null!=tbDatasourceConfig.getDatasourceType()
+                && tbDatasourceConfig.getDatasourceType().equals(DataSourceType.MYSQL)) {
+            datasourceInner.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp()
+                    + ":" + tbDatasourceConfig.getConnectionPort() + "/"
                     + tbDatasourceConfig.getSchemaDesc()
                     + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC");//url
         }else {

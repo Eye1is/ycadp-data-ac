@@ -10,6 +10,8 @@ package com.broadtext.ycadp.data.ac.provider.controller;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
+import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
+import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldInfoVo;
 import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
@@ -17,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -47,9 +51,12 @@ public class DataacInfoController {
         return respEntity;
     }
 
-    @GetMapping("/data/datasourceDictData/{id}")
-    public RespEntity getDictData(@PathVariable(value="id")String datasourceId, String dictSql, String dictKey){
+    @GetMapping("/data/datasourceDictData")
+    public RespEntity getDictData(@RequestBody DatasourceDictVo datasourceDictVo){
         RespEntity respEntity;
+        String datasourceId = datasourceDictVo.getDatasourceId();
+        String dictSql = datasourceDictVo.getDictSql();
+        String dictKey = datasourceDictVo.getDictKey();
         List<FieldDictVo> dictFields = dataacInfoService.getDictData(datasourceId, dictSql,dictKey);
         if (null != dictFields && dictFields.size() !=0 ){
             respEntity=new RespEntity(RespCode.SUCCESS,dictFields);
@@ -59,9 +66,12 @@ public class DataacInfoController {
         return respEntity;
     }
 
-    @GetMapping("/data/datasourceDictDataByMap/{id}")
-    public RespEntity getAllDataWithDict(@PathVariable(value="id")String datasourceId, String sql, Map<String, List<FieldDictVo>> dictMap){
+    @PostMapping("/data/datasourceDictDataByMap")
+    public RespEntity getAllDataWithDict(@RequestBody FieldDictMapVo dictMapVo){
         RespEntity respEntity;
+        String datasourceId = dictMapVo.getDatasourceId();
+        String sql = dictMapVo.getSql();
+        Map<String, List<FieldDictVo>> dictMap = dictMapVo.getDictMap();
         List<Map<String, Object>> dictMapFields = dataacInfoService.getAllDataWithDict(datasourceId, sql,dictMap);
         if (null != dictMapFields && dictMapFields.size() !=0 ){
             respEntity=new RespEntity(RespCode.SUCCESS,dictMapFields);

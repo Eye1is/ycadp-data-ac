@@ -3,6 +3,8 @@ package com.broadtext.ycadp.data.ac.api;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.hystrix.DataAcFallbackFactor;
+import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
+import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.TBDatasourceConfigVo;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -103,21 +105,17 @@ public interface DataAcApi {
 
     /**
      * 根据信息获取所有该表下的数据(包括字典转换),建议在填写字典key的预览中使用
-     * @param datasourceId
-     * @param sql
-     * @param dictMap
+     * @param dictMapVo
      * @return
      */
-    @GetMapping("/data/datasourceDictDataByMap/{id}")
-    RespEntity getAllDataWithDict(@PathVariable(value = "id") String datasourceId, @RequestParam String sql, @RequestParam Map<String, List<FieldDictVo>> dictMap);
+    @PostMapping("/data/datasourceDictDataByMap")
+    RespEntity getAllDataWithDict(@RequestBody FieldDictMapVo dictMapVo);
 
     /**
      * 根据信息获取所有该表下的数据(包括字典转换),建议在数据接入输入字典sql使用
-     * @param datasourceId
-     * @param dictSql
-     * @param dictKey
+     * @param datasourceDictVo
      * @return
      */
-    @GetMapping("/data/datasourceDictDataByMap/{id}")
-    RespEntity getDictData(@PathVariable(value="id")String datasourceId, @RequestParam String dictSql, @RequestParam String dictKey);
+    @GetMapping("/data/datasourceDictDataByMap")
+    RespEntity getDictData(@RequestBody DatasourceDictVo datasourceDictVo);
 }

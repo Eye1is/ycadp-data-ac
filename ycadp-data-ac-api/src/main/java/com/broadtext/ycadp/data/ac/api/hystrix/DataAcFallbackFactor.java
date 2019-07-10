@@ -68,7 +68,7 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi> {
             }
 
             @Override
-            public RespEntity getAllFieldsById(String id, String tableName) {
+            public RespEntity<List<Map<String,Object>>> getAllFieldsById(String id, String tableName) {
                 return null;
             }
 

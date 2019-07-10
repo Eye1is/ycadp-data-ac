@@ -101,7 +101,7 @@ public interface DataAcApi {
      * @return
      */
     @GetMapping("/data/datasourceInfo/{id}")
-    RespEntity getAllFieldsById(@PathVariable(value = "id") String id, @RequestParam(value = "tableName") String tableName);
+    RespEntity<List<Map<String,Object>>> getAllFieldsById(@PathVariable(value = "id") String id, @RequestParam(value = "tableName") String tableName);
 
     /**
      * 根据信息获取所有该表下的数据(包括字典转换),建议在填写字典key的预览中使用

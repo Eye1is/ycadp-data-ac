@@ -125,6 +125,6 @@ public interface DataAcApi {
      * @param sql
      * @return
      */
-    @GetMapping("/data/datasourceDataCount/{id}")
+    @GetMapping("/data/datasourceDataCount/{datasourceId}")
     RespEntity<Integer> getDataCount(@PathVariable(value="datasourceId") String id, @RequestParam(value="countSql") String sql);
 }

@@ -102,19 +102,17 @@ public class DataacInfoController {
         return respEntity;
     }
     /**
-     * @param id
-     * @param sql
+     * @param
+     * @param
      * @return
      */
     @GetMapping("/data/datasourceDataCountView")
-    public RespEntity getDataCountView(String id, String sql) {
+    public RespEntity getDataCountView(String datasourceId, String countSql) {
         RespEntity respEntity;
-        Integer dataCount = dataacInfoService.getDataCount(id, sql);
+        Integer dataCount = dataacInfoService.getDataCount(datasourceId, countSql);
         if (null == dataCount) {
-            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
-        } else if (dataCount == 0) {
-            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "无数据");
-        } else {
+            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE,0);
+        }else {
             respEntity = new RespEntity(RespCode.SUCCESS, dataCount);
         }
         return respEntity;

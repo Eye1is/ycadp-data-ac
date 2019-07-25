@@ -127,4 +127,12 @@ public interface DataAcApi {
      */
     @GetMapping("/data/datasourceDataCount/{datasourceId}")
     RespEntity<Integer> getDataCount(@PathVariable(value="datasourceId") String id, @RequestParam(value="countSql") String sql);
+    /**
+     * 根据sql获取数据量
+     * @param id
+     * @param sql
+     * @return
+     */
+    @GetMapping("/data/datasourceDataCountView")
+    RespEntity<Integer> getDataCountView(@RequestParam(value="datasourceId") String datasourceId, @RequestParam(value="countSql") String countSql);
 }

@@ -101,4 +101,22 @@ public class DataacInfoController {
         }
         return respEntity;
     }
+    /**
+     * @param id
+     * @param sql
+     * @return
+     */
+    @GetMapping("/data/datasourceDataCountView")
+    public RespEntity getDataCountView(String id, String sql) {
+        RespEntity respEntity;
+        Integer dataCount = dataacInfoService.getDataCount(id, sql);
+        if (null == dataCount) {
+            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        } else if (dataCount == 0) {
+            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "无数据");
+        } else {
+            respEntity = new RespEntity(RespCode.SUCCESS, dataCount);
+        }
+        return respEntity;
+    }
 }

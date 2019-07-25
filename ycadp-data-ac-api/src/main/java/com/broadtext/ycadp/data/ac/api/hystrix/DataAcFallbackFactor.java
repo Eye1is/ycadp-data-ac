@@ -86,6 +86,11 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi> {
             public RespEntity<Integer> getDataCount(String id, String sql) {
                 return null;
             }
+
+			@Override
+			public RespEntity<Integer> getDataCountView(String datasourceId, String countSql) {
+				return null;
+			}
         };
     }
 }

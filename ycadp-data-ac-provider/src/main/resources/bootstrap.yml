@@ -2,8 +2,7 @@ spring:
   cloud:
     config:
       name: dataac-service-001
-      profile: dev
-      label: master
+      label: ${ycadpBranch}
       discovery: 
         enabled: true
         service-id: spring-cloud-config-server
@@ -14,15 +13,15 @@ eureka:
   instance:
     prefer-ip-address: true
     # 指定此客户端的ip
-    ip-address: 192.168.16.71
+    ip-address: ${eurekaClientIp}
     instance-id: ${spring.cloud.client.ip-address}:${server.port}
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 10
     health-check-url-path: /actuator/health
   client:
     service-url:
-      defaultZone:  http://192.168.16.71:8761/eureka/
-dataacService: dataac-service-001
-projectTaskService : PROJECTMANAGE-SERVICE-001
+      defaultZone:  http://${eurekaServerIp}:8761/eureka/
+
+
 
 YCKafkaProject: yc.kafka.project

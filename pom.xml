@@ -16,7 +16,6 @@
 	<description>数据接入</description>
 	<modules>
 		<module>ycadp-data-ac-api</module>
-		<module>ycadp-data-ac-provider</module>
 	</modules>
 
 

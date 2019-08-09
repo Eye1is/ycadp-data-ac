@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * @author PC-Xuchenglong
  */
-@FeignClient(name = "${dataacService}", fallbackFactory = DataAcFallbackFactor.class)
+@FeignClient(name = "dataac-service-001", fallbackFactory = DataAcFallbackFactor.class)
 public interface DataAcApi {
     /**
      * 新增数据源

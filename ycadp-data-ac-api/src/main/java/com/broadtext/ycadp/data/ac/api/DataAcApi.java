@@ -135,4 +135,13 @@ public interface DataAcApi {
      */
     @GetMapping("/data/datasourceDataCountView")
     RespEntity<Integer> getDataCountView(@RequestParam(value="datasourceId") String datasourceId, @RequestParam(value="countSql") String countSql);
+
+    /**
+     * 获取某个字段的distinct列表
+     * @param datasourceId
+     * @param sql
+     * @return
+     */
+    @GetMapping("/data/distinctFields")
+    RespEntity<List<String>>getDistinctFields(@RequestParam(value="datasourceId") String datasourceId,@RequestParam(value="sql") String sql);
 }

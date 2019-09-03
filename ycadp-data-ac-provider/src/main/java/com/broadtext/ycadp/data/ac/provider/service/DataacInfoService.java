@@ -134,4 +134,12 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig, Strin
      * @return Map
      */
     Map<Boolean, String> check(TBDatasourceConfig tbDatasourceConfig);
+
+    /**
+     * 获取去重字段list
+     * @param datasourceId
+     * @param sql
+     * @return
+     */
+    List<String> getDistinctFields(String datasourceId,String sql);
 }

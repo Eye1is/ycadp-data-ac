@@ -13,12 +13,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -343,5 +338,34 @@ public class DataacInfoForMySQLImpl extends BaseServiceImpl<TBDatasourceConfig, 
 
             }
         }
+    }
+
+    @Override
+    public List<String> getDistinctFields(String datasourceId, String sql) {
+        TBDatasourceConfig byId = this.findById(datasourceId);
+        List<String> distinctFields=new ArrayList<>();
+        if (byId!=null){
+            JDBCUtils jdbcUtils = new JDBCUtils(byId);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                ps = connection.prepareStatement(sql);
+                rs = ps.executeQuery();
+                while (rs.next()){
+                    String aa=rs.getString(1);
+                    distinctFields.add(rs.getString(1));
+                }
+                return distinctFields;
+            }catch (Exception e){
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        }
+        return null;
     }
 }

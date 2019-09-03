@@ -117,4 +117,16 @@ public class DataacInfoController {
         }
         return respEntity;
     }
+
+    /**
+     * 获取某个字段去重之后的list
+     * @param datasourceId
+     * @param sql
+     * @return
+     */
+    @GetMapping("/data/distinctFields")
+    public RespEntity getDistinctFields(String datasourceId,String sql){
+        List<String> distinctFields = dataacInfoService.getDistinctFields(datasourceId, sql);
+        return new RespEntity(RespCode.SUCCESS,distinctFields);
+    }
 }

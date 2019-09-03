@@ -143,5 +143,5 @@ public interface DataAcApi {
      * @return
      */
     @GetMapping("/data/distinctFields")
-    RespEntity<List<String>>getDistinctFields(@RequestParam(value="datasourceId") String datasourceId,@RequestParam(value="sql") String sql);
+    RespEntity<List<String>> getDistinctFields(@RequestParam(value="datasourceId") String datasourceId,@RequestParam(value="sql") String sql);
 }

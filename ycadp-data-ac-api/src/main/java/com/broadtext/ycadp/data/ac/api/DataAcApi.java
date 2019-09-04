@@ -112,7 +112,7 @@ public interface DataAcApi {
     RespEntity<List<Map<String, Object>>> getAllDataWithDict(@RequestBody FieldDictMapVo dictMapVo);
 
     /**
-     * 根据信息获取所有该表下的数据(包括字典转换),建议在数据接入输入字典sql使用
+     * 根据信息获取所有该表下的字典数据,建议在数据接入输入字典sql使用
      * @param datasourceDictVo
      * @return
      */
@@ -127,10 +127,11 @@ public interface DataAcApi {
      */
     @GetMapping("/data/datasourceDataCount/{datasourceId}")
     RespEntity<Integer> getDataCount(@PathVariable(value="datasourceId") String id, @RequestParam(value="countSql") String sql);
+
     /**
      * 根据sql获取数据量
-     * @param id
-     * @param sql
+     * @param datasourceId
+     * @param countSql
      * @return
      */
     @GetMapping("/data/datasourceDataCountView")

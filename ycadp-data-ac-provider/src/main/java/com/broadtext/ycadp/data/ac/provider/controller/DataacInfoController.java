@@ -19,12 +19,14 @@ import com.broadtext.ycadp.data.ac.api.vo.FieldInfoVo;
 import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.List;
 import java.util.Map;
 
@@ -108,10 +110,11 @@ public class DataacInfoController {
      * @return
      */
     @PostMapping("/data/datasourceDataCountView")
-    public RespEntity getDataCountView(@RequestBody CountVo countVo) {
+    public RespEntity getDataCountView(@RequestBody LinkedMultiValueMap<String,String> countMultiValue) {
         RespEntity respEntity;
-        String datasourceId = countVo.getDatasourceId();
-        String countSql = countVo.getCountSql();
+        List<String> strings = countMultiValue.get("data");
+        String datasourceId = strings.get(0);
+        String countSql = strings.get(1);
         Integer dataCount = dataacInfoService.getDataCount(datasourceId, countSql);
         if (null == dataCount) {
             respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE,0);

@@ -3,13 +3,13 @@ package com.broadtext.ycadp.data.ac.api.hystrix;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.DataAcApi;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
-import com.broadtext.ycadp.data.ac.api.vo.CountVo;
 import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.TBDatasourceConfigVo;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
 
 import java.util.List;
 import java.util.Map;
@@ -89,7 +89,7 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi> {
             }
 
 			@Override
-			public RespEntity<Integer> getDataCountView(CountVo countVo) {
+			public RespEntity<Integer> getDataCountView(LinkedMultiValueMap<String,String> countMultiValue) {
 				return null;
 			}
 

@@ -134,7 +134,7 @@ public interface DataAcApi {
      * @param countVo
      * @return
      */
-    @GetMapping("/data/datasourceDataCountView")
+    @PostMapping("/data/datasourceDataCountView")
     RespEntity<Integer> getDataCountView(@RequestBody CountVo countVo);
 
     /**

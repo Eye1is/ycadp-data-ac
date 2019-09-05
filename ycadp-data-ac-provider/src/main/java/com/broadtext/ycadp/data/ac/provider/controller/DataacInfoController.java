@@ -107,7 +107,7 @@ public class DataacInfoController {
      * @param
      * @return
      */
-    @GetMapping("/data/datasourceDataCountView")
+    @PostMapping("/data/datasourceDataCountView")
     public RespEntity getDataCountView(@RequestBody CountVo countVo) {
         RespEntity respEntity;
         String datasourceId = countVo.getDatasourceId();

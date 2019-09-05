@@ -3,6 +3,7 @@ package com.broadtext.ycadp.data.ac.api;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.hystrix.DataAcFallbackFactor;
+import com.broadtext.ycadp.data.ac.api.vo.CountVo;
 import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
@@ -130,12 +131,11 @@ public interface DataAcApi {
 
     /**
      * 根据sql获取数据量
-     * @param datasourceId
-     * @param countSql
+     * @param countVo
      * @return
      */
     @GetMapping("/data/datasourceDataCountView")
-    RespEntity<Integer> getDataCountView(@RequestParam(value="datasourceId") String datasourceId, @RequestParam(value="countSql") String countSql);
+    RespEntity<Integer> getDataCountView(@RequestBody CountVo countVo);
 
     /**
      * 获取某个字段的distinct列表

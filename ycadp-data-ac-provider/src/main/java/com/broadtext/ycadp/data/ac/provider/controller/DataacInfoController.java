@@ -11,6 +11,7 @@ import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
+import com.broadtext.ycadp.data.ac.api.vo.CountVo;
 import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
@@ -107,8 +108,10 @@ public class DataacInfoController {
      * @return
      */
     @GetMapping("/data/datasourceDataCountView")
-    public RespEntity getDataCountView(String datasourceId, String countSql) {
+    public RespEntity getDataCountView(@RequestBody CountVo countVo) {
         RespEntity respEntity;
+        String datasourceId = countVo.getDatasourceId();
+        String countSql = countVo.getCountSql();
         Integer dataCount = dataacInfoService.getDataCount(datasourceId, countSql);
         if (null == dataCount) {
             respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE,0);

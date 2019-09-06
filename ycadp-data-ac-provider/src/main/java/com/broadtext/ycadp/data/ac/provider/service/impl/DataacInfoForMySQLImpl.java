@@ -135,6 +135,8 @@ public class DataacInfoForMySQLImpl extends BaseServiceImpl<TBDatasourceConfig, 
                                     for (FieldDictVo dict : dicts) {
                                         if (dict.getDictValue().equals(rs.getString(i))) {
                                             rowData.put(md.getColumnLabel(i), dict.getDictText());
+                                        } else {
+                                            rowData.put(md.getColumnLabel(i), rs.getObject(i));
                                         }
                                     }
                                 } else {

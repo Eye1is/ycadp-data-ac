@@ -131,11 +131,16 @@ public class DataacInfoForMySQLImpl extends BaseServiceImpl<TBDatasourceConfig, 
                         } else {
                             if (null != dictMap && 0 < dictMap.size()) {
                                 if (dictMap.containsKey(md.getColumnLabel(i))) {
+                                    boolean isDict = false;
                                     List<FieldDictVo> dicts = dictMap.get(md.getColumnLabel(i));
                                     for (FieldDictVo dict : dicts) {
                                         if (dict.getDictValue().equals(rs.getString(i))) {
                                             rowData.put(md.getColumnLabel(i), dict.getDictText());
+                                            isDict = true;
                                         }
+                                    }
+                                    if(!isDict){
+                                        rowData.put(md.getColumnLabel(i), rs.getObject(i));
                                     }
                                 } else {
                                     rowData.put(md.getColumnLabel(i), rs.getObject(i));

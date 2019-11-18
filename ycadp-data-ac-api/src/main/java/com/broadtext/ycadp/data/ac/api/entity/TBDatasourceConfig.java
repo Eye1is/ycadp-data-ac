@@ -60,5 +60,8 @@ public class TBDatasourceConfig extends AbstractBaseEntity{
     /** DB2模式 */
     @Column(name = "DB2_SCHEMA")
     private String db2Schema;
+    /** 排序字段 */
+    @Column(name = "SORT_NUM")
+    private String sortNum;
 
 }

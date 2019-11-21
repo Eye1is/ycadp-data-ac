@@ -5,9 +5,12 @@ import com.broadtext.ycadp.base.entity.ListPager;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
+import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceGroup;
+import com.broadtext.ycadp.data.ac.api.entity.TBDatasourcePackage;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
-import com.broadtext.ycadp.data.ac.api.vo.DataSourceListVo;
-import com.broadtext.ycadp.data.ac.api.vo.TBDatasourceConfigVo;
+import com.broadtext.ycadp.data.ac.api.vo.*;
+import com.broadtext.ycadp.data.ac.provider.service.DataacGroupService;
+import com.broadtext.ycadp.data.ac.provider.service.DataacPackageService;
 import com.broadtext.ycadp.data.ac.provider.service.DataacService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,10 @@ import java.util.List;
 public class DataacController {
     @Autowired
     private DataacService dataacService;
+    @Autowired
+    private DataacGroupService dataacGroupService;
+    @Autowired
+    private DataacPackageService dataacPackageService;
 
     /**
      * 新增数据源
@@ -184,5 +191,177 @@ public class DataacController {
         return respEntity;
     }
 
+    /**
+     * 新增group
+     * @param groupVo
+     * @return
+     */
+    @PostMapping("/data/datasource/group")
+    public RespEntity addGroup(@RequestBody GroupVo groupVo){
+        TBDatasourceGroup groupEntity=new TBDatasourceGroup();
+        groupEntity.setGroupName(groupVo.getGroupName());
+        groupEntity.setSortNum(groupVo.getSortNum());
+        TBDatasourceGroup tbDatasourceGroup = dataacGroupService.addOne(groupEntity);
+        if (tbDatasourceGroup!=null){
+            return new RespEntity(RespCode.SUCCESS,tbDatasourceGroup);
+        }else {
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        }
+    }
+
+    /**
+     * 编辑group
+     * @param id
+     * @param groupVo
+     * @return
+     */
+    @PutMapping("/data/datasource/group/{id}")
+    public RespEntity editGroup(@PathVariable("id") String id,@RequestBody GroupVo groupVo){
+        TBDatasourceGroup byId = dataacGroupService.findById(id);
+        byId.setGroupName(groupVo.getGroupName());
+        byId.setSortNum(groupVo.getSortNum());
+        TBDatasourceGroup tbDatasourceGroup = dataacGroupService.updateOne(byId);
+        if (tbDatasourceGroup!=null){
+            return new RespEntity(RespCode.SUCCESS,tbDatasourceGroup);
+        }else {
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        }
+    }
+
+    /**
+     * 回显group
+     * @param id
+     * @return
+     */
+    @GetMapping("/data/datasource/group/{id}")
+    public RespEntity echoGroup(@PathVariable("id") String id){
+        TBDatasourceGroup byId = dataacGroupService.findById(id);
+        return new RespEntity(RespCode.SUCCESS, byId);
+    }
+
+    /**
+     * 删除group
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/data/datasource/group/{id}")
+    public RespEntity deleteGroup(@PathVariable("id") String id){
+        dataacGroupService.removeOne(id);
+        return new RespEntity(RespCode.SUCCESS);
+    }
+
+    /**
+     * 新增package
+     * @param packageAddVo
+     * @return
+     */
+    @PostMapping("/data/datasource/package")
+    public RespEntity addPackage(@RequestBody PackageAddVo packageAddVo){
+        TBDatasourcePackage tbDatasourcePackage=new TBDatasourcePackage();
+        tbDatasourcePackage.setGroupId(packageAddVo.getGroupId());
+        tbDatasourcePackage.setPackageName(packageAddVo.getPackageName());
+        tbDatasourcePackage.setSortNum(packageAddVo.getSortNum());
+        TBDatasourcePackage result = dataacPackageService.addOne(tbDatasourcePackage);
+        if (result!=null){
+            return new RespEntity(RespCode.SUCCESS,result);
+        }else {
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        }
+
+    }
+
+    /**
+     * 编辑package
+     * @param id
+     * @param packageAddVo
+     * @return
+     */
+    @PutMapping("/data/datasource/package/{id}")
+    public RespEntity editPackage(@PathVariable("id") String id,@RequestBody PackageAddVo packageAddVo){
+        TBDatasourcePackage byId = dataacPackageService.findById(id);
+        byId.setPackageName(packageAddVo.getPackageName());
+        byId.setSortNum(packageAddVo.getSortNum());
+        TBDatasourcePackage tbDatasourcePackage = dataacPackageService.updateOne(byId);
+        if (tbDatasourcePackage!=null){
+            return new RespEntity(RespCode.SUCCESS, tbDatasourcePackage);
+        }else {
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        }
+    }
+
+    /**
+     * 回显package
+     * @param id
+     * @return
+     */
+    @GetMapping("/data/datasource/package/{id}")
+    public RespEntity echoPackage(@PathVariable("id") String id){
+        TBDatasourcePackage byId = dataacPackageService.findById(id);
+        return new RespEntity(RespCode.SUCCESS, byId);
+    }
+
+    /**
+     * 删除package
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/data/datasource/package/{id}")
+    public RespEntity deletePackage(@PathVariable("id") String id){
+        dataacPackageService.removeOne(id);
+        return new RespEntity(RespCode.SUCCESS);
+    }
+
+    /**
+     * 包结构树形展示（完整树形）
+     * @return
+     */
+    @GetMapping("/data/datasource/tree")
+    public RespEntity viewTree(){
+        List<GroupVo> groupVoList = new ArrayList<>();
+        List<TBDatasourceGroup> groupList = dataacGroupService.getListBySortNum();//排序过的组List
+        List<TBDatasourcePackage> packageList;
+        for (TBDatasourceGroup g:groupList){
+            GroupVo gVo=new GroupVo();
+            gVo.setId(g.getId());
+            gVo.setGroupName(g.getGroupName());
+            gVo.setSortNum(g.getSortNum());
+            List<PackageVo> packageVoList = new ArrayList<>();
+            packageList=dataacPackageService.getOrderedListByGroupId(g.getId());
+            for (TBDatasourcePackage p:packageList){
+                PackageVo pVo = new PackageVo();
+                pVo.setId(p.getId());
+                pVo.setGroupId(g.getId());
+                pVo.setPackageName(p.getPackageName());
+                pVo.setSortNum(p.getSortNum());
+                packageVoList.add(pVo);
+            }
+            gVo.setPackageVoList(packageVoList);
+            groupVoList.add(gVo);
+        }
+        return new RespEntity(RespCode.SUCCESS, groupVoList);
+    }
+
+    /**
+     * 移动改变顺序
+     * @param sortGroupVo
+     * @return
+     */
+    @PostMapping("/data/datasource/sort")
+    public RespEntity changeSort(@RequestBody SortGroupVo sortGroupVo){
+        List<GroupVo> groupVoList = sortGroupVo.getGroupVoList();
+        for (GroupVo gVo : groupVoList){
+            TBDatasourceGroup theGroup = dataacGroupService.getOne(gVo.getId());//该vo对应的真实group实体
+            theGroup.setSortNum(gVo.getSortNum());
+            dataacGroupService.updateOne(theGroup);
+            List<PackageVo> packageVoList = gVo.getPackageVoList();
+            for (PackageVo pVo : packageVoList){
+                TBDatasourcePackage thePackage = dataacPackageService.getOne(pVo.getId());
+                thePackage.setGroupId(pVo.getGroupId());
+                thePackage.setSortNum(pVo.getSortNum());
+                dataacPackageService.updateOne(thePackage);
+            }
+        }
+        return new RespEntity(RespCode.SUCCESS);
+    }
 
 }

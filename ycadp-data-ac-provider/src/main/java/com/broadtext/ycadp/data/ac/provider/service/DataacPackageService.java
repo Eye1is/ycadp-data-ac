@@ -17,4 +17,10 @@ public interface DataacPackageService extends BaseService<TBDatasourcePackage,St
      * @return
      */
     List<TBDatasourcePackage> getOrderedListByGroupId(String groupId);
+
+    /**
+     * 根据groupId删除包
+     * @param groupId
+     */
+    void removePackageByGroupId(String groupId);
 }

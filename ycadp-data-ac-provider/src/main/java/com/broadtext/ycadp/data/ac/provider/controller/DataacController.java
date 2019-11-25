@@ -200,7 +200,16 @@ public class DataacController {
     public RespEntity addGroup(@RequestBody GroupVo groupVo){
         TBDatasourceGroup groupEntity=new TBDatasourceGroup();
         groupEntity.setGroupName(groupVo.getGroupName());
-        groupEntity.setSortNum(groupVo.getSortNum());
+        int maxSortNum=0;
+        List<TBDatasourceGroup> list = dataacGroupService.getList();
+        for (TBDatasourceGroup group : list){
+            int tempSortNum = Integer.valueOf(group.getSortNum());
+            if (tempSortNum>maxSortNum){
+                maxSortNum=tempSortNum;
+            }
+        }
+        groupEntity.setSortNum(String.valueOf(++maxSortNum));
+//        groupEntity.setSortNum(groupVo.getSortNum());
         TBDatasourceGroup tbDatasourceGroup = dataacGroupService.addOne(groupEntity);
         if (tbDatasourceGroup!=null){
             return new RespEntity(RespCode.SUCCESS,tbDatasourceGroup);
@@ -219,7 +228,7 @@ public class DataacController {
     public RespEntity editGroup(@PathVariable("id") String id,@RequestBody GroupVo groupVo){
         TBDatasourceGroup byId = dataacGroupService.findById(id);
         byId.setGroupName(groupVo.getGroupName());
-        byId.setSortNum(groupVo.getSortNum());
+//        byId.setSortNum(groupVo.getSortNum());
         TBDatasourceGroup tbDatasourceGroup = dataacGroupService.updateOne(byId);
         if (tbDatasourceGroup!=null){
             return new RespEntity(RespCode.SUCCESS,tbDatasourceGroup);
@@ -246,7 +255,18 @@ public class DataacController {
      */
     @DeleteMapping("/data/datasource/group/{id}")
     public RespEntity deleteGroup(@PathVariable("id") String id){
+        String sortNum=dataacGroupService.getOne(id).getSortNum();
+        int sortNumInt = Integer.valueOf(sortNum);
+        List<TBDatasourceGroup> list = dataacGroupService.getList();
+        for (TBDatasourceGroup group : list){
+            int tempSortNum=Integer.valueOf(group.getSortNum());
+            if (tempSortNum>sortNumInt){
+                group.setSortNum(String.valueOf(--tempSortNum));
+                dataacGroupService.updateOne(group);
+            }
+        }
         dataacGroupService.removeOne(id);
+        dataacPackageService.removePackageByGroupId(id);
         return new RespEntity(RespCode.SUCCESS);
     }
 
@@ -260,7 +280,16 @@ public class DataacController {
         TBDatasourcePackage tbDatasourcePackage=new TBDatasourcePackage();
         tbDatasourcePackage.setGroupId(packageAddVo.getGroupId());
         tbDatasourcePackage.setPackageName(packageAddVo.getPackageName());
-        tbDatasourcePackage.setSortNum(packageAddVo.getSortNum());
+        int maxSortNum=0;
+        List<TBDatasourcePackage> listByGroupId = dataacPackageService.getOrderedListByGroupId(packageAddVo.getGroupId());
+        for (TBDatasourcePackage p : listByGroupId){
+            int tempSortNum = Integer.valueOf(p.getSortNum());
+            if (tempSortNum>maxSortNum){
+                maxSortNum=tempSortNum;
+            }
+        }
+        tbDatasourcePackage.setSortNum(String.valueOf(++maxSortNum));
+//        tbDatasourcePackage.setSortNum(packageAddVo.getSortNum());
         TBDatasourcePackage result = dataacPackageService.addOne(tbDatasourcePackage);
         if (result!=null){
             return new RespEntity(RespCode.SUCCESS,result);
@@ -280,7 +309,7 @@ public class DataacController {
     public RespEntity editPackage(@PathVariable("id") String id,@RequestBody PackageAddVo packageAddVo){
         TBDatasourcePackage byId = dataacPackageService.findById(id);
         byId.setPackageName(packageAddVo.getPackageName());
-        byId.setSortNum(packageAddVo.getSortNum());
+//        byId.setSortNum(packageAddVo.getSortNum());
         TBDatasourcePackage tbDatasourcePackage = dataacPackageService.updateOne(byId);
         if (tbDatasourcePackage!=null){
             return new RespEntity(RespCode.SUCCESS, tbDatasourcePackage);
@@ -307,6 +336,16 @@ public class DataacController {
      */
     @DeleteMapping("/data/datasource/package/{id}")
     public RespEntity deletePackage(@PathVariable("id") String id){
+        TBDatasourcePackage one = dataacPackageService.getOne(id);
+        int sortNum=Integer.valueOf(one.getSortNum());
+        List<TBDatasourcePackage> listByGroupId = dataacPackageService.getOrderedListByGroupId(one.getGroupId());
+        for (TBDatasourcePackage p : listByGroupId){
+            int tempSortNum=Integer.valueOf(p.getSortNum());
+            if (tempSortNum>sortNum){
+                p.setSortNum(String.valueOf(--tempSortNum));
+                dataacPackageService.updateOne(p);
+            }
+        }
         dataacPackageService.removeOne(id);
         return new RespEntity(RespCode.SUCCESS);
     }

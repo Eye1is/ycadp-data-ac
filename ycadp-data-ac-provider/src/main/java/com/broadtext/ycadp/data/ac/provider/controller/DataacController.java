@@ -1,5 +1,6 @@
 package com.broadtext.ycadp.data.ac.provider.controller;
 
+import com.broadtext.ycadp.base.entity.ListPager;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,59 +85,59 @@ public class DataacController {
     }
 
 
-//    /**
-//     * 查询数据源列表
-//     * @param request
-//     * @param pager
-//     * @return
-//     */
-//    @GetMapping("/data/datasource")
-//    public RespEntity getDatasources(HttpServletRequest request, ListPager<DataSourceListVo> pager){
-//        RespEntity respEntity=null;
-//        String ispage=request.getParameter("isPage");
-//        String datasourceName=request.getParameter("datasourceName");
-//        List<TBDatasourceConfig> datas=new ArrayList<>();
-//        if (datasourceName==null){//无筛选条件查询所有
-//            datas=dataacService.getList();
-//        }else if (!"".equals(datasourceName)){//有筛选条件
-//            datas=dataacService.getListByDatasourceName(datasourceName);
-//        }else {//无筛选条件查询所有
-//            datas=dataacService.getList();
-//        }
-//        List<DataSourceListVo> voDatas=new ArrayList<>();
-//        for (TBDatasourceConfig daSource : datas){
-//            DataSourceListVo vo=new DataSourceListVo();
-//            vo.setId(daSource.getId());
-//            vo.setDatasourceName(daSource.getDatasourceName());
-//            vo.setDatasourceType(daSource.getDatasourceType());
-//            voDatas.add(vo);
-//        }
-//        if (ispage==null||"true".equals(ispage)){
-//            //分页
-//            String sort=request.getParameter("sort");
-//            String pageNum=request.getParameter("pageNum");
-//            String pageSize=request.getParameter("pageSize");
-//            if (pageNum==null||pageSize==null||"".equals(pageNum)||"".equals(pageSize)){
-//                respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "请求分页参数有误");
-//            }else {
-//                pager.setList(voDatas);
-//                pager.setPageNum(Integer.parseInt(pageNum));
-//                pager.setPageSize(Integer.parseInt(pageSize));
-//                pager.setTotal(voDatas.size());
-//                if (sort!=null||!"".equals(sort)){
-//                    pager.setSort(sort);
-//                }
-//                respEntity=new RespEntity(RespCode.SUCCESS,pager);
-//            }
-//        }else {
-//            //不分页
-//            pager.setList(voDatas);
-//            pager.setPageNum(1);
-//            pager.setTotal(voDatas.size());//所有行记录数
-//            respEntity=new RespEntity(RespCode.SUCCESS,pager);
-//        }
-//        return respEntity;
-//    }
+    /**
+     * 查询数据源列表
+     * @param request
+     * @param pager
+     * @return
+     */
+    @GetMapping("/data/datasource1")
+    public RespEntity getDatasources(HttpServletRequest request, ListPager<DataSourceListVo> pager){
+        RespEntity respEntity=null;
+        String ispage=request.getParameter("isPage");
+        String datasourceName=request.getParameter("datasourceName");
+        List<TBDatasourceConfig> datas=new ArrayList<>();
+        if (datasourceName==null){//无筛选条件查询所有
+            datas=dataacService.getList();
+        }else if (!"".equals(datasourceName)){//有筛选条件
+            datas=dataacService.getListByDatasourceName(datasourceName);
+        }else {//无筛选条件查询所有
+            datas=dataacService.getList();
+        }
+        List<DataSourceListVo> voDatas=new ArrayList<>();
+        for (TBDatasourceConfig daSource : datas){
+            DataSourceListVo vo=new DataSourceListVo();
+            vo.setId(daSource.getId());
+            vo.setDatasourceName(daSource.getDatasourceName());
+            vo.setDatasourceType(daSource.getDatasourceType());
+            voDatas.add(vo);
+        }
+        if (ispage==null||"true".equals(ispage)){
+            //分页
+            String sort=request.getParameter("sort");
+            String pageNum=request.getParameter("pageNum");
+            String pageSize=request.getParameter("pageSize");
+            if (pageNum==null||pageSize==null||"".equals(pageNum)||"".equals(pageSize)){
+                respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "请求分页参数有误");
+            }else {
+                pager.setList(voDatas);
+                pager.setPageNum(Integer.parseInt(pageNum));
+                pager.setPageSize(Integer.parseInt(pageSize));
+                pager.setTotal(voDatas.size());
+                if (sort!=null||!"".equals(sort)){
+                    pager.setSort(sort);
+                }
+                respEntity=new RespEntity(RespCode.SUCCESS,pager);
+            }
+        }else {
+            //不分页
+            pager.setList(voDatas);
+            pager.setPageNum(1);
+            pager.setTotal(voDatas.size());//所有行记录数
+            respEntity=new RespEntity(RespCode.SUCCESS,pager);
+        }
+        return respEntity;
+    }
 
     /**
      * 查询数据源列表

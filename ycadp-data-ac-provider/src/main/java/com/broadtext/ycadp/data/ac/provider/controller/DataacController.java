@@ -52,6 +52,7 @@ public class DataacController {
         dasource.setDictSql(datasourceConfig.getDictSql());
         dasource.setRemark(datasourceConfig.getRemark());
         dasource.setSchemaDesc(datasourceConfig.getSchemaDesc());
+        dasource.setPackageId(datasourceConfig.getPackageId());
         TBDatasourceConfig result=dataacService.addOne(dasource);
         if (result!=null){
             datasourceConfig.setId(result.getId());
@@ -216,6 +217,7 @@ public class DataacController {
              dasource.setDictSql(datasourceConfig.getDictSql());
              dasource.setRemark(datasourceConfig.getRemark());
              dasource.setSchemaDesc(datasourceConfig.getSchemaDesc());
+             dasource.setPackageId(datasourceConfig.getPackageId());
              dataacService.updateOne(dasource);
              datasourceConfig.setId(id);
              respEntity=new RespEntity(RespCode.SUCCESS,datasourceConfig);

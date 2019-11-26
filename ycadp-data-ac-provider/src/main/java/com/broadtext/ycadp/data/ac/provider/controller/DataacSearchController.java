@@ -3,9 +3,11 @@ package com.broadtext.ycadp.data.ac.provider.controller;
 import com.alibaba.fastjson.JSON;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
+import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
+import com.broadtext.ycadp.data.ac.provider.service.DataacService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +30,11 @@ import java.util.Map;
 public class DataacSearchController {
     /**服务层依赖注入*/
     @Autowired
-    private DataacInfoService dataacInfoService;
+    private DataacInfoService mysql;
+    @Autowired
+    private DataacInfoService oracle;
+    @Autowired
+    private DataacService dataacService;
 
     /**
      * 查找数据库表列表
@@ -38,27 +44,49 @@ public class DataacSearchController {
      */
     @GetMapping("/data/datatable/{id}")
     public RespEntity searchTables(@PathVariable(value="id") String id,String tableName) {
-        TBDatasourceConfig datasource=dataacInfoService.findById(id);
+
+        TBDatasourceConfig datasource=dataacService.findById(id);
         List<String> list=new ArrayList<String>();
         List<String> listContains=new ArrayList<String>();
         Map map =new HashMap();
         try {
-            if (tableName==null){//无筛选条件查询所有
-                list= dataacInfoService.getAllTables(datasource);
-                map.put("list",list);
-            }else if (!"".equals(tableName)){//有筛选条件
-                list= dataacInfoService.getAllTables(datasource);
-                if(list.size()>0){
-                    for (String str : list) {
-                        if(str.contains(tableName)){
-                            listContains.add(str);
+            String datasourceType = dataacService.getFieldTypeById(id);
+            if (DataSourceType.MYSQL.equals(datasourceType)) {
+                if (tableName == null) {//无筛选条件查询所有
+                    list = mysql.getAllTables(datasource);
+                    map.put("list", list);
+                } else if (!"".equals(tableName)) {//有筛选条件
+                    list = mysql.getAllTables(datasource);
+                    if (list.size() > 0) {
+                        for (String str : list) {
+                            if (str.contains(tableName)) {
+                                listContains.add(str);
+                            }
                         }
                     }
+                    map.put("list", listContains);
+                } else {//无筛选条件查询所有
+                    list = mysql.getAllTables(datasource);
+                    map.put("list", list);
                 }
-                map.put("list",listContains);
-            }else {//无筛选条件查询所有
-                list= dataacInfoService.getAllTables(datasource);
-                map.put("list",list);
+            } else if (DataSourceType.ORACLE.equals(datasourceType)) {
+                if (tableName == null) {//无筛选条件查询所有
+                    list = mysql.getAllTables(datasource);
+                    map.put("list", list);
+                } else if (!"".equals(tableName)) {//有筛选条件
+                    list = mysql.getAllTables(datasource);
+                    if (list.size() > 0) {
+                        for (String str : list) {
+                            if (str.contains(tableName)) {
+                                listContains.add(str);
+                            }
+                        }
+                    }
+                    map.put("list", listContains);
+                } else {//无筛选条件查询所有
+                    list = mysql.getAllTables(datasource);
+                    map.put("list", list);
+                }
             }
             return new RespEntity(RespCode.SUCCESS,map);
         } catch (Exception e) {
@@ -74,7 +102,7 @@ public class DataacSearchController {
      */
     @GetMapping("data/datatables/{id}")
     public RespEntity searchDataTable(HttpServletRequest request, @PathVariable(value="id") String id) {
-        TBDatasourceConfig datasource=dataacInfoService.findById(id);
+        TBDatasourceConfig datasource=dataacService.findById(id);
         String ispage=request.getParameter("isPage");
         String tableName=request.getParameter("tableName");
 //        List<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
@@ -91,10 +119,18 @@ public class DataacSearchController {
             sql="select * from "+tableName;
         }
         try {
-            List allData = dataacInfoService.getAllData(datasource, sql);
-            String sqlTotal="select * from "+tableName;
+            List allData = new ArrayList();
+            String datasourceType = dataacService.getFieldTypeById(id);
+            if(DataSourceType.MYSQL.equals(datasourceType)) {
+                allData = mysql.getAllData(datasource, sql);
+                String sqlTotal="select * from "+tableName;
+                count=mysql.getDataCount(datasource,sqlTotal);
+            } else if (DataSourceType.ORACLE.equals(datasourceType)) {
+                allData = oracle.getAllData(datasource, sql);
+                String sqlTotal = "select * from " + tableName;
+                count = oracle.getDataCount(datasource, sqlTotal);
+            }
             String str = JSON.toJSONString(allData);
-            count=dataacInfoService.getDataCount(datasource,sqlTotal);
             map.put("total",count);
             map.put("list",str);
             return new RespEntity(RespCode.SUCCESS,map);

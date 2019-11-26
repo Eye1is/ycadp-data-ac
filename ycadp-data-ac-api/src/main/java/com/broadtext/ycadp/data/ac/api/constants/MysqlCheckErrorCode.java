@@ -11,9 +11,9 @@ package com.broadtext.ycadp.data.ac.api.constants;
  * 测试数据源错误码常量类
  * @author ouhaoliang
  */
-public final class CheckErrorCode {
+public final class MysqlCheckErrorCode {
 
-    private CheckErrorCode() {
+    private MysqlCheckErrorCode() {
     }
 
     /**

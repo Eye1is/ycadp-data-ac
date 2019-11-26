@@ -1,7 +1,9 @@
 package com.broadtext.ycadp.data.ac.provider.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,8 +28,11 @@ import lombok.extern.slf4j.Slf4j;
 public class DataacTestConnectController {
     /**注入依赖*/
     @Autowired
-    private DataacInfoService dataacInfoService;
-
+    private DataacInfoService mysql;
+    @Autowired
+    private DataacInfoService oracle;
+    @Autowired
+    private DataacService dataacService;
 
     /**
      * 测试数据源连接
@@ -40,7 +45,13 @@ public class DataacTestConnectController {
             RespEntity respEntity = null;
             boolean result = false;
             String resultMessage = "";
-            Map<Boolean,String> map = dataacInfoService.check(datasourceConfig);
+            Map<Boolean,String> map = new HashMap<>();
+            String datasourceType = dataacService.getFieldTypeById(datasourceConfig.getId());
+            if(DataSourceType.MYSQL.equals(datasourceType)) {
+                map = mysql.check(datasourceConfig);
+            } else if (DataSourceType.ORACLE.equals(datasourceType)){
+                map = oracle.check(datasourceConfig);
+            }
             for(boolean key : map.keySet()) {
             	result = key;
             	resultMessage = map.get(key);

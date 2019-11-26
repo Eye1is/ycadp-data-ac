@@ -31,8 +31,6 @@ public class DataacTestConnectController {
     private DataacInfoService mysql;
     @Autowired
     private DataacInfoService oracle;
-    @Autowired
-    private DataacService dataacService;
 
     /**
      * 测试数据源连接
@@ -46,7 +44,7 @@ public class DataacTestConnectController {
             boolean result = false;
             String resultMessage = "";
             Map<Boolean,String> map = new HashMap<>();
-            String datasourceType = dataacService.getFieldTypeById(datasourceConfig.getId());
+            String datasourceType = datasourceConfig.getDatasourceType();
             if(DataSourceType.MYSQL.equals(datasourceType)) {
                 map = mysql.check(datasourceConfig);
             } else if (DataSourceType.ORACLE.equals(datasourceType)){

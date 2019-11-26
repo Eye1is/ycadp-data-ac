@@ -1,7 +1,5 @@
 package com.broadtext.ycadp.data.ac.provider.controller;
 
-import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
-import com.broadtext.ycadp.base.entity.ListPager;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
@@ -16,9 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据接入Controller
@@ -147,6 +146,7 @@ public class DataacController {
         RespEntity respEntity = null;
         try {
             List<DataSourceListVo> list = new ArrayList<>();
+            Map<String, List<DataSourceListVo>> map = new HashMap<>();
             if (packageId != null && !"".equals(packageId)) {
                 List<TBDatasourceConfig> dataSourceList = dataacService.getDatasourceByPackageId(packageId);
                 for (TBDatasourceConfig tbDatasourceConfig : dataSourceList) {
@@ -160,9 +160,11 @@ public class DataacController {
                     dataSourceListVo.setPackageId(tbDatasourceConfig.getPackageId());
                     list.add(dataSourceListVo);
                 }
-                respEntity = new RespEntity<>(RespCode.SUCCESS,list);
+                map.put("list",list);
+                respEntity = new RespEntity<>(RespCode.SUCCESS,map);
             } else {
-                respEntity = new RespEntity<>(RespCode.SUCCESS,list);
+                map.put("list",list);
+                respEntity = new RespEntity<>(RespCode.SUCCESS,map);
             }
         } catch (Exception e) {
             respEntity = new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE,"系统出错");

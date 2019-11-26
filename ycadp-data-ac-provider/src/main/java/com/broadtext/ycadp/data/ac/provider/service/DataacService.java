@@ -18,4 +18,17 @@ public interface DataacService extends BaseService<TBDatasourceConfig,String>{
      * @return
      */
     List<TBDatasourceConfig> getListByDatasourceName(String datasourceName);
+
+    /**
+     * 根据数据源Id查找数据源类型
+     * @param datasourceId
+     * @return
+     */
+    String getFieldTypeById(String datasourceId);
+    /**
+     * 根据数据包id查找数据源实体集合
+     * @param packageId
+     * @return
+     */
+    List<TBDatasourceConfig> getDatasourceByPackageId(String packageId);
 }

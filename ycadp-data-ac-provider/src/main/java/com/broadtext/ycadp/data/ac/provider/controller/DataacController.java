@@ -83,60 +83,92 @@ public class DataacController {
     }
 
 
+//    /**
+//     * 查询数据源列表
+//     * @param request
+//     * @param pager
+//     * @return
+//     */
+//    @GetMapping("/data/datasource")
+//    public RespEntity getDatasources(HttpServletRequest request, ListPager<DataSourceListVo> pager){
+//        RespEntity respEntity=null;
+//        String ispage=request.getParameter("isPage");
+//        String datasourceName=request.getParameter("datasourceName");
+//        List<TBDatasourceConfig> datas=new ArrayList<>();
+//        if (datasourceName==null){//无筛选条件查询所有
+//            datas=dataacService.getList();
+//        }else if (!"".equals(datasourceName)){//有筛选条件
+//            datas=dataacService.getListByDatasourceName(datasourceName);
+//        }else {//无筛选条件查询所有
+//            datas=dataacService.getList();
+//        }
+//        List<DataSourceListVo> voDatas=new ArrayList<>();
+//        for (TBDatasourceConfig daSource : datas){
+//            DataSourceListVo vo=new DataSourceListVo();
+//            vo.setId(daSource.getId());
+//            vo.setDatasourceName(daSource.getDatasourceName());
+//            vo.setDatasourceType(daSource.getDatasourceType());
+//            voDatas.add(vo);
+//        }
+//        if (ispage==null||"true".equals(ispage)){
+//            //分页
+//            String sort=request.getParameter("sort");
+//            String pageNum=request.getParameter("pageNum");
+//            String pageSize=request.getParameter("pageSize");
+//            if (pageNum==null||pageSize==null||"".equals(pageNum)||"".equals(pageSize)){
+//                respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "请求分页参数有误");
+//            }else {
+//                pager.setList(voDatas);
+//                pager.setPageNum(Integer.parseInt(pageNum));
+//                pager.setPageSize(Integer.parseInt(pageSize));
+//                pager.setTotal(voDatas.size());
+//                if (sort!=null||!"".equals(sort)){
+//                    pager.setSort(sort);
+//                }
+//                respEntity=new RespEntity(RespCode.SUCCESS,pager);
+//            }
+//        }else {
+//            //不分页
+//            pager.setList(voDatas);
+//            pager.setPageNum(1);
+//            pager.setTotal(voDatas.size());//所有行记录数
+//            respEntity=new RespEntity(RespCode.SUCCESS,pager);
+//        }
+//        return respEntity;
+//    }
+
     /**
      * 查询数据源列表
-     * @param request
-     * @param pager
+     * @param packageId
      * @return
      */
     @GetMapping("/data/datasource")
-    public RespEntity getDatasources(HttpServletRequest request, ListPager<DataSourceListVo> pager){
-        RespEntity respEntity=null;
-        String ispage=request.getParameter("isPage");
-        String datasourceName=request.getParameter("datasourceName");
-        List<TBDatasourceConfig> datas=new ArrayList<>();
-        if (datasourceName==null){//无筛选条件查询所有
-            datas=dataacService.getList();
-        }else if (!"".equals(datasourceName)){//有筛选条件
-            datas=dataacService.getListByDatasourceName(datasourceName);
-        }else {//无筛选条件查询所有
-            datas=dataacService.getList();
-        }
-        List<DataSourceListVo> voDatas=new ArrayList<>();
-        for (TBDatasourceConfig daSource : datas){
-            DataSourceListVo vo=new DataSourceListVo();
-            vo.setId(daSource.getId());
-            vo.setDatasourceName(daSource.getDatasourceName());
-            vo.setDatasourceType(daSource.getDatasourceType());
-            voDatas.add(vo);
-        }
-        if (ispage==null||"true".equals(ispage)){
-            //分页
-            String sort=request.getParameter("sort");
-            String pageNum=request.getParameter("pageNum");
-            String pageSize=request.getParameter("pageSize");
-            if (pageNum==null||pageSize==null||"".equals(pageNum)||"".equals(pageSize)){
-                respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "请求分页参数有误");
-            }else {
-                pager.setList(voDatas);
-                pager.setPageNum(Integer.parseInt(pageNum));
-                pager.setPageSize(Integer.parseInt(pageSize));
-                pager.setTotal(voDatas.size());
-                if (sort!=null||!"".equals(sort)){
-                    pager.setSort(sort);
+    public RespEntity getDatasources(String packageId) {
+        RespEntity respEntity = null;
+        try {
+            List<DataSourceListVo> list = new ArrayList<>();
+            if (packageId != null && !"".equals(packageId)) {
+                List<TBDatasourceConfig> dataSourceList = dataacService.getDatasourceByPackageId(packageId);
+                for (TBDatasourceConfig tbDatasourceConfig : dataSourceList) {
+                    DataSourceListVo dataSourceListVo = new DataSourceListVo();
+                    dataSourceListVo.setId(tbDatasourceConfig.getId());
+                    dataSourceListVo.setDatasourceName(tbDatasourceConfig.getDatasourceName());
+                    dataSourceListVo.setDatasourceType(tbDatasourceConfig.getDatasourceType());
+                    dataSourceListVo.setConnectionIp(tbDatasourceConfig.getConnectionIp());
+                    dataSourceListVo.setConnectionPort(tbDatasourceConfig.getConnectionPort());
+                    dataSourceListVo.setSchemaDesc(tbDatasourceConfig.getSchemaDesc());
+                    dataSourceListVo.setPackageId(tbDatasourceConfig.getPackageId());
+                    list.add(dataSourceListVo);
                 }
-                respEntity=new RespEntity(RespCode.SUCCESS,pager);
+                respEntity = new RespEntity<>(RespCode.SUCCESS,list);
+            } else {
+                respEntity = new RespEntity<>(RespCode.SUCCESS,list);
             }
-        }else {
-            //不分页
-            pager.setList(voDatas);
-            pager.setPageNum(1);
-            pager.setTotal(voDatas.size());//所有行记录数
-            respEntity=new RespEntity(RespCode.SUCCESS,pager);
+        } catch (Exception e) {
+            respEntity = new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE,"系统出错");
         }
         return respEntity;
     }
-    
     
     
     /**

@@ -18,7 +18,7 @@ import javax.persistence.Table;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class TBDatasourceConfig extends AbstractBaseEntity{
-    /** 数据源名称 */
+    /** 数据包ID*/
     @Column(name = "PACKAGE_ID")
     private String packageId;
     /** 数据源名称 */

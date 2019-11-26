@@ -21,4 +21,8 @@ public interface DataacRepository extends BaseRepository<TBDatasourceConfig,Stri
      */
     @Query(value = "SELECT * FROM T_B_DATASOURCE_CONFIG WHERE DATASOURCE_NAME LIKE CONCAT('%', :datasourceName, '%')", nativeQuery = true)
     List<TBDatasourceConfig> findByDatasourceName(@Param("datasourceName") String datasourceName);
+
+
+    @Query(value = "SELECT * FROM T_B_DATASOURCE_CONFIG WHERE PACKAGE_ID = :packageId", nativeQuery = true)
+    List<TBDatasourceConfig> findByPackageId(String packageId);
 }

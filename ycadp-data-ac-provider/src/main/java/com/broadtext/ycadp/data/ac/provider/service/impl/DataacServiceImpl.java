@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 数据接入服务实现类
@@ -25,5 +26,21 @@ public class DataacServiceImpl extends BaseServiceImpl<TBDatasourceConfig,String
     @Override
     public List<TBDatasourceConfig> getListByDatasourceName(String datasourceName) {
         return dataacRepository.findByDatasourceName(datasourceName);
+    }
+
+    @Override
+    public String getFieldTypeById(String datasourceId) {
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull){
+            TBDatasourceConfig datasourceConfig = dataacRepository.getOne(datasourceId);
+            return datasourceConfig.getDatasourceType();
+        }
+        return null;
+    }
+
+    @Override
+    public List<TBDatasourceConfig> getDatasourceByPackageId(String packageId) {
+        return dataacRepository.findByPackageId(packageId);
     }
 }

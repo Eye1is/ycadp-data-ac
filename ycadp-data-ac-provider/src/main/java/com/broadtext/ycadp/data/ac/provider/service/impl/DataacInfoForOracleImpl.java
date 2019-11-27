@@ -9,6 +9,7 @@ package com.broadtext.ycadp.data.ac.provider.service.impl;
 
 import com.broadtext.ycadp.core.common.service.BaseServiceImpl;
 import com.broadtext.ycadp.data.ac.api.constants.MysqlCheckErrorCode;
+import com.broadtext.ycadp.data.ac.api.constants.OracleCheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldInfoVo;
@@ -327,14 +328,16 @@ public class DataacInfoForOracleImpl extends BaseServiceImpl<TBDatasourceConfig,
             checkMap.put(true, "连接成功");
             return checkMap;
         } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println(e.getErrorCode());
             int errorCode = e.getErrorCode();
-            if (errorCode == MysqlCheckErrorCode.ERROR_CONNECTION) {
+            if (errorCode == OracleCheckErrorCode.ERROR_CONNECTION) {
                 checkMap.put(false, "网络异常,IP地址或者端口有误");
-            } else if (errorCode == MysqlCheckErrorCode.ERROR_DATASOURCE) {
+            } else if (errorCode == OracleCheckErrorCode.ERROR_DATASOURCE) {
                 checkMap.put(false, "连接失败,错误的数据库名");
-            } else if (errorCode == MysqlCheckErrorCode.ERROR_USERORPW) {
+            } else if (errorCode == OracleCheckErrorCode.ERROR_USERORPW) {
                 checkMap.put(false, "连接失败,用户名或密码错误");
-            } else if (errorCode == MysqlCheckErrorCode.ERROR_ACCESS) {
+            } else if (errorCode == OracleCheckErrorCode.ERROR_ACCESS) {
                 checkMap.put(false, "连接失败,无权访问");
             } else {
                 checkMap.put(false, "连接失败,系统错误");

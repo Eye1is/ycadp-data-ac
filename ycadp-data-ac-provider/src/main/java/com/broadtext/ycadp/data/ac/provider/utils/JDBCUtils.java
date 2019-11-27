@@ -51,11 +51,17 @@ public class JDBCUtils {
                     + ":" + tbDatasourceConfig.getConnectionPort() + "/"
                     + tbDatasourceConfig.getSchemaDesc()
                     + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC");//url
+            //验证连接有效与否的SQL,不同的数据配置不同
+            //检验连接是否有效的查询语句。如果数据库Driver支持ping()方法,
+            //则优先使用ping()方法进行检查,否则使用validationQuery查询进行检查。(Oracle jdbc Driver目前不支持ping方法)
+            datasourceInner.setValidationQuery("select 1");
         } else if (null != tbDatasourceConfig.getDatasourceType()
                 && tbDatasourceConfig.getDatasourceType().equals(DataSourceType.ORACLE)) {
             datasourceInner.setUrl("jdbc:oracle:thin:@" + tbDatasourceConfig.getConnectionIp()
                     + ":" + tbDatasourceConfig.getConnectionPort() + "/"
                     + tbDatasourceConfig.getSchemaDesc());//url
+            //Oracle的验证语句
+            datasourceInner.setValidationQuery("select 1 FROM DUAL");
         } else {
             datasourceInner.setUrl(null);
         }
@@ -65,9 +71,7 @@ public class JDBCUtils {
         datasourceInner.setInitialSize(2);
         datasourceInner.setMaxActive(maxActive);
         datasourceInner.setMinIdle(0);
-
         datasourceInner.setMaxWait(maxWait);
-        datasourceInner.setValidationQuery("SELECT 1");
         //设置从连接池获取连接时是否检查连接有效性,true时,每次都检查;false时,不检查
         datasourceInner.setTestOnBorrow(false);
         //设置从连接池获取连接时是否检查连接有效性,
@@ -82,11 +86,6 @@ public class JDBCUtils {
         datasourceInner.setTimeBetweenEvictionRunsMillis(timeBtnEviRuns);
         //配置一个连接在池中最小生存的时间,单位是毫秒
         datasourceInner.setMinEvictableIdleTimeMillis(minEviIdleTime);
-        //验证连接有效与否的SQL,不同的数据配置不同
-        //检验连接是否有效的查询语句。如果数据库Driver支持ping()方法,
-        //则优先使用ping()方法进行检查,否则使用validationQuery查询进行检查。(Oracle jdbc Driver目前不支持ping方法)
-        datasourceInner.setValidationQuery("select 1");
-
         //连接泄露检查,打开removeAbandoned功能,
         //连接从连接池借出后,长时间不归还,将触发强制回连接.
         //回收周期随timeBetweenEvictionRunsMillis进行,如果连接为从连接池借出状态,并且未执行任何sql,

@@ -19,9 +19,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.broadtext</groupId>
-			<artifactId>ycadp-kafka</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc14</artifactId>
+			<version>10.2.0.3.0</version>
 		</dependency>
 	</dependencies>
 </project>

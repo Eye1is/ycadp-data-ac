@@ -8,7 +8,6 @@
 package com.broadtext.ycadp.data.ac.provider.service.impl;
 
 import com.broadtext.ycadp.core.common.service.BaseServiceImpl;
-import com.broadtext.ycadp.data.ac.api.constants.MysqlCheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.constants.OracleCheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;

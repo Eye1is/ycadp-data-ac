@@ -11,6 +11,7 @@ import com.broadtext.ycadp.data.ac.api.vo.*;
 import com.broadtext.ycadp.data.ac.provider.service.DataacGroupService;
 import com.broadtext.ycadp.data.ac.provider.service.DataacPackageService;
 import com.broadtext.ycadp.data.ac.provider.service.DataacService;
+import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -415,7 +416,11 @@ public class DataacController {
             gVo.setPackageVoList(packageVoList);
             groupVoList.add(gVo);
         }
-        return new RespEntity(RespCode.SUCCESS, groupVoList);
+        if (!ArrayUtil.isEmpty(groupVoList)){
+            return new RespEntity(RespCode.SUCCESS, groupVoList);
+        } else {
+            return new RespEntity(RespCode.SUCCESS,new ArrayList<>());
+        }
     }
 
     /**

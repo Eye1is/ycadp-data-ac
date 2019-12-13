@@ -21,7 +21,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<ycadp-bootframework-core.version>0.0.2</ycadp-bootframework-core.version>
+		<ycadp-bootframework-core.version>0.0.1-SNAPSHOT</ycadp-bootframework-core.version>
 		<spring-cloud.version>Greenwich.RC2</spring-cloud.version>
 	</properties>
 

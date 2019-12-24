@@ -58,12 +58,12 @@ public class DataacTestConnectController {
             if(result) {
             	respEntity=new RespEntity(RespCode.SUCCESS,resultMessage);
             }else {
-            	respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE,resultMessage);
+            	respEntity=new RespEntity(RespCode.SUCCESS,resultMessage);
             }
             return respEntity;
         }catch (Exception e){
             e.printStackTrace();
-            RespEntity respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE,e.getMessage());
+            RespEntity respEntity=new RespEntity(RespCode.SUCCESS,"连接失败");
             return respEntity;
         }
     }

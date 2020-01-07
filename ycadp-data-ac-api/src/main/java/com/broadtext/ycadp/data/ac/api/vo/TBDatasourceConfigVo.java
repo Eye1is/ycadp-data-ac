@@ -40,8 +40,8 @@ public class TBDatasourceConfigVo {
     private Integer connectionPort;
     /** 表数量 */
     private String tableCount = "";
-    /** 文件ID */
-    private String fileId = "";
+    /** 云地址 */
+    private String cloudUrl = "";
     /** DB2模式 */
     private String db2Schema = "";
     /** 数据包ID*/

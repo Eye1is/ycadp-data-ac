@@ -54,9 +54,9 @@ public class TBDatasourceConfig extends AbstractBaseEntity{
     /** 表数量 */
     @Column(name = "TABLE_COUNT")
     private String tableCount;
-    /** 文件ID */
-    @Column(name = "FILE_ID")
-    private String fileId;
+    /** 云地址 */
+    @Column(name = "CLOUD_URL")
+    private String cloudUrl;
     /** DB2模式 */
     @Column(name = "DB2_SCHEMA")
     private String db2Schema;

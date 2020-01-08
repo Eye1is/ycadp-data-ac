@@ -1,4 +1,4 @@
-package com.broadtext.ycadp.data.ac.provider.service.impl;
+package com.broadtext.ycadp.data.ac.provider.service.jdbc.impl;
 
 import com.broadtext.ycadp.core.common.service.BaseServiceImpl;
 import com.broadtext.ycadp.data.ac.api.constants.MysqlCheckErrorCode;
@@ -6,7 +6,7 @@ import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldInfoVo;
 import com.broadtext.ycadp.data.ac.provider.repository.DataacRepository;
-import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
+import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.provider.utils.JDBCUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -273,28 +273,33 @@ public class DataacInfoForMySQLImpl extends BaseServiceImpl<TBDatasourceConfig, 
     }
 
     @Override
-    public void crateTable(TBDatasourceConfig tbDatasourceConfig, String sql) {
+    public void crateTable(String datasourceId, String sql) throws Exception {
 
     }
 
     @Override
-    public void update(TBDatasourceConfig tbDatasourceConfig, String sql) {
+    public void update(String datasourceId, String sql) throws Exception {
 
     }
 
     @Override
-    public void insert(TBDatasourceConfig tbDatasourceConfig, String sql) {
+    public void insert(String datasourceId, String sql) throws Exception {
 
     }
 
     @Override
-    public String query(TBDatasourceConfig tbDatasourceConfig, String sql) {
+    public String query(String datasourceId, String sql) throws Exception {
         return null;
     }
 
     @Override
-    public String delete(TBDatasourceConfig tbDatasourceConfig, String sql) {
-        return null;
+    public void delete(String datasourceId, String sql) throws Exception {
+
+    }
+
+    @Override
+    public void truncate(String datasourceId, String sql) throws Exception {
+
     }
 
     @Override
@@ -372,5 +377,16 @@ public class DataacInfoForMySQLImpl extends BaseServiceImpl<TBDatasourceConfig, 
             }
         }
         return null;
+    }
+
+    @Override
+    public String getLimitString(String sql, int skipResults, int maxResults) {
+        String limitSql;
+        if (skipResults > 0) {
+            limitSql = sql + " limit " + skipResults + ',' + maxResults + ";";
+        } else {
+            limitSql = sql + " limit " + maxResults + ";";
+        }
+        return limitSql;
     }
 }

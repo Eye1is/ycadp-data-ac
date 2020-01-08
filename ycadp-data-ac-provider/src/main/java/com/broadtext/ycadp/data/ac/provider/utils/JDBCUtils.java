@@ -8,11 +8,15 @@
 package com.broadtext.ycadp.data.ac.provider.utils;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.stat.JdbcDataSourceStat;
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 
+import javax.management.JMException;
+import javax.management.openmbean.TabularData;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 
 /**
  * 连接池工具类
@@ -45,26 +49,35 @@ public class JDBCUtils {
     private final Integer maxPoolPsPerConnSize = 20;
 
     public JDBCUtils(TBDatasourceConfig tbDatasourceConfig){
-        //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
-        if (tbDatasourceConfig.getDatasourceType().equals(DataSourceType.MYSQL)) {
-            datasourceInner.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp()
-                    + ":" + tbDatasourceConfig.getConnectionPort() + "/"
-                    + tbDatasourceConfig.getSchemaDesc()
-                    + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC");//url
-            //验证连接有效与否的SQL,不同的数据配置不同
-            //检验连接是否有效的查询语句。如果数据库Driver支持ping()方法,
-            //则优先使用ping()方法进行检查,否则使用validationQuery查询进行检查。(Oracle jdbc Driver目前不支持ping方法)
-            datasourceInner.setValidationQuery("select 1");
-        } else if (null != tbDatasourceConfig.getDatasourceType()
-                && tbDatasourceConfig.getDatasourceType().equals(DataSourceType.ORACLE)) {
-            datasourceInner.setUrl("jdbc:oracle:thin:@" + tbDatasourceConfig.getConnectionIp()
-                    + ":" + tbDatasourceConfig.getConnectionPort() + "/"
-                    + tbDatasourceConfig.getSchemaDesc());//url
-            //Oracle的验证语句
-            datasourceInner.setValidationQuery("select 1 FROM DUAL");
-        } else {
-            datasourceInner.setUrl(null);
+        switch(tbDatasourceConfig.getDatasourceType()){
+            case DataSourceType.MYSQL:
+                datasourceInner.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp()
+                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                        + tbDatasourceConfig.getSchemaDesc()
+                        + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC");//url
+                //验证连接有效与否的SQL,不同的数据配置不同
+                //检验连接是否有效的查询语句。如果数据库Driver支持ping()方法,
+                //则优先使用ping()方法进行检查,否则使用validationQuery查询进行检查。(Oracle jdbc Driver目前不支持ping方法)
+                datasourceInner.setValidationQuery("select 1");
+                break;
+            case DataSourceType.ORACLE:
+                datasourceInner.setUrl("jdbc:oracle:thin:@" + tbDatasourceConfig.getConnectionIp()
+                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                        + tbDatasourceConfig.getSchemaDesc());//url
+                //Oracle的验证语句
+                datasourceInner.setValidationQuery("select 1 FROM DUAL");
+                break;
+            case DataSourceType.PostgreSQL:
+                datasourceInner.setUrl("jdbc:postgresql://" + tbDatasourceConfig.getConnectionIp()
+                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                        + tbDatasourceConfig.getSchemaDesc());//url
+                //PostgreSQL的验证语句
+                datasourceInner.setValidationQuery("select version();");
+            default:
+                datasourceInner.setUrl(null);
+                break;
         }
+        //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
         datasourceInner.setUsername(tbDatasourceConfig.getDatasourceUserName());//用户名
         datasourceInner.setPassword(tbDatasourceConfig.getDatasourcePasswd());//密码
         //配置初始化大小、最小、最大

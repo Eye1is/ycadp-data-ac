@@ -15,7 +15,7 @@ import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldInfoVo;
-import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
+import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.provider.service.DataacService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +40,8 @@ public class DataacInfoController {
     private DataacInfoService mysql;
     @Autowired
     private DataacInfoService oracle;
+    @Autowired
+    private DataacInfoService postgresql;
     @Autowired
     private DataacService dataacService;
 
@@ -71,10 +73,18 @@ public class DataacInfoController {
         List<FieldInfoVo> allFields = new ArrayList<>();
         try {
             String datasourceType = dataacService.getFieldTypeById(id);
-            if (DataSourceType.MYSQL.equals(datasourceType)) {
-                allFields = mysql.getAllFields(id, tableName);
-            } else if (DataSourceType.ORACLE.equals(datasourceType)) {
-                allFields = oracle.getAllFields(id, tableName);
+            switch (datasourceType) {
+                case DataSourceType.MYSQL:
+                    allFields = mysql.getAllFields(id, tableName);
+                    break;
+                case DataSourceType.ORACLE:
+                    allFields = oracle.getAllFields(id, tableName);
+                    break;
+                case DataSourceType.PostgreSQL:
+                    allFields = postgresql.getAllFields(id, tableName);
+                    break;
+                default:
+                    break;
             }
             if (null != allFields && allFields.size() != 0) {
                 respEntity = new RespEntity(RespCode.SUCCESS, allFields);
@@ -89,17 +99,25 @@ public class DataacInfoController {
     }
 
     @GetMapping("/data/datasourceDictDataBySql")
-    public RespEntity getDictData(@RequestBody DatasourceDictVo datasourceDictVo) {
+    public RespEntity getDictData(@RequestBody DatasourceDictVo datasourceDictVo) throws Exception {
         RespEntity respEntity;
         List<FieldDictVo> dictFields = new ArrayList<>();
         String datasourceId = datasourceDictVo.getDatasourceId();
         String dictSql = datasourceDictVo.getDictSql();
         String dictKey = datasourceDictVo.getDictKey();
         String datasourceType = dataacService.getFieldTypeById(datasourceDictVo.getDatasourceId());
-        if (DataSourceType.MYSQL.equals(datasourceType)) {
-            dictFields = mysql.getDictData(datasourceId, dictSql, dictKey);
-        } else if (DataSourceType.ORACLE.equals(datasourceType)) {
-            dictFields = oracle.getDictData(datasourceId, dictSql, dictKey);
+        switch (datasourceType) {
+            case DataSourceType.MYSQL:
+                dictFields = mysql.getDictData(datasourceId, dictSql, dictKey);
+                break;
+            case DataSourceType.ORACLE:
+                dictFields = oracle.getDictData(datasourceId, dictSql, dictKey);
+                break;
+            case DataSourceType.PostgreSQL:
+                dictFields = postgresql.getDictData(datasourceId, dictSql, dictKey);
+                break;
+            default:
+                break;
         }
         if (null != dictFields && dictFields.size() != 0) {
             respEntity = new RespEntity(RespCode.SUCCESS, dictFields);
@@ -110,17 +128,25 @@ public class DataacInfoController {
     }
 
     @PostMapping("/data/datasourceDictDataByMap")
-    public RespEntity getAllDataWithDict(@RequestBody FieldDictMapVo dictMapVo) {
+    public RespEntity getAllDataWithDict(@RequestBody FieldDictMapVo dictMapVo) throws Exception {
         RespEntity respEntity;
         List<Map<String, Object>> dictMapFields = new ArrayList<>();
         String datasourceId = dictMapVo.getDatasourceId();
         String sql = dictMapVo.getSql();
         Map<String, List<FieldDictVo>> dictMap = dictMapVo.getDictMap();
         String datasourceType = dataacService.getFieldTypeById(dictMapVo.getDatasourceId());
-        if (DataSourceType.MYSQL.equals(datasourceType)) {
-            dictMapFields = mysql.getAllDataWithDict(datasourceId, sql, dictMap);
-        } else if (DataSourceType.ORACLE.equals(datasourceType)) {
-            dictMapFields = oracle.getAllDataWithDict(datasourceId, sql, dictMap);
+        switch (datasourceType) {
+            case DataSourceType.MYSQL:
+                dictMapFields = mysql.getAllDataWithDict(datasourceId, sql, dictMap);
+                break;
+            case DataSourceType.ORACLE:
+                dictMapFields = oracle.getAllDataWithDict(datasourceId, sql, dictMap);
+                break;
+            case DataSourceType.PostgreSQL:
+                dictMapFields = postgresql.getAllDataWithDict(datasourceId, sql, dictMap);
+                break;
+            default:
+                break;
         }
         if (null != dictMapFields && dictMapFields.size() != 0) {
             respEntity = new RespEntity(RespCode.SUCCESS, dictMapFields);
@@ -136,14 +162,22 @@ public class DataacInfoController {
      * @return
      */
     @GetMapping("/data/datasourceDataCount/{id}")
-    public RespEntity getDataCount(@PathVariable(value = "id") String id, String sql) {
+    public RespEntity getDataCount(@PathVariable(value = "id") String id, String sql) throws Exception {
         RespEntity respEntity;
         String datasourceType = dataacService.getFieldTypeById(id);
         Integer dataCount = 0;
-        if (DataSourceType.MYSQL.equals(datasourceType)) {
-            dataCount = mysql.getDataCount(id, sql);
-        } else if (DataSourceType.ORACLE.equals(datasourceType)) {
-            dataCount = oracle.getDataCount(id, sql);
+        switch (datasourceType) {
+            case DataSourceType.MYSQL:
+                dataCount = mysql.getDataCount(id, sql);
+                break;
+            case DataSourceType.ORACLE:
+                dataCount = oracle.getDataCount(id, sql);
+                break;
+            case DataSourceType.PostgreSQL:
+                dataCount = postgresql.getDataCount(id, sql);
+                break;
+            default:
+                break;
         }
         if (null == dataCount) {
             respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
@@ -161,17 +195,25 @@ public class DataacInfoController {
      * @return
      */
     @PostMapping("/data/datasourceDataCountView")
-    public RespEntity getDataCountView(@RequestBody LinkedMultiValueMap<String, String> countMultiValue) {
+    public RespEntity getDataCountView(@RequestBody LinkedMultiValueMap<String, String> countMultiValue) throws Exception {
         RespEntity respEntity;
         List<String> strings = countMultiValue.get("data");
         String datasourceId = strings.get(0);
         String countSql = strings.get(1);
         String datasourceType = dataacService.getFieldTypeById(datasourceId);
         Integer dataCount = 0;
-        if (DataSourceType.MYSQL.equals(datasourceType)) {
-            dataCount = mysql.getDataCount(datasourceId, countSql);
-        } else if (DataSourceType.ORACLE.equals(datasourceType)) {
-            dataCount = oracle.getDataCount(datasourceId, countSql);
+        switch (datasourceType) {
+            case DataSourceType.MYSQL:
+                dataCount = mysql.getDataCount(datasourceId, countSql);
+                break;
+            case DataSourceType.ORACLE:
+                dataCount = oracle.getDataCount(datasourceId, countSql);
+                break;
+            case DataSourceType.PostgreSQL:
+                dataCount = postgresql.getDataCount(datasourceId, countSql);
+                break;
+            default:
+                break;
         }
         if (null == dataCount) {
             respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE, 0);
@@ -189,13 +231,21 @@ public class DataacInfoController {
      * @return
      */
     @GetMapping("/data/distinctFields")
-    public RespEntity getDistinctFields(String datasourceId, String sql) {
+    public RespEntity getDistinctFields(String datasourceId, String sql) throws Exception {
         List<String> distinctFields = new ArrayList<>();
         String datasourceType = dataacService.getFieldTypeById(datasourceId);
-        if (DataSourceType.MYSQL.equals(datasourceType)) {
-            distinctFields = mysql.getDistinctFields(datasourceId, sql);
-        } else if (DataSourceType.ORACLE.equals(datasourceType)) {
-            distinctFields = oracle.getDistinctFields(datasourceId, sql);
+        switch (datasourceType) {
+            case DataSourceType.MYSQL:
+                distinctFields = mysql.getDistinctFields(datasourceId, sql);
+                break;
+            case DataSourceType.ORACLE:
+                distinctFields = oracle.getDistinctFields(datasourceId, sql);
+                break;
+            case DataSourceType.PostgreSQL:
+                distinctFields = postgresql.getDistinctFields(datasourceId, sql);
+                break;
+            default:
+                break;
         }
         return new RespEntity(RespCode.SUCCESS, distinctFields);
     }

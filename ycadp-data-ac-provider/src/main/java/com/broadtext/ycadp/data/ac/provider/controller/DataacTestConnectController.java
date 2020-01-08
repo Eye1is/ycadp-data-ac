@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
-import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
+import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
-import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
-import com.broadtext.ycadp.data.ac.provider.service.DataacService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +29,8 @@ public class DataacTestConnectController {
     private DataacInfoService mysql;
     @Autowired
     private DataacInfoService oracle;
+    @Autowired
+    private DataacInfoService postgresql;
 
     /**
      * 测试数据源连接
@@ -45,10 +45,18 @@ public class DataacTestConnectController {
             String resultMessage = "";
             Map<Boolean,String> map = new HashMap<>();
             String datasourceType = datasourceConfig.getDatasourceType();
-            if(DataSourceType.MYSQL.equals(datasourceType)) {
-                map = mysql.check(datasourceConfig);
-            } else if (DataSourceType.ORACLE.equals(datasourceType)){
-                map = oracle.check(datasourceConfig);
+            switch (datasourceType) {
+                case DataSourceType.MYSQL:
+                    map = mysql.check(datasourceConfig);
+                    break;
+                case DataSourceType.ORACLE:
+                    map = oracle.check(datasourceConfig);
+                    break;
+                case DataSourceType.PostgreSQL:
+                    map = postgresql.check(datasourceConfig);
+                    break;
+                default:
+                    break;
             }
             for(boolean key : map.keySet()) {
             	result = key;

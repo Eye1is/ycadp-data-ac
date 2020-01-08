@@ -31,5 +31,9 @@ public final class DataSourceType {
     /**
      * 常量:EXCEL
      */
-    public static final String EXCEL = "4";
+    public static final String EXCEL = "14";
+    /**
+     * 常量:PostgreSQL
+     */
+    public static final String PostgreSQL = "24";
 }

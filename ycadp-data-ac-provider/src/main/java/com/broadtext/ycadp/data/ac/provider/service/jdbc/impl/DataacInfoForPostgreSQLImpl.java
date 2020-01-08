@@ -1,19 +1,19 @@
 /*
- * DataacInfoForOracleImpl.java
- * Created at 2019/11/11
+ * DataacInfoForPostgresqlImpl.java
+ * Created at 2020/1/6
  * Created by ouhaoliang
- * Copyright (C) 2019 Broadtext, All rights reserved
+ * Copyright (C) 2020 Broadtext, All rights reserved
  */
 
-package com.broadtext.ycadp.data.ac.provider.service.impl;
+package com.broadtext.ycadp.data.ac.provider.service.jdbc.impl;
 
 import com.broadtext.ycadp.core.common.service.BaseServiceImpl;
-import com.broadtext.ycadp.data.ac.api.constants.OracleCheckErrorCode;
+import com.broadtext.ycadp.data.ac.api.constants.PostgresqlCheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldInfoVo;
 import com.broadtext.ycadp.data.ac.provider.repository.DataacRepository;
-import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
+import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.provider.utils.JDBCUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -35,15 +35,14 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Oracle数据源的具体实现
+ * PostgreSQL数据源的具体实现
  */
-@Service("oracle")
+@Service("postgresql")
 @Transactional
-public class DataacInfoForOracleImpl extends BaseServiceImpl<TBDatasourceConfig, String, DataacRepository> implements DataacInfoService {
+public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceConfig, String, DataacRepository> implements DataacInfoService {
 
     @Autowired
     private DataacRepository dataacRepository;
-
 
     @Override
     public List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig) {
@@ -55,7 +54,7 @@ public class DataacInfoForOracleImpl extends BaseServiceImpl<TBDatasourceConfig,
         ResultSet rs = null;
         try {
             connection = jdbcUtils.getConnection();
-            ps = connection.prepareStatement("select * from USER_TABLES");
+            ps = connection.prepareStatement("select tablename from pg_tables where schemaname='public'");
             rs = ps.executeQuery();
             List<String> list = new ArrayList<String>();
             while (rs.next()) {
@@ -245,30 +244,25 @@ public class DataacInfoForOracleImpl extends BaseServiceImpl<TBDatasourceConfig,
 
     @Override
     public List<FieldInfoVo> getAllFields(String datasourceId, String table) {
+        return null;
+    }
+
+    @Override
+    public void crateTable(String datasourceId, String sql) {
         Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
         boolean isNotNull = byId.isPresent();
         if (isNotNull) {
             TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
-
             JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
             Connection connection;
             PreparedStatement ps = null;
             ResultSet rs = null;
             try {
                 connection = jdbcUtils.getConnection();
-                ps = connection.prepareStatement("SELECT B.COLUMN_NAME,B.DATA_TYPE,A.COMMENTS FROM USER_COL_COMMENTS A, USER_TAB_COLUMNS B" +
-                        " WHERE A.TABLE_NAME = B.TABLE_NAME AND a.column_name = b.COLUMN_NAME AND A.TABLE_NAME = '" + table + "' AND a.column_name = b.COLUMN_NAME");
-                rs = ps.executeQuery();
-                List<FieldInfoVo> list = new ArrayList<FieldInfoVo>();
-                FieldInfoVo field;
-                while (rs.next()) {
-                    field = new FieldInfoVo();
-                    field.setFieldName(rs.getString(1));
-                    field.setFieldType(rs.getString(2));
-                    field.setFieldDesign(rs.getString(3));
-                    list.add(field);
-                }
-                return list;
+                connection.setAutoCommit(false);
+                ps = connection.prepareStatement(sql);
+                ps.execute();
+                connection.commit();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -277,32 +271,139 @@ public class DataacInfoForOracleImpl extends BaseServiceImpl<TBDatasourceConfig,
                 jdbcUtils.close();
             }
         }
-        return null;
     }
 
     @Override
-    public void crateTable(TBDatasourceConfig tbDatasourceConfig, String sql) {
-
+    public void update(String datasourceId, String sql) {
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull) {
+            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                connection.setAutoCommit(false);
+                ps = connection.prepareStatement(sql);
+                ps.execute();
+                connection.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        }
     }
 
     @Override
-    public void update(TBDatasourceConfig tbDatasourceConfig, String sql) {
-
+    public void insert(String datasourceId, String sql) {
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull) {
+            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                connection.setAutoCommit(false);
+                ps = connection.prepareStatement(sql);
+                ps.execute();
+                connection.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        }
     }
 
     @Override
-    public void insert(TBDatasourceConfig tbDatasourceConfig, String sql) {
-
+    public String query(String datasourceId, String sql) {
+        String s = "";
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull) {
+            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                connection.setAutoCommit(false);
+                ps = connection.prepareStatement(sql);
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    s = rs.getString(1);
+                }
+                connection.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        }
+        return s;
     }
 
     @Override
-    public String query(TBDatasourceConfig tbDatasourceConfig, String sql) {
-        return null;
+    public void delete(String datasourceId, String sql) {
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull) {
+            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                ps = connection.prepareStatement(sql);
+                ps.execute();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        }
     }
 
     @Override
-    public String delete(TBDatasourceConfig tbDatasourceConfig, String sql) {
-        return null;
+    public void truncate(String datasourceId, String sql) throws Exception {
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull) {
+            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                connection.setAutoCommit(false);
+                ps = connection.prepareStatement(sql);
+                ps.execute();
+                connection.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        }
     }
 
     @Override
@@ -310,11 +411,11 @@ public class DataacInfoForOracleImpl extends BaseServiceImpl<TBDatasourceConfig,
         //获取当前正在执行的线程的名字
         System.out.println(Thread.currentThread().getName());
         Map<Boolean, String> checkMap = new HashMap<>();
-        String url = "jdbc:oracle:thin:@" + tbDatasourceConfig.getConnectionIp()
-                + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+        String url = "jdbc:postgresql://" + tbDatasourceConfig.getConnectionIp()
+        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
                 + tbDatasourceConfig.getSchemaDesc();
         try {
-            String driverClass = "oracle.jdbc.driver.OracleDriver";
+            String driverClass = "org.postgresql.Driver";
             Class.forName(driverClass);
         } catch (ClassNotFoundException e) {
             checkMap.put(false, "连接失败,缺少驱动");
@@ -330,13 +431,13 @@ public class DataacInfoForOracleImpl extends BaseServiceImpl<TBDatasourceConfig,
             e.printStackTrace();
             System.out.println(e.getErrorCode());
             int errorCode = e.getErrorCode();
-            if (errorCode == OracleCheckErrorCode.ERROR_CONNECTION) {
+            if (errorCode == PostgresqlCheckErrorCode.ERROR_CONNECTION) {
                 checkMap.put(false, "网络异常,IP地址或者端口有误");
-            } else if (errorCode == OracleCheckErrorCode.ERROR_DATASOURCE) {
+            } else if (errorCode == PostgresqlCheckErrorCode.ERROR_DATASOURCE) {
                 checkMap.put(false, "连接失败,错误的数据库名");
-            } else if (errorCode == OracleCheckErrorCode.ERROR_USERORPW) {
+            } else if (errorCode == PostgresqlCheckErrorCode.ERROR_USERORPW) {
                 checkMap.put(false, "连接失败,用户名或密码错误");
-            } else if (errorCode == OracleCheckErrorCode.ERROR_ACCESS) {
+            } else if (errorCode == PostgresqlCheckErrorCode.ERROR_ACCESS) {
                 checkMap.put(false, "连接失败,无权访问");
             } else {
                 checkMap.put(false, "连接失败,系统错误");
@@ -380,6 +481,11 @@ public class DataacInfoForOracleImpl extends BaseServiceImpl<TBDatasourceConfig,
                 jdbcUtils.close();
             }
         }
+        return null;
+    }
+
+    @Override
+    public String getLimitString(String sql, int skipResults, int maxResults) throws Exception {
         return null;
     }
 }

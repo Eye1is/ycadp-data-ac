@@ -5,7 +5,7 @@
  * Copyright (C) 2019 Broadtext, All rights reserved
  */
 
-package com.broadtext.ycadp.data.ac.provider.service;
+package com.broadtext.ycadp.data.ac.provider.service.jdbc;
 
 
 import com.broadtext.ycadp.core.common.service.BaseService;
@@ -29,7 +29,7 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig, Strin
      * @param tbDatasourceConfig
      * @return string类型的list集合
      */
-    List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig);
+    List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig) throws Exception;
 
     /**
      * 根据信息获取所有该表下的数据,只允许在数据接入的查询中使用
@@ -38,7 +38,7 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig, Strin
      * @param sql
      * @return list集合
      */
-    List getAllData(TBDatasourceConfig tbDatasourceConfig, String sql);
+    List getAllData(TBDatasourceConfig tbDatasourceConfig, String sql) throws Exception;
 
     /**
      * 根据信息获取所有该表下的数据(包括字典转换),建议在填写字典key的预览中使用
@@ -48,7 +48,7 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig, Strin
      * @param dictMap
      * @return
      */
-    List<Map<String, Object>> getAllDataWithDict(String datasourceId, String sql, Map<String, List<FieldDictVo>> dictMap);
+    List<Map<String, Object>> getAllDataWithDict(String datasourceId, String sql, Map<String, List<FieldDictVo>> dictMap) throws Exception;
 
     /**
      * 根据信息获取所有该表下的数据(包括字典转换),建议在数据接入输入字典sql使用
@@ -58,7 +58,7 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig, Strin
      * @param key
      * @return
      */
-    List<FieldDictVo> getDictData(String datasourceId, String dictSql, String key);
+    List<FieldDictVo> getDictData(String datasourceId, String dictSql, String key) throws Exception;
 
     /**
      * 获取数据数量
@@ -67,7 +67,7 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig, Strin
      * @param sql
      * @return Integer
      */
-    Integer getDataCount(TBDatasourceConfig tbDatasourceConfig, String sql);
+    Integer getDataCount(TBDatasourceConfig tbDatasourceConfig, String sql) throws Exception;
 
     /**
      * 获取数据数量(参数id)
@@ -75,7 +75,7 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig, Strin
      * @param sql
      * @return
      */
-    Integer getDataCount(String id, String sql);
+    Integer getDataCount(String id, String sql) throws Exception;
 
     /**
      * 获取数据接入表信息
@@ -83,49 +83,55 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig, Strin
      * @param table
      * @return
      */
-    List<FieldInfoVo> getAllFields(String datasourceId, String table);
+    List<FieldInfoVo> getAllFields(String datasourceId, String table) throws Exception;
 
     /**
      * 建表
      *
-     * @param tbDatasourceConfig
+     * @param datasourceId
      * @param sql
      */
-    void crateTable(TBDatasourceConfig tbDatasourceConfig, String sql);
+    void crateTable(String datasourceId, String sql) throws Exception;
 
     /**
      * 更新
      *
-     * @param tbDatasourceConfig
+     * @param datasourceId
      * @param sql
      */
-    void update(TBDatasourceConfig tbDatasourceConfig, String sql);
+    void update(String datasourceId, String sql) throws Exception;
 
     /**
      * 插入
      *
-     * @param tbDatasourceConfig
+     * @param datasourceId
      * @param sql
      */
-    void insert(TBDatasourceConfig tbDatasourceConfig, String sql);
+    void insert(String datasourceId, String sql) throws Exception;
 
     /**
      * 查询某字段的返回数据
      *
-     * @param tbDatasourceConfig
+     * @param datasourceId
      * @param sql
      * @return String
      */
-    String query(TBDatasourceConfig tbDatasourceConfig, String sql);
+    String query(String datasourceId, String sql) throws Exception;
 
     /**
      * 删除
      *
-     * @param tbDatasourceConfig
+     * @param datasourceId
      * @param sql
-     * @return String
      */
-    String delete(TBDatasourceConfig tbDatasourceConfig, String sql);
+    void delete(String datasourceId, String sql) throws Exception;
+
+    /**
+     * @param datasourceId
+     * @param sql
+     * @throws Exception
+     */
+    void truncate(String datasourceId, String sql) throws Exception;
 
     /**
      * 测试连接是否成功
@@ -133,7 +139,7 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig, Strin
      * @param tbDatasourceConfig
      * @return Map
      */
-    Map<Boolean, String> check(TBDatasourceConfig tbDatasourceConfig);
+    Map<Boolean, String> check(TBDatasourceConfig tbDatasourceConfig) throws Exception;
 
     /**
      * 获取去重字段list
@@ -141,5 +147,15 @@ public interface DataacInfoService extends BaseService<TBDatasourceConfig, Strin
      * @param sql
      * @return
      */
-    List<String> getDistinctFields(String datasourceId,String sql);
+    List<String> getDistinctFields(String datasourceId,String sql) throws Exception;
+
+    /**
+     *
+     * @param sql
+     * @param skipResults
+     * @param maxResults
+     * @return
+     * @throws Exception
+     */
+    String getLimitString(String sql, int skipResults, int maxResults) throws Exception;
 }

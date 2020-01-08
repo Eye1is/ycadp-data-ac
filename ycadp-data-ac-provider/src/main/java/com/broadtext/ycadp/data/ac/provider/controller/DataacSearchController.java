@@ -6,7 +6,7 @@ import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
-import com.broadtext.ycadp.data.ac.provider.service.DataacInfoService;
+import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.provider.service.DataacService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +34,8 @@ public class DataacSearchController {
     @Autowired
     private DataacInfoService oracle;
     @Autowired
+    private DataacInfoService postgresql;
+    @Autowired
     private DataacService dataacService;
 
     /**
@@ -51,42 +53,66 @@ public class DataacSearchController {
         Map map =new HashMap();
         try {
             String datasourceType = dataacService.getFieldTypeById(id);
-            if (DataSourceType.MYSQL.equals(datasourceType)) {
-                if (tableName == null) {//无筛选条件查询所有
-                    list = mysql.getAllTables(datasource);
-                    map.put("list", list);
-                } else if (!"".equals(tableName)) {//有筛选条件
-                    list = mysql.getAllTables(datasource);
-                    if (list.size() > 0) {
-                        for (String str : list) {
-                            if (str.contains(tableName)) {
-                                listContains.add(str);
+            switch (datasourceType) {
+                case DataSourceType.MYSQL:
+                    if (tableName == null) {//无筛选条件查询所有
+                        list = mysql.getAllTables(datasource);
+                        map.put("list", list);
+                    } else if (!"".equals(tableName)) {//有筛选条件
+                        list = mysql.getAllTables(datasource);
+                        if (list.size() > 0) {
+                            for (String str : list) {
+                                if (str.contains(tableName)) {
+                                    listContains.add(str);
+                                }
                             }
                         }
+                        map.put("list", listContains);
+                    } else {//无筛选条件查询所有
+                        list = mysql.getAllTables(datasource);
+                        map.put("list", list);
                     }
-                    map.put("list", listContains);
-                } else {//无筛选条件查询所有
-                    list = mysql.getAllTables(datasource);
-                    map.put("list", list);
-                }
-            } else if (DataSourceType.ORACLE.equals(datasourceType)) {
-                if (tableName == null) {//无筛选条件查询所有
-                    list = mysql.getAllTables(datasource);
-                    map.put("list", list);
-                } else if (!"".equals(tableName)) {//有筛选条件
-                    list = mysql.getAllTables(datasource);
-                    if (list.size() > 0) {
-                        for (String str : list) {
-                            if (str.contains(tableName)) {
-                                listContains.add(str);
+                    break;
+                case DataSourceType.ORACLE:
+                    if (tableName == null) {//无筛选条件查询所有
+                        list = oracle.getAllTables(datasource);
+                        map.put("list", list);
+                    } else if (!"".equals(tableName)) {//有筛选条件
+                        list = oracle.getAllTables(datasource);
+                        if (list.size() > 0) {
+                            for (String str : list) {
+                                if (str.contains(tableName)) {
+                                    listContains.add(str);
+                                }
                             }
                         }
+                        map.put("list", listContains);
+                    } else {//无筛选条件查询所有
+                        list = oracle.getAllTables(datasource);
+                        map.put("list", list);
                     }
-                    map.put("list", listContains);
-                } else {//无筛选条件查询所有
-                    list = mysql.getAllTables(datasource);
-                    map.put("list", list);
-                }
+                    break;
+                case DataSourceType.PostgreSQL:
+                    if (tableName == null) {//无筛选条件查询所有
+                        list = postgresql.getAllTables(datasource);
+                        map.put("list", list);
+                    } else if (!"".equals(tableName)) {//有筛选条件
+                        list = postgresql.getAllTables(datasource);
+                        if (list.size() > 0) {
+                            for (String str : list) {
+                                if (str.contains(tableName)) {
+                                    listContains.add(str);
+                                }
+                            }
+                        }
+                        map.put("list", listContains);
+                    } else {//无筛选条件查询所有
+                        list = postgresql.getAllTables(datasource);
+                        map.put("list", list);
+                    }
+                    break;
+                default:
+                    break;
             }
             return new RespEntity(RespCode.SUCCESS,map);
         } catch (Exception e) {
@@ -101,8 +127,9 @@ public class DataacSearchController {
      * @return 返回接口数据
      */
     @GetMapping("data/datatables/{id}")
-    public RespEntity searchDataTable(HttpServletRequest request, @PathVariable(value="id") String id) {
+    public RespEntity searchDataTable(HttpServletRequest request, @PathVariable(value="id") String id) throws Exception {
         TBDatasourceConfig datasource=dataacService.findById(id);
+        String datasourceType = dataacService.getFieldTypeById(id);
         String ispage=request.getParameter("isPage");
         String tableName=request.getParameter("tableName");
 //        List<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
@@ -113,26 +140,49 @@ public class DataacSearchController {
             //分页
             String pageNum=request.getParameter("pageNum");
             String pageSize=request.getParameter("pageSize");
-            sql="select * from "+tableName+" limit " +Integer.parseInt(pageSize)*(Integer.parseInt(pageNum)-1)+","+Integer.parseInt(pageSize);
+            sql="select * from "+tableName;
+            int skipResults = Integer.parseInt(pageSize) * (Integer.parseInt(pageNum) - 1);
+            int maxResults = Integer.parseInt(pageSize);
+//          sql="select * from "+tableName+" limit " +Integer.parseInt(pageSize)*(Integer.parseInt(pageNum)-1)+","+Integer.parseInt(pageSize);
+            switch (datasourceType) {
+                case DataSourceType.MYSQL:
+                    sql = mysql.getLimitString(sql, skipResults, maxResults);
+                    break;
+                case DataSourceType.ORACLE:
+                    sql = oracle.getLimitString(sql, skipResults, maxResults);
+                    break;
+                case DataSourceType.PostgreSQL:
+                    sql = postgresql.getLimitString(sql, skipResults, maxResults);
+                    break;
+                default:
+                    break;
+            }
         }else {
             //不分页
             sql="select * from "+tableName;
         }
         try {
-            List allData = new ArrayList();
-            String datasourceType = dataacService.getFieldTypeById(id);
-            if(DataSourceType.MYSQL.equals(datasourceType)) {
-                allData = mysql.getAllData(datasource, sql);
-                String sqlTotal="select * from "+tableName;
-                count=mysql.getDataCount(datasource,sqlTotal);
-            } else if (DataSourceType.ORACLE.equals(datasourceType)) {
-                allData = oracle.getAllData(datasource, sql);
-                String sqlTotal = "select * from " + tableName;
-                count = oracle.getDataCount(datasource, sqlTotal);
+            List<Map<String, Object>> allData = new ArrayList();
+            String sqlTotal="select * from "+tableName;
+            switch (datasourceType) {
+                case DataSourceType.MYSQL:
+                    allData = mysql.getAllData(datasource, sql);
+                    count=mysql.getDataCount(datasource,sqlTotal);
+                    break;
+                case DataSourceType.ORACLE:
+                    allData = oracle.getAllData(datasource, sql);
+                    count = oracle.getDataCount(datasource, sqlTotal);
+                    break;
+                case DataSourceType.PostgreSQL:
+                    allData = postgresql.getAllData(datasource, sql);
+                    count = postgresql.getDataCount(datasource, sqlTotal);
+                    break;
+                default:
+                    break;
             }
-            String str = JSON.toJSONString(allData);
+//            String str = JSON.toJSONString(allData);
             map.put("total",count);
-            map.put("list",str);
+            map.put("list",allData);
             return new RespEntity(RespCode.SUCCESS,map);
         } catch (Exception e) {
             e.printStackTrace();

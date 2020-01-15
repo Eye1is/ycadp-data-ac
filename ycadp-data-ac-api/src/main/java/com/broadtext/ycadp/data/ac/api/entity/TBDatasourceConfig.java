@@ -3,6 +3,7 @@ package com.broadtext.ycadp.data.ac.api.entity;
 import com.broadtext.ycadp.base.entity.AbstractBaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import javax.persistence.Table;
 @Table(name = "T_B_DATASOURCE_CONFIG")
 @Data
 @EqualsAndHashCode(callSuper = true)
+@Accessors(chain = true)
 public class TBDatasourceConfig extends AbstractBaseEntity{
     /** 数据包ID*/
     @Column(name = "PACKAGE_ID")
@@ -27,7 +29,7 @@ public class TBDatasourceConfig extends AbstractBaseEntity{
     /** 数据源类型 */
     @Column(name = "DATASOURCE_TYPE")
     private String datasourceType;
-    /** 数据库名(MYSQL)/模式名(ORACLE)/架构名(DB2) */
+    /** 数据库名(MYSQL)/模式名(ORACLE)/架构名(DB2)/excel文件名 */
     @Column(name = "SCHEMA_DESC")
     private String schemaDesc;
     /** 数据源用户名 */

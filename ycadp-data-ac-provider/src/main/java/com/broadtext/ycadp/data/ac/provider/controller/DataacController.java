@@ -3,24 +3,43 @@ package com.broadtext.ycadp.data.ac.provider.controller;
 import com.broadtext.ycadp.base.entity.ListPager;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
+import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
+import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceExcel;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceGroup;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourcePackage;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.vo.*;
-import com.broadtext.ycadp.data.ac.provider.service.DataacGroupService;
-import com.broadtext.ycadp.data.ac.provider.service.DataacPackageService;
-import com.broadtext.ycadp.data.ac.provider.service.DataacService;
+import com.broadtext.ycadp.data.ac.provider.service.*;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
+import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 数据接入Controller
@@ -36,6 +55,10 @@ public class DataacController {
     private DataacGroupService dataacGroupService;
     @Autowired
     private DataacPackageService dataacPackageService;
+    @Autowired
+    private ExcelToolService excelToolService;
+    @Autowired
+    private DataExcelService dataExcelService;
 
     /**
      * 新增数据源
@@ -66,6 +89,47 @@ public class DataacController {
         return respEntity;
     }
 
+    /**
+     * 添加excel数据源
+     * @param multipartFile
+     * @param infoVo
+     * @return
+     */
+    @PostMapping("/data/datasource/excel")
+    public RespEntity addDatasourceExcel(@RequestParam("file") MultipartFile multipartFile, ExcelBaseInfoVo infoVo) {
+        String excelName = multipartFile.getOriginalFilename();
+        Map<String, String> analysisMap = analysisExcel(multipartFile);
+        if (analysisMap.containsKey("errorValue")) {
+            System.out.println("sql执行出现错误！！");
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "sql执行出现错误！！");
+        } else if (analysisMap.containsKey("exceptionValue")) {
+            System.out.println("解析excel文件过程出现异常！！");
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！");
+        }
+        TBDatasourceConfig datasourceConfig = new TBDatasourceConfig();
+        datasourceConfig.setDatasourceName(infoVo.getDatasourceName())
+                .setRemark(infoVo.getRemark())
+                .setCloudUrl(infoVo.getCloudUrl())
+                .setPackageId(infoVo.getPackageId())
+                .setDatasourceType(DataSourceType.EXCEL)
+                .setSchemaDesc(excelName);
+        TBDatasourceConfig dataConfigResult = dataacService.addOne(datasourceConfig);
+        if (dataConfigResult.getId() != null) {
+            for (Map.Entry<String, String> entry : analysisMap.entrySet()) {
+                TBDatasourceExcel excelEntity = new TBDatasourceExcel();
+                excelEntity.setDatasourceId(dataConfigResult.getId())
+                        .setSheetName(entry.getKey())
+                        .setSheetTableName(entry.getValue());
+                TBDatasourceExcel excelMappingResult = dataExcelService.addOne(excelEntity);
+                if (excelMappingResult.getId() == null) {
+                    return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "添加excel数据源映射关系实体失败！！");
+                }
+            }
+            return new RespEntity(RespCode.SUCCESS, dataConfigResult);
+        } else {
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "添加数据源实体失败！！");
+        }
+    }
 
     /**
      * 删除数据源
@@ -75,6 +139,26 @@ public class DataacController {
     @DeleteMapping("/data/datasource/{id}")
     public RespEntity deleteDatasource(@PathVariable("id") String id){
         try {
+            TBDatasourceConfig one = dataacService.getOne(id);
+            if (one.getDatasourceType().equals(DataSourceType.EXCEL)) {
+                List<TBDatasourceExcel> listByDataSourceId = dataExcelService.getListByDataSourceId(id);
+                List<String> tableNameList = new ArrayList<>();
+                for (TBDatasourceExcel e : listByDataSourceId) {
+                    tableNameList.add(e.getSheetTableName());
+                }
+                String dropTableSql = "DROP TABLE ";
+                for (int i = 0; i < tableNameList.size(); i++) {
+                    dropTableSql += tableNameList.get(i)+",";
+                }
+                dropTableSql = dropTableSql.substring(0, dropTableSql.length() - 1);
+                PostgreConfigVo pVo = new PostgreConfigVo();
+                pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
+                        .setUser("postgres")
+                        .setPwd("postgres");
+                boolean b = excelToolService.generateDataInPostgre(pVo, dropTableSql);
+                //再删除原有的映射关系和excel数据
+                dataExcelService.deleteByDatasourceId(id);
+            }
             dataacService.removeOne(id);
             RespEntity respEntity=new RespEntity(RespCode.SUCCESS);
             return respEntity;
@@ -228,6 +312,84 @@ public class DataacController {
         	respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
         return respEntity;
+    }
+
+    /**
+     * 编辑excel数据源
+     * @param id
+     * @param multipartFile
+     * @param infoVo
+     * @return
+     */
+    @PutMapping("/data/datasource/excel/{id}")
+    public RespEntity updateDatasourceExcel(@PathVariable("id") String id, @RequestParam("file") MultipartFile multipartFile, ExcelBaseInfoVo infoVo) {
+        TBDatasourceConfig dasource=dataacService.findById(id);
+        if (infoVo.getFlag().equals("1")) {//生成过资产
+            dasource.setDatasourceName(infoVo.getDatasourceName())
+                    .setRemark(infoVo.getRemark())
+                    .setPackageId(infoVo.getPackageId());
+            TBDatasourceConfig datasourceConfig = dataacService.updateOne(dasource);
+            return new RespEntity(RespCode.SUCCESS, datasourceConfig);
+        } else {//未生成过资产，允许修改excel文件
+            if (multipartFile == null) {
+                dasource.setDatasourceName(infoVo.getDatasourceName())
+                        .setRemark(infoVo.getRemark())
+                        .setPackageId(infoVo.getPackageId());
+                TBDatasourceConfig datasourceConfig = dataacService.updateOne(dasource);
+                return new RespEntity(RespCode.SUCCESS, datasourceConfig);
+            } else {
+                //先删除pg数据库中的excel表数据
+                List<TBDatasourceExcel> listByDataSourceId = dataExcelService.getListByDataSourceId(id);
+                List<String> tableNameList = new ArrayList<>();
+                for (TBDatasourceExcel e : listByDataSourceId) {
+                    tableNameList.add(e.getSheetTableName());
+                }
+                String dropTableSql = "DROP TABLE ";
+                for (int i = 0; i < tableNameList.size(); i++) {
+                    dropTableSql += tableNameList.get(i)+",";
+                }
+                dropTableSql = dropTableSql.substring(0, dropTableSql.length() - 1);
+                PostgreConfigVo pVo = new PostgreConfigVo();
+                pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
+                        .setUser("postgres")
+                        .setPwd("postgres");
+                boolean b = excelToolService.generateDataInPostgre(pVo, dropTableSql);
+                //再删除原有的映射关系和excel数据
+                dataExcelService.deleteByDatasourceId(id);
+                //然后添加各项数据
+                String excelName = multipartFile.getOriginalFilename();
+                Map<String, String> analysisMap = analysisExcel(multipartFile);
+                if (analysisMap.containsKey("errorValue")) {
+                    System.out.println("sql执行出现错误！！");
+                    return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "sql执行出现错误！！");
+                } else if (analysisMap.containsKey("exceptionValue")) {
+                    System.out.println("解析excel文件过程出现异常！！");
+                    return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！");
+                }
+                dasource.setDatasourceName(infoVo.getDatasourceName())
+                        .setRemark(infoVo.getRemark())
+                        .setPackageId(infoVo.getPackageId())
+                        .setCloudUrl(infoVo.getCloudUrl())
+                        .setSchemaDesc(excelName);
+                TBDatasourceConfig dataConfigResult = dataacService.updateOne(dasource);
+                if (dataConfigResult.getId() != null) {
+                    for (Map.Entry<String, String> entry : analysisMap.entrySet()) {
+                        TBDatasourceExcel excelEntity = new TBDatasourceExcel();
+                        excelEntity.setDatasourceId(dataConfigResult.getId())
+                                .setSheetName(entry.getKey())
+                                .setSheetTableName(entry.getValue());
+                        TBDatasourceExcel excelMappingResult = dataExcelService.addOne(excelEntity);
+                        if (excelMappingResult.getId() == null) {
+                            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "添加excel数据源映射关系实体失败！！");
+                        }
+                    }
+                    return new RespEntity(RespCode.SUCCESS, dataConfigResult);
+                } else {
+                    return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "编辑数据源实体失败！！");
+                }
+            }
+
+        }
     }
 
     /**
@@ -444,6 +606,279 @@ public class DataacController {
             }
         }
         return new RespEntity(RespCode.SUCCESS);
+    }
+
+    /**
+     * 解析Excel文件
+     * 1.将其真实数据放入postgres数据库中，每个sheet对应一张表
+     * 2.将excel名与postgres库中表的映射关系放入ac库中
+     * ----返回各个sheet的名称list，用在在ac库的映射表中
+     *
+     * @param multipartFile
+     * @return
+     */
+    public Map<String, String> analysisExcel(MultipartFile multipartFile) {
+        //连接我们的postgreSql数据库
+        PostgreConfigVo pVo = new PostgreConfigVo();
+        pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
+                .setUser("postgres")
+                .setPwd("postgres");
+        //开始处理MultipartFile
+        File file = null;
+        List<String> headerValue = new ArrayList<>();//放表头数据
+        Map<String, String> sheetAndTableName = new HashMap<>();//放最终返回的sheet名和表名的键值对
+        String insertSql = "";
+        boolean sqlFlag = false;
+        boolean commentSqlFlag = false;
+        boolean dataSqlFlag = false;
+        try {
+            String[] split = multipartFile.getOriginalFilename().split("\\.");
+            String eShortName = split[0];
+//            String generateTableSql
+            file = multipartFileToFile(multipartFile);
+            Workbook wb = null;
+            Sheet sheet = null;
+            Row row = null;
+            wb = readExcel(file, multipartFile.getOriginalFilename());
+            if (wb != null) {//-----------------------暂时只处理单个sheet-----------------
+                int numberOfSheets = wb.getNumberOfSheets();
+                String sheetName = "";
+                int rownum = 0;
+                int column = 0;
+                int tableSuccessValue = 0;//最终是否成功建表的标志符
+                int tableDataSuccessValue = 0;//最终是否成功插入数据的标志符
+                String errorMessage = "";//拼接所有的错误信息
+                for (int n = 0; n < numberOfSheets; n++) {
+                    sheet = wb.getSheetAt(n);
+                    sheetName = sheet.getSheetName();
+                    headerValue.clear();
+                    //获取最大行数
+                    rownum = sheet.getPhysicalNumberOfRows();
+                    row = sheet.getRow(0);//拿第一行 表头
+                    //获取最大列数
+                    if (row != null) {
+                        column = row.getPhysicalNumberOfCells();
+                    } else {
+                        column = 0;
+                    }
+                    //获取表头
+                    for (int j = 0; j < column; j++) {
+                        Cell cell = row.getCell(j);
+                        String cellValue = cell.getRichStringCellValue().getString();
+                        headerValue.add(cellValue);
+                    }
+//                judgeSql="DROP TABLE IF EXISTS "+"";
+                    Map<String, String> sqlMap = generateTableSql(sheetName, headerValue);
+                    String tableName = sqlMap.get("tableName");
+                    System.out.println("-------------建表sql为：" + sqlMap.get("sql"));
+                    System.out.println("-------------备注sql为：" + sqlMap.get("commentSql"));
+                    sqlFlag = excelToolService.generateDataInPostgre(pVo, sqlMap.get("sql"));
+                    commentSqlFlag = excelToolService.generateDataInPostgre(pVo, sqlMap.get("commentSql"));
+                    //开始insert数据
+                    String cellValue = "";
+                    insertSql = "insert into " + tableName + " values ";
+                    for (int i = 1; i < rownum; i++) {
+                        row = sheet.getRow(i);
+                        insertSql += "(";
+                        for (int j = 0; j < column; j++) {
+                            Cell cell = row.getCell(j);
+                            if (cell != null) {
+                                cell.setCellType(Cell.CELL_TYPE_STRING);
+                                if (cell.getRichStringCellValue() != null) {
+                                    cellValue = cell.getRichStringCellValue().getString();
+                                }
+                            }
+                            insertSql += "'" + cellValue + "',";
+                        }
+                        insertSql = insertSql.substring(0, insertSql.length() - 1);
+                        insertSql += "),";
+                    }
+                    if (rownum != 0) {
+                        insertSql = insertSql.substring(0, insertSql.length() - 1);
+                        System.out.println("----------插入数据sql为：" + insertSql);
+                        dataSqlFlag = excelToolService.generateDataInPostgre(pVo, insertSql);
+                    }else {
+                        dataSqlFlag = true;
+                    }
+                    if (sqlFlag && commentSqlFlag) {
+                        tableSuccessValue += 1;
+                        sheetAndTableName.put(sheetName, tableName);
+                    } else {
+                        errorMessage += "第" + String.valueOf(tableSuccessValue + 1) + "个sheet建表失败\n";
+                    }
+                    if (dataSqlFlag) {
+                        tableDataSuccessValue += 1;
+                    } else {
+                        errorMessage += "第" + String.valueOf(tableDataSuccessValue + 1) + "个sheet建表之后插入数据失败\n";
+                    }
+                }
+                if (tableSuccessValue == numberOfSheets) {
+                    System.out.println("-----------执行建表sql成功！！------------");
+                } else {
+                    System.out.println("---------" + errorMessage + "----------");
+                }
+                if (tableDataSuccessValue == numberOfSheets) {
+                    System.out.println("-----------执行插入数据sql成功！！------------");
+                } else {
+                    System.out.println("---------" + errorMessage + "----------");
+                }
+                if (!errorMessage.equals("")) {
+                    sheetAndTableName.put("errorValue", errorMessage);
+                }
+            }
+            //处理系统生成的临时文件
+            File f = new File(file.toURI());
+            if (f.delete()) {
+                System.out.println("临时文件删除成功");
+            } else {
+                System.out.println("临时文件删除失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            sheetAndTableName.put("exceptionValue", e.getMessage());
+        }
+        return sheetAndTableName;
+    }
+
+    /**
+     * MultipartFile转为File
+     * @param multipartFile
+     * @return
+     * @throws Exception
+     */
+    public static File multipartFileToFile(MultipartFile multipartFile) throws Exception {
+        File toFile = null;
+        if (multipartFile.equals("") || multipartFile.getSize() <= 0) {
+            multipartFile = null;
+        } else {
+            InputStream ins = null;
+            ins = multipartFile.getInputStream();
+            toFile = new File(multipartFile.getOriginalFilename());
+            inputStreamToFile(ins, toFile);
+            ins.close();
+        }
+        return toFile;
+    }
+
+    /**
+     * 获取流文件
+     * @param ins
+     * @param file
+     */
+    private static void inputStreamToFile(InputStream ins, File file) {
+        try {
+            OutputStream os = new FileOutputStream(file);
+            int bytesRead = 0;
+            byte[] buffer = new byte[8192];
+            while ((bytesRead = ins.read(buffer, 0, 8192))!=-1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            os.close();
+            ins.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 读取excel文件为workbook
+     * @param file
+     * @param fileName
+     * @return
+     */
+    public static Workbook readExcel(File file,String fileName) {
+        Workbook wb = null;
+        InputStream is = null;
+        if (fileName == null) {
+            return null;
+        }
+        String extString = fileName.substring(fileName.lastIndexOf("."));
+        try {
+            is = new FileInputStream(file);
+            if (".xls".equals(extString)) {
+                wb = new HSSFWorkbook(is);
+            } else if (".xlsx".equals(extString)) {
+                wb = new XSSFWorkbook(is);
+            } else {
+                wb = null;
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return wb;
+    }
+
+    /**
+     * 生成执行sql（1.建表sql  2.备注sql）
+     *
+     * @param sheetName
+     * @param headerValues
+     * @return
+     */
+    public Map<String, String> generateTableSql(String sheetName, List<String> headerValues) {
+        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]");
+        Matcher m = p.matcher(sheetName);
+        String tableName = "";
+        if (m.find()) {//有中文
+            tableName = excelToolService.getFullSpellPingYin(sheetName);
+        } else {//无中文
+            tableName = sheetName;
+        }
+        tableName += System.currentTimeMillis() / 1000;//加上时间戳
+        tableName = tableName.replaceAll(" ", "");
+//        System.out.println("-----------表名为：" + tableName);
+        String sql = "create table " + tableName + " ( ";
+        String commentSql = "comment on table " + tableName + " is '" + sheetName + "';";
+        List<String> newNameList = new ArrayList<>();
+        for (int i = 0; i < headerValues.size(); i++) {
+            newNameList.add(excelToolService.getFullSpellPingYin(headerValues.get(i)));
+        }
+        for (int j = 0; j < newNameList.size(); j++) {
+            String dealedStr = newNameList.get(j);
+            if (dealedStr.contains("(") || dealedStr.contains(")")) {
+                if (dealedStr.contains("(")) {
+                    dealedStr = dealedStr.replaceAll("\\(", "_");
+                }
+                if (dealedStr.contains(")")) {
+                    dealedStr = dealedStr.replaceAll("\\)", "_");
+                }
+            }
+            sql += dealedStr + " varchar,";
+            commentSql += "comment on column " + tableName + "." + dealedStr + " is '" + headerValues.get(j) + "';";
+        }
+        sql = sql.substring(0, sql.length() - 1);
+        sql += ");";
+        Map<String, String> sqlMap = new HashMap();
+        sqlMap.put("sql", sql);
+        sqlMap.put("commentSql", commentSql);
+        sqlMap.put("tableName", tableName);
+        return sqlMap;
+    }
+
+    /**
+     * 测试接口
+     * @param multipartFile
+     * @return
+     */
+    @PostMapping("/data/datasource/xcltest")
+    public RespEntity xclTest(@RequestParam("file") MultipartFile multipartFile){
+
+        String str = "jhghjfv你好hjk,";
+
+        String testStr = "gongzuoliang(shi)";
+        if (testStr.contains("(")||testStr.contains(")")) {
+            if (testStr.contains("(")) {
+                testStr = testStr.replaceAll("\\(", "_");
+            }
+            if (testStr.contains(")")) {
+                testStr = testStr.replaceAll("\\)", "_");
+            }
+        }
+        str = str.substring(0, str.length() - 1);
+        return new RespEntity(RespCode.SUCCESS,testStr);
+//        return new RespEntity(RespCode.SUCCESS, multipartFile.getOriginalFilename());
     }
 
 }

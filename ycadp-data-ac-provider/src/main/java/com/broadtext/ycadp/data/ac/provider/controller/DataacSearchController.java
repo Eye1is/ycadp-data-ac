@@ -5,7 +5,9 @@ import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
+import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceExcel;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
+import com.broadtext.ycadp.data.ac.provider.service.DataExcelService;
 import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.provider.service.DataacService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,8 @@ public class DataacSearchController {
     private DataacInfoService postgresql;
     @Autowired
     private DataacService dataacService;
+    @Autowired
+    private DataExcelService excelService;
 
     /**
      * 查找数据库表列表
@@ -108,6 +112,30 @@ public class DataacSearchController {
                         map.put("list", listContains);
                     } else {//无筛选条件查询所有
                         list = postgresql.getAllTables(datasource);
+                        map.put("list", list);
+                    }
+                    break;
+                case DataSourceType.EXCEL:
+                    List<TBDatasourceExcel> listByDataSourceId = excelService.getListByDataSourceId(id);
+                    if (tableName == null) {//无筛选条件查询所有
+//                        List<String> sheetTableNameList = new ArrayList<>();
+//                        List<String> sheetNameList = new ArrayList<>();
+                        for (TBDatasourceExcel e : listByDataSourceId) {
+//                            sheetTableNameList.add(e.getSheetTableName());
+                            list.add(e.getSheetName());
+                        }
+                        map.put("list", list);
+                    } else if (!"".equals(tableName)) {//有筛选条件
+                        for (TBDatasourceExcel e : listByDataSourceId) {
+                            if (e.getSheetName().contains(tableName)) {
+                                list.add(e.getSheetName());
+                            }
+                        }
+                        map.put("list", list);
+                    } else {//无筛选条件查询所有
+                        for (TBDatasourceExcel e : listByDataSourceId) {
+                            list.add(e.getSheetName());
+                        }
                         map.put("list", list);
                     }
                     break;

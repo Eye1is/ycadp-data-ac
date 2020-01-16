@@ -62,13 +62,14 @@ public class DataacController {
 
     /**
      * 新增数据源
+     *
      * @param datasourceConfig
      * @return
      */
     @PostMapping("/data/datasource")
-    public RespEntity addDatasource(@RequestBody TBDatasourceConfigVo datasourceConfig){
-        RespEntity respEntity=null;
-        TBDatasourceConfig dasource=new TBDatasourceConfig();
+    public RespEntity addDatasource(@RequestBody TBDatasourceConfigVo datasourceConfig) {
+        RespEntity respEntity = null;
+        TBDatasourceConfig dasource = new TBDatasourceConfig();
         dasource.setDatasourceName(datasourceConfig.getDatasourceName());
         dasource.setDatasourceType(datasourceConfig.getDatasourceType());
         dasource.setConnectionIp(datasourceConfig.getConnectionIp());
@@ -79,18 +80,19 @@ public class DataacController {
         dasource.setRemark(datasourceConfig.getRemark());
         dasource.setSchemaDesc(datasourceConfig.getSchemaDesc());
         dasource.setPackageId(datasourceConfig.getPackageId());
-        TBDatasourceConfig result=dataacService.addOne(dasource);
-        if (result!=null){
+        TBDatasourceConfig result = dataacService.addOne(dasource);
+        if (result != null) {
             datasourceConfig.setId(result.getId());
-            respEntity=new RespEntity(RespCode.SUCCESS,datasourceConfig);
-        }else {
-            respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+            respEntity = new RespEntity(RespCode.SUCCESS, datasourceConfig);
+        } else {
+            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
         return respEntity;
     }
 
     /**
      * 添加excel数据源
+     *
      * @param multipartFile
      * @param infoVo
      * @return
@@ -133,11 +135,12 @@ public class DataacController {
 
     /**
      * 删除数据源
+     *
      * @param id
      * @return
      */
     @DeleteMapping("/data/datasource/{id}")
-    public RespEntity deleteDatasource(@PathVariable("id") String id){
+    public RespEntity deleteDatasource(@PathVariable("id") String id) {
         try {
             TBDatasourceConfig one = dataacService.getOne(id);
             if (one.getDatasourceType().equals(DataSourceType.EXCEL)) {
@@ -148,7 +151,7 @@ public class DataacController {
                 }
                 String dropTableSql = "DROP TABLE ";
                 for (int i = 0; i < tableNameList.size(); i++) {
-                    dropTableSql += tableNameList.get(i)+",";
+                    dropTableSql += tableNameList.get(i) + ",";
                 }
                 dropTableSql = dropTableSql.substring(0, dropTableSql.length() - 1);
                 PostgreConfigVo pVo = new PostgreConfigVo();
@@ -160,11 +163,11 @@ public class DataacController {
                 dataExcelService.deleteByDatasourceId(id);
             }
             dataacService.removeOne(id);
-            RespEntity respEntity=new RespEntity(RespCode.SUCCESS);
+            RespEntity respEntity = new RespEntity(RespCode.SUCCESS);
             return respEntity;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            RespEntity respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE,e.getMessage());
+            RespEntity respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE, e.getMessage());
             return respEntity;
         }
     }
@@ -172,60 +175,62 @@ public class DataacController {
 
     /**
      * 查询数据源列表
+     *
      * @param request
      * @param pager
      * @return
      */
     @GetMapping("/data/datasource1")
-    public RespEntity getDatasources(HttpServletRequest request, ListPager<DataSourceListVo> pager){
-        RespEntity respEntity=null;
-        String ispage=request.getParameter("isPage");
-        String datasourceName=request.getParameter("datasourceName");
-        List<TBDatasourceConfig> datas=new ArrayList<>();
-        if (datasourceName==null){//无筛选条件查询所有
-            datas=dataacService.getList();
-        }else if (!"".equals(datasourceName)){//有筛选条件
-            datas=dataacService.getListByDatasourceName(datasourceName);
-        }else {//无筛选条件查询所有
-            datas=dataacService.getList();
+    public RespEntity getDatasources(HttpServletRequest request, ListPager<DataSourceListVo> pager) {
+        RespEntity respEntity = null;
+        String ispage = request.getParameter("isPage");
+        String datasourceName = request.getParameter("datasourceName");
+        List<TBDatasourceConfig> datas = new ArrayList<>();
+        if (datasourceName == null) {//无筛选条件查询所有
+            datas = dataacService.getList();
+        } else if (!"".equals(datasourceName)) {//有筛选条件
+            datas = dataacService.getListByDatasourceName(datasourceName);
+        } else {//无筛选条件查询所有
+            datas = dataacService.getList();
         }
-        List<DataSourceListVo> voDatas=new ArrayList<>();
-        for (TBDatasourceConfig daSource : datas){
-            DataSourceListVo vo=new DataSourceListVo();
+        List<DataSourceListVo> voDatas = new ArrayList<>();
+        for (TBDatasourceConfig daSource : datas) {
+            DataSourceListVo vo = new DataSourceListVo();
             vo.setId(daSource.getId());
             vo.setDatasourceName(daSource.getDatasourceName());
             vo.setDatasourceType(daSource.getDatasourceType());
             voDatas.add(vo);
         }
-        if (ispage==null||"true".equals(ispage)){
+        if (ispage == null || "true".equals(ispage)) {
             //分页
-            String sort=request.getParameter("sort");
-            String pageNum=request.getParameter("pageNum");
-            String pageSize=request.getParameter("pageSize");
-            if (pageNum==null||pageSize==null||"".equals(pageNum)||"".equals(pageSize)){
-                respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "请求分页参数有误");
-            }else {
+            String sort = request.getParameter("sort");
+            String pageNum = request.getParameter("pageNum");
+            String pageSize = request.getParameter("pageSize");
+            if (pageNum == null || pageSize == null || "".equals(pageNum) || "".equals(pageSize)) {
+                respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "请求分页参数有误");
+            } else {
                 pager.setList(voDatas);
                 pager.setPageNum(Integer.parseInt(pageNum));
                 pager.setPageSize(Integer.parseInt(pageSize));
                 pager.setTotal(voDatas.size());
-                if (sort!=null||!"".equals(sort)){
+                if (sort != null || !"".equals(sort)) {
                     pager.setSort(sort);
                 }
-                respEntity=new RespEntity(RespCode.SUCCESS,pager);
+                respEntity = new RespEntity(RespCode.SUCCESS, pager);
             }
-        }else {
+        } else {
             //不分页
             pager.setList(voDatas);
             pager.setPageNum(1);
             pager.setTotal(voDatas.size());//所有行记录数
-            respEntity=new RespEntity(RespCode.SUCCESS,pager);
+            respEntity = new RespEntity(RespCode.SUCCESS, pager);
         }
         return respEntity;
     }
 
     /**
      * 查询数据源列表
+     *
      * @param packageId
      * @return
      */
@@ -248,74 +253,77 @@ public class DataacController {
                     dataSourceListVo.setPackageId(tbDatasourceConfig.getPackageId());
                     list.add(dataSourceListVo);
                 }
-                map.put("list",list);
-                respEntity = new RespEntity<>(RespCode.SUCCESS,map);
+                map.put("list", list);
+                respEntity = new RespEntity<>(RespCode.SUCCESS, map);
             } else {
-                map.put("list",list);
-                respEntity = new RespEntity<>(RespCode.SUCCESS,map);
+                map.put("list", list);
+                respEntity = new RespEntity<>(RespCode.SUCCESS, map);
             }
         } catch (Exception e) {
-            respEntity = new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE,"系统出错");
+            respEntity = new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE, "系统出错");
         }
         return respEntity;
     }
-    
-    
+
+
     /**
-              * 查询数据源明细信息
+     * 查询数据源明细信息
+     *
      * @param id
      * @return
      */
     @GetMapping("/data/datasource/{id}")
-    public RespEntity getDatasource(@PathVariable("id") String id){
+    public RespEntity getDatasource(@PathVariable("id") String id) {
         try {
             TBDatasourceConfig datasource = dataacService.findById(id);
             RespEntity respEntity = null;
-            if(datasource != null) {
-            	respEntity = new RespEntity(RespCode.SUCCESS, datasource);
-            }else {
-            	respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+            if (datasource != null) {
+                respEntity = new RespEntity(RespCode.SUCCESS, datasource);
+            } else {
+                respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
             }
             return respEntity;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            RespEntity respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE,e.getMessage());
+            RespEntity respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE, e.getMessage());
             return respEntity;
         }
     }
-    
+
     /**
-              * 编辑数据源
+     * 编辑数据源
+     *
      * @param id
      * @param datasourceConfig
      * @return
      */
     @PutMapping("/data/datasource/{id}")
-    public RespEntity updateDatasource(@PathVariable("id") String id,@RequestBody TBDatasourceConfigVo datasourceConfig){
-        RespEntity respEntity=null;
-        TBDatasourceConfig dasource=dataacService.findById(id);
-        if(dasource != null) {
-        	 dasource.setDatasourceName(datasourceConfig.getDatasourceName());
-             dasource.setDatasourceType(datasourceConfig.getDatasourceType());
-             dasource.setConnectionIp(datasourceConfig.getConnectionIp());
-             dasource.setConnectionPort(datasourceConfig.getConnectionPort());
-             dasource.setDatasourceUserName(datasourceConfig.getDatasourceUserName());
-             dasource.setDatasourcePasswd(datasourceConfig.getDatasourcePasswd());
-             dasource.setDictSql(datasourceConfig.getDictSql());
-             dasource.setRemark(datasourceConfig.getRemark());
-             dasource.setSchemaDesc(datasourceConfig.getSchemaDesc());
-             dasource.setPackageId(datasourceConfig.getPackageId());
-             dataacService.updateOne(dasource);
-             datasourceConfig.setId(id);
-             respEntity=new RespEntity(RespCode.SUCCESS,datasourceConfig);
-        }else {
-        	respEntity=new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+    public RespEntity updateDatasource(@PathVariable("id") String id, @RequestBody TBDatasourceConfigVo datasourceConfig) {
+        RespEntity respEntity = null;
+        TBDatasourceConfig dasource = dataacService.findById(id);
+        if (dasource != null) {
+            dasource.setDatasourceName(datasourceConfig.getDatasourceName());
+            dasource.setDatasourceType(datasourceConfig.getDatasourceType());
+            dasource.setConnectionIp(datasourceConfig.getConnectionIp());
+            dasource.setConnectionPort(datasourceConfig.getConnectionPort());
+            dasource.setDatasourceUserName(datasourceConfig.getDatasourceUserName());
+            dasource.setDatasourcePasswd(datasourceConfig.getDatasourcePasswd());
+            dasource.setDictSql(datasourceConfig.getDictSql());
+            dasource.setRemark(datasourceConfig.getRemark());
+            dasource.setSchemaDesc(datasourceConfig.getSchemaDesc());
+            dasource.setPackageId(datasourceConfig.getPackageId());
+            dataacService.updateOne(dasource);
+            datasourceConfig.setId(id);
+            respEntity = new RespEntity(RespCode.SUCCESS, datasourceConfig);
+        } else {
+            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
         return respEntity;
     }
 
     /**
      * 编辑excel数据源
+     *
      * @param id
      * @param multipartFile
      * @param infoVo
@@ -323,7 +331,7 @@ public class DataacController {
      */
     @PutMapping("/data/datasource/excel/{id}")
     public RespEntity updateDatasourceExcel(@PathVariable("id") String id, @RequestParam("file") MultipartFile multipartFile, ExcelBaseInfoVo infoVo) {
-        TBDatasourceConfig dasource=dataacService.findById(id);
+        TBDatasourceConfig dasource = dataacService.findById(id);
         if (infoVo.getFlag().equals("1")) {//生成过资产
             dasource.setDatasourceName(infoVo.getDatasourceName())
                     .setRemark(infoVo.getRemark())
@@ -346,7 +354,7 @@ public class DataacController {
                 }
                 String dropTableSql = "DROP TABLE ";
                 for (int i = 0; i < tableNameList.size(); i++) {
-                    dropTableSql += tableNameList.get(i)+",";
+                    dropTableSql += tableNameList.get(i) + ",";
                 }
                 dropTableSql = dropTableSql.substring(0, dropTableSql.length() - 1);
                 PostgreConfigVo pVo = new PostgreConfigVo();
@@ -393,75 +401,146 @@ public class DataacController {
     }
 
     /**
+     * excel导入（全量更新）
+     * @param id
+     * @param multipartFile
+     * @return
+     */
+    @PostMapping("/data/datasource/excel/import/{id}")
+    public RespEntity excelImport(@PathVariable("id") String id, @RequestParam("file") MultipartFile multipartFile) {
+        List<String> sheetNamesFromDb = new ArrayList<>();
+        List<TBDatasourceExcel> listByDataSourceId = dataExcelService.getListByDataSourceId(id);
+        for (TBDatasourceExcel e : listByDataSourceId) {
+            sheetNamesFromDb.add(e.getSheetName());
+        }
+        int size = sheetNamesFromDb.size();
+        int compareNum = 0;
+        List<String> excelSheetNames = getExcelSheetNames(multipartFile);
+        for (int i = 0; i < excelSheetNames.size(); i++) {
+            for (int j = 0; j < sheetNamesFromDb.size(); j++) {
+                if (excelSheetNames.get(i).equals(sheetNamesFromDb.get(j))) {
+                    compareNum++;
+                    break;
+                }
+                continue;
+            }
+        }
+        if (compareNum == size) {//校验sheet名称无误，开始全量更新
+            //先删除pg数据库中的excel表数据
+            List<String> tableNameList = new ArrayList<>();
+            for (TBDatasourceExcel e : listByDataSourceId) {
+                tableNameList.add(e.getSheetTableName());
+            }
+            String dropTableSql = "DROP TABLE ";
+            for (int i = 0; i < tableNameList.size(); i++) {
+                dropTableSql += tableNameList.get(i) + ",";
+            }
+            dropTableSql = dropTableSql.substring(0, dropTableSql.length() - 1);
+            PostgreConfigVo pVo = new PostgreConfigVo();
+            pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
+                    .setUser("postgres")
+                    .setPwd("postgres");
+            boolean b = excelToolService.generateDataInPostgre(pVo, dropTableSql);
+            //再删除原有的映射关系和excel数据
+            dataExcelService.deleteByDatasourceId(id);
+            //然后添加各项数据
+            String excelName = multipartFile.getOriginalFilename();
+            Map<String, String> analysisMap = analysisExcel(multipartFile);
+            if (analysisMap.containsKey("errorValue")) {
+                System.out.println("sql执行出现错误！！");
+                return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "sql执行出现错误！！");
+            } else if (analysisMap.containsKey("exceptionValue")) {
+                System.out.println("解析excel文件过程出现异常！！");
+                return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！");
+            }
+            for (Map.Entry<String, String> entry : analysisMap.entrySet()) {
+                TBDatasourceExcel excelEntity = new TBDatasourceExcel();
+                excelEntity.setDatasourceId(id)
+                        .setSheetName(entry.getKey())
+                        .setSheetTableName(entry.getValue());
+                TBDatasourceExcel excelMappingResult = dataExcelService.addOne(excelEntity);
+                if (excelMappingResult.getId() == null) {
+                    return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "添加excel数据源映射关系实体失败！！");
+                }
+            }
+        }
+        return new RespEntity(RespCode.SUCCESS);
+    }
+
+    /**
      * 新增group
+     *
      * @param groupVo
      * @return
      */
     @PostMapping("/data/datasource/group")
-    public RespEntity addGroup(@RequestBody GroupVo groupVo){
-        TBDatasourceGroup groupEntity=new TBDatasourceGroup();
+    public RespEntity addGroup(@RequestBody GroupVo groupVo) {
+        TBDatasourceGroup groupEntity = new TBDatasourceGroup();
         groupEntity.setGroupName(groupVo.getGroupName());
-        int maxSortNum=0;
+        int maxSortNum = 0;
         List<TBDatasourceGroup> list = dataacGroupService.getList();
-        for (TBDatasourceGroup group : list){
+        for (TBDatasourceGroup group : list) {
             int tempSortNum = Integer.valueOf(group.getSortNum());
-            if (tempSortNum>maxSortNum){
-                maxSortNum=tempSortNum;
+            if (tempSortNum > maxSortNum) {
+                maxSortNum = tempSortNum;
             }
         }
         groupEntity.setSortNum(String.valueOf(++maxSortNum));
 //        groupEntity.setSortNum(groupVo.getSortNum());
         TBDatasourceGroup tbDatasourceGroup = dataacGroupService.addOne(groupEntity);
-        if (tbDatasourceGroup!=null){
-            return new RespEntity(RespCode.SUCCESS,tbDatasourceGroup);
-        }else {
+        if (tbDatasourceGroup != null) {
+            return new RespEntity(RespCode.SUCCESS, tbDatasourceGroup);
+        } else {
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
     }
 
     /**
      * 编辑group
+     *
      * @param id
      * @param groupVo
      * @return
      */
     @PutMapping("/data/datasource/group/{id}")
-    public RespEntity editGroup(@PathVariable("id") String id,@RequestBody GroupVo groupVo){
+    public RespEntity editGroup(@PathVariable("id") String id, @RequestBody GroupVo groupVo) {
         TBDatasourceGroup byId = dataacGroupService.findById(id);
         byId.setGroupName(groupVo.getGroupName());
 //        byId.setSortNum(groupVo.getSortNum());
         TBDatasourceGroup tbDatasourceGroup = dataacGroupService.updateOne(byId);
-        if (tbDatasourceGroup!=null){
-            return new RespEntity(RespCode.SUCCESS,tbDatasourceGroup);
-        }else {
+        if (tbDatasourceGroup != null) {
+            return new RespEntity(RespCode.SUCCESS, tbDatasourceGroup);
+        } else {
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
     }
 
     /**
      * 回显group
+     *
      * @param id
      * @return
      */
     @GetMapping("/data/datasource/group/{id}")
-    public RespEntity echoGroup(@PathVariable("id") String id){
+    public RespEntity echoGroup(@PathVariable("id") String id) {
         TBDatasourceGroup byId = dataacGroupService.findById(id);
         return new RespEntity(RespCode.SUCCESS, byId);
     }
 
     /**
      * 删除group
+     *
      * @param id
      * @return
      */
     @DeleteMapping("/data/datasource/group/{id}")
-    public RespEntity deleteGroup(@PathVariable("id") String id){
-        String sortNum=dataacGroupService.getOne(id).getSortNum();
+    public RespEntity deleteGroup(@PathVariable("id") String id) {
+        String sortNum = dataacGroupService.getOne(id).getSortNum();
         int sortNumInt = Integer.valueOf(sortNum);
         List<TBDatasourceGroup> list = dataacGroupService.getList();
-        for (TBDatasourceGroup group : list){
-            int tempSortNum=Integer.valueOf(group.getSortNum());
-            if (tempSortNum>sortNumInt){
+        for (TBDatasourceGroup group : list) {
+            int tempSortNum = Integer.valueOf(group.getSortNum());
+            if (tempSortNum > sortNumInt) {
                 group.setSortNum(String.valueOf(--tempSortNum));
                 dataacGroupService.updateOne(group);
             }
@@ -473,28 +552,29 @@ public class DataacController {
 
     /**
      * 新增package
+     *
      * @param packageAddVo
      * @return
      */
     @PostMapping("/data/datasource/package")
-    public RespEntity addPackage(@RequestBody PackageAddVo packageAddVo){
-        TBDatasourcePackage tbDatasourcePackage=new TBDatasourcePackage();
+    public RespEntity addPackage(@RequestBody PackageAddVo packageAddVo) {
+        TBDatasourcePackage tbDatasourcePackage = new TBDatasourcePackage();
         tbDatasourcePackage.setGroupId(packageAddVo.getGroupId());
         tbDatasourcePackage.setPackageName(packageAddVo.getPackageName());
-        int maxSortNum=0;
+        int maxSortNum = 0;
         List<TBDatasourcePackage> listByGroupId = dataacPackageService.getOrderedListByGroupId(packageAddVo.getGroupId());
-        for (TBDatasourcePackage p : listByGroupId){
+        for (TBDatasourcePackage p : listByGroupId) {
             int tempSortNum = Integer.valueOf(p.getSortNum());
-            if (tempSortNum>maxSortNum){
-                maxSortNum=tempSortNum;
+            if (tempSortNum > maxSortNum) {
+                maxSortNum = tempSortNum;
             }
         }
         tbDatasourcePackage.setSortNum(String.valueOf(++maxSortNum));
 //        tbDatasourcePackage.setSortNum(packageAddVo.getSortNum());
         TBDatasourcePackage result = dataacPackageService.addOne(tbDatasourcePackage);
-        if (result!=null){
-            return new RespEntity(RespCode.SUCCESS,result);
-        }else {
+        if (result != null) {
+            return new RespEntity(RespCode.SUCCESS, result);
+        } else {
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
 
@@ -502,47 +582,50 @@ public class DataacController {
 
     /**
      * 编辑package
+     *
      * @param id
      * @param packageAddVo
      * @return
      */
     @PutMapping("/data/datasource/package/{id}")
-    public RespEntity editPackage(@PathVariable("id") String id,@RequestBody PackageAddVo packageAddVo){
+    public RespEntity editPackage(@PathVariable("id") String id, @RequestBody PackageAddVo packageAddVo) {
         TBDatasourcePackage byId = dataacPackageService.findById(id);
         byId.setPackageName(packageAddVo.getPackageName());
 //        byId.setSortNum(packageAddVo.getSortNum());
         TBDatasourcePackage tbDatasourcePackage = dataacPackageService.updateOne(byId);
-        if (tbDatasourcePackage!=null){
+        if (tbDatasourcePackage != null) {
             return new RespEntity(RespCode.SUCCESS, tbDatasourcePackage);
-        }else {
+        } else {
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
     }
 
     /**
      * 回显package
+     *
      * @param id
      * @return
      */
     @GetMapping("/data/datasource/package/{id}")
-    public RespEntity echoPackage(@PathVariable("id") String id){
+    public RespEntity echoPackage(@PathVariable("id") String id) {
         TBDatasourcePackage byId = dataacPackageService.findById(id);
         return new RespEntity(RespCode.SUCCESS, byId);
     }
 
     /**
      * 删除package
+     *
      * @param id
      * @return
      */
     @DeleteMapping("/data/datasource/package/{id}")
-    public RespEntity deletePackage(@PathVariable("id") String id){
+    public RespEntity deletePackage(@PathVariable("id") String id) {
         TBDatasourcePackage one = dataacPackageService.getOne(id);
-        int sortNum=Integer.valueOf(one.getSortNum());
+        int sortNum = Integer.valueOf(one.getSortNum());
         List<TBDatasourcePackage> listByGroupId = dataacPackageService.getOrderedListByGroupId(one.getGroupId());
-        for (TBDatasourcePackage p : listByGroupId){
-            int tempSortNum=Integer.valueOf(p.getSortNum());
-            if (tempSortNum>sortNum){
+        for (TBDatasourcePackage p : listByGroupId) {
+            int tempSortNum = Integer.valueOf(p.getSortNum());
+            if (tempSortNum > sortNum) {
                 p.setSortNum(String.valueOf(--tempSortNum));
                 dataacPackageService.updateOne(p);
             }
@@ -553,21 +636,22 @@ public class DataacController {
 
     /**
      * 包结构树形展示（完整树形）
+     *
      * @return
      */
     @GetMapping("/data/datasource/tree")
-    public RespEntity viewTree(){
+    public RespEntity viewTree() {
         List<GroupVo> groupVoList = new ArrayList<>();
         List<TBDatasourceGroup> groupList = dataacGroupService.getListBySortNum();//排序过的组List
         List<TBDatasourcePackage> packageList;
-        for (TBDatasourceGroup g:groupList){
-            GroupVo gVo=new GroupVo();
+        for (TBDatasourceGroup g : groupList) {
+            GroupVo gVo = new GroupVo();
             gVo.setId(g.getId());
             gVo.setGroupName(g.getGroupName());
             gVo.setSortNum(g.getSortNum());
             List<PackageVo> packageVoList = new ArrayList<>();
-            packageList=dataacPackageService.getOrderedListByGroupId(g.getId());
-            for (TBDatasourcePackage p:packageList){
+            packageList = dataacPackageService.getOrderedListByGroupId(g.getId());
+            for (TBDatasourcePackage p : packageList) {
                 PackageVo pVo = new PackageVo();
                 pVo.setId(p.getId());
                 pVo.setGroupId(g.getId());
@@ -578,27 +662,28 @@ public class DataacController {
             gVo.setPackageVoList(packageVoList);
             groupVoList.add(gVo);
         }
-        if (!ArrayUtil.isEmpty(groupVoList)){
+        if (!ArrayUtil.isEmpty(groupVoList)) {
             return new RespEntity(RespCode.SUCCESS, groupVoList);
         } else {
-            return new RespEntity(RespCode.SUCCESS,new ArrayList<>());
+            return new RespEntity(RespCode.SUCCESS, new ArrayList<>());
         }
     }
 
     /**
      * 移动改变顺序
+     *
      * @param sortGroupVo
      * @return
      */
     @PostMapping("/data/datasource/sort")
-    public RespEntity changeSort(@RequestBody SortGroupVo sortGroupVo){
+    public RespEntity changeSort(@RequestBody SortGroupVo sortGroupVo) {
         List<GroupVo> groupVoList = sortGroupVo.getGroupVoList();
-        for (GroupVo gVo : groupVoList){
+        for (GroupVo gVo : groupVoList) {
             TBDatasourceGroup theGroup = dataacGroupService.getOne(gVo.getId());//该vo对应的真实group实体
             theGroup.setSortNum(gVo.getSortNum());
             dataacGroupService.updateOne(theGroup);
             List<PackageVo> packageVoList = gVo.getPackageVoList();
-            for (PackageVo pVo : packageVoList){
+            for (PackageVo pVo : packageVoList) {
                 TBDatasourcePackage thePackage = dataacPackageService.getOne(pVo.getId());
                 thePackage.setGroupId(pVo.getGroupId());
                 thePackage.setSortNum(pVo.getSortNum());
@@ -618,7 +703,7 @@ public class DataacController {
      * @return
      */
     public Map<String, String> analysisExcel(MultipartFile multipartFile) {
-        //连接我们的postgreSql数据库
+        //配置我们的postgreSql数据库链接信息
         PostgreConfigVo pVo = new PostgreConfigVo();
         pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
                 .setUser("postgres")
@@ -640,7 +725,7 @@ public class DataacController {
             Sheet sheet = null;
             Row row = null;
             wb = readExcel(file, multipartFile.getOriginalFilename());
-            if (wb != null) {//-----------------------暂时只处理单个sheet-----------------
+            if (wb != null) {
                 int numberOfSheets = wb.getNumberOfSheets();
                 String sheetName = "";
                 int rownum = 0;
@@ -697,7 +782,7 @@ public class DataacController {
                         insertSql = insertSql.substring(0, insertSql.length() - 1);
                         System.out.println("----------插入数据sql为：" + insertSql);
                         dataSqlFlag = excelToolService.generateDataInPostgre(pVo, insertSql);
-                    }else {
+                    } else {
                         dataSqlFlag = true;
                     }
                     if (sqlFlag && commentSqlFlag) {
@@ -741,7 +826,35 @@ public class DataacController {
     }
 
     /**
+     * 获取excel文件的所有sheet名
+     * @param multipartFile
+     * @return
+     */
+    public List<String> getExcelSheetNames(MultipartFile multipartFile){
+        //开始处理MultipartFile
+        File file = null;
+        List<String> sheetNamesList = new ArrayList<>();
+        try {
+            file = multipartFileToFile(multipartFile);
+            Workbook wb = null;
+            Sheet sheet = null;
+            wb = readExcel(file, multipartFile.getOriginalFilename());
+            if (wb != null) {
+                int numberOfSheets = wb.getNumberOfSheets();
+                for (int n = 0; n < numberOfSheets; n++) {
+                    sheet = wb.getSheetAt(n);
+                    sheetNamesList.add(sheet.getSheetName());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return sheetNamesList;
+    }
+
+    /**
      * MultipartFile转为File
+     *
      * @param multipartFile
      * @return
      * @throws Exception
@@ -762,6 +875,7 @@ public class DataacController {
 
     /**
      * 获取流文件
+     *
      * @param ins
      * @param file
      */
@@ -770,7 +884,7 @@ public class DataacController {
             OutputStream os = new FileOutputStream(file);
             int bytesRead = 0;
             byte[] buffer = new byte[8192];
-            while ((bytesRead = ins.read(buffer, 0, 8192))!=-1) {
+            while ((bytesRead = ins.read(buffer, 0, 8192)) != -1) {
                 os.write(buffer, 0, bytesRead);
             }
             os.close();
@@ -782,11 +896,12 @@ public class DataacController {
 
     /**
      * 读取excel文件为workbook
+     *
      * @param file
      * @param fileName
      * @return
      */
-    public static Workbook readExcel(File file,String fileName) {
+    public static Workbook readExcel(File file, String fileName) {
         Workbook wb = null;
         InputStream is = null;
         if (fileName == null) {
@@ -857,18 +972,53 @@ public class DataacController {
         return sqlMap;
     }
 
+//    public String checSheetNameAndFieldNames(MultipartFile multipartFile, String id) {
+//        List<String> sheetNamesFromDb = new ArrayList<>();
+//        List<TBDatasourceExcel> listByDataSourceId = dataExcelService.getListByDataSourceId(id);
+//        for (TBDatasourceExcel e : listByDataSourceId) {
+//            sheetNamesFromDb.add(e.getSheetName());
+//        }
+//        int size = sheetNamesFromDb.size();
+//        int compareNum = 0;
+//        List<String> excelSheetNames = getExcelSheetNames(multipartFile);
+//        for (int i = 0; i < excelSheetNames.size(); i++) {
+//            for (int j = 0; j < sheetNamesFromDb.size(); j++) {
+//                if (excelSheetNames.get(i).equals(sheetNamesFromDb.get(j))) {
+//                    compareNum++;
+//                    break;
+//                }
+//                continue;
+//            }
+//        }
+//        if (compareNum != size) {
+//            return "0";//sheet不匹配
+//        }
+//        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]");
+//        for (String sheetName : excelSheetNames) {
+//            Matcher m = p.matcher(sheetName);
+//            String tableName = "";
+//            if (m.find()) {//有中文
+//                tableName = excelToolService.getFullSpellPingYin(sheetName);
+//            } else {//无中文
+//                tableName = sheetName;
+//            }
+//
+//        }
+//    }
+
     /**
      * 测试接口
+     *
      * @param multipartFile
      * @return
      */
     @PostMapping("/data/datasource/xcltest")
-    public RespEntity xclTest(@RequestParam("file") MultipartFile multipartFile){
+    public RespEntity xclTest(@RequestParam("file") MultipartFile multipartFile) {
 
         String str = "jhghjfv你好hjk,";
 
         String testStr = "gongzuoliang(shi)";
-        if (testStr.contains("(")||testStr.contains(")")) {
+        if (testStr.contains("(") || testStr.contains(")")) {
             if (testStr.contains("(")) {
                 testStr = testStr.replaceAll("\\(", "_");
             }
@@ -877,7 +1027,7 @@ public class DataacController {
             }
         }
         str = str.substring(0, str.length() - 1);
-        return new RespEntity(RespCode.SUCCESS,testStr);
+        return new RespEntity(RespCode.SUCCESS, testStr);
 //        return new RespEntity(RespCode.SUCCESS, multipartFile.getOriginalFilename());
     }
 

@@ -54,7 +54,7 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
         ResultSet rs = null;
         try {
             connection = jdbcUtils.getConnection();
-            ps = connection.prepareStatement("select tablename from pg_tables where schemaname='public'");
+            ps = connection.prepareStatement("select tablename from pg_tables");
             rs = ps.executeQuery();
             List<String> list = new ArrayList<String>();
             while (rs.next()) {
@@ -150,7 +150,7 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
                                             isDict = true;
                                         }
                                     }
-                                    if(!isDict){
+                                    if (!isDict) {
                                         rowData.put(md.getColumnLabel(i), rs.getObject(i));
                                     }
                                 } else {
@@ -179,7 +179,7 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
     @Override
     public List<FieldDictVo> getDictData(String datasourceId, String dictSql, String key) {
         List<FieldDictVo> list = new ArrayList<>();
-        List<Map<String, Object>> data = getAllDataWithDict(datasourceId,dictSql.replace("?", key), null);
+        List<Map<String, Object>> data = getAllDataWithDict(datasourceId, dictSql.replace("?", key), null);
         for (Map<String, Object> map : data) {
             list.add(new FieldDictVo(map.get("_value").toString(),
                     map.get("_text").toString()));
@@ -195,7 +195,7 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
         ResultSet rs = null;
         try {
             connection = jdbcUtils.getConnection();
-            ps = connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
+            ps = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs = ps.executeQuery();
             if (rs == null) {
                 return 0;
@@ -224,7 +224,7 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
             ResultSet rs = null;
             try {
                 connection = jdbcUtils.getConnection();
-                ps = connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
+                ps = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
                 rs = ps.executeQuery();
                 if (rs == null) {
                     return 0;
@@ -244,6 +244,61 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
 
     @Override
     public List<FieldInfoVo> getAllFields(String datasourceId, String table) {
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull) {
+            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
+
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                ps = connection.prepareStatement("SELECT" +
+                        "A .attnum," +
+                        "A .attname," +
+                        "concat_ws (" +
+                        "''," +
+                        "T .typname," +
+                        "SUBSTRING (" +
+                        "format_type (A .atttypid, A .atttypmod)" +
+                        "FROM" +
+                        "'\\(.*\\)'" +
+                        ")" +
+                        ") AS TYPE," +
+                        "d.description" +
+                        "FROM" +
+                        "pg_class C," +
+                        "pg_attribute A," +
+                        "pg_type T," +
+                        "pg_description d " +
+                        "WHERE" +
+                        "C .relname = '" + table + "'" +
+                        "AND A .attnum > 0" +
+                        "AND A .attrelid = C .oid" +
+                        "AND A .atttypid = T .oid" +
+                        "AND d.objoid = A .attrelid" +
+                        "AND d.objsubid = A .attnum");
+                rs = ps.executeQuery();
+                List<FieldInfoVo> list = new ArrayList<FieldInfoVo>();
+                FieldInfoVo field;
+                while (rs.next()) {
+                    field = new FieldInfoVo();
+                    field.setFieldName(rs.getString(2));
+                    field.setFieldType(rs.getString(3));
+                    field.setFieldDesign(rs.getString(4));
+                    list.add(field);
+                }
+                return list;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        }
         return null;
     }
 
@@ -412,7 +467,7 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
         System.out.println(Thread.currentThread().getName());
         Map<Boolean, String> checkMap = new HashMap<>();
         String url = "jdbc:postgresql://" + tbDatasourceConfig.getConnectionIp()
-        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                + ":" + tbDatasourceConfig.getConnectionPort() + "/"
                 + tbDatasourceConfig.getSchemaDesc();
         try {
             String driverClass = "org.postgresql.Driver";
@@ -458,8 +513,8 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
     @Override
     public List<String> getDistinctFields(String datasourceId, String sql) {
         TBDatasourceConfig byId = this.findById(datasourceId);
-        List<String> distinctFields=new ArrayList<>();
-        if (byId!=null){
+        List<String> distinctFields = new ArrayList<>();
+        if (byId != null) {
             JDBCUtils jdbcUtils = new JDBCUtils(byId);
             Connection connection;
             PreparedStatement ps = null;
@@ -468,12 +523,12 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
                 connection = jdbcUtils.getConnection();
                 ps = connection.prepareStatement(sql);
                 rs = ps.executeQuery();
-                while (rs.next()){
-                    String aa=rs.getString(1);
+                while (rs.next()) {
+                    String aa = rs.getString(1);
                     distinctFields.add(rs.getString(1));
                 }
                 return distinctFields;
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 JdbcUtils.closeResultSet(rs);

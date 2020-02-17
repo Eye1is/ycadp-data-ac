@@ -73,6 +73,14 @@ public class JDBCUtils {
                         + tbDatasourceConfig.getSchemaDesc());//url
                 //PostgreSQL的验证语句
                 datasourceInner.setValidationQuery("select version();");
+                break;
+            case DataSourceType.EXCEL:
+                datasourceInner.setUrl("jdbc:postgresql://" + tbDatasourceConfig.getConnectionIp()
+                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                        + tbDatasourceConfig.getSchemaDesc());//url
+                //PostgreSQL的验证语句
+                datasourceInner.setValidationQuery("select version();");
+                break;
             default:
                 datasourceInner.setUrl(null);
                 break;

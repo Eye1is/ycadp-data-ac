@@ -31,4 +31,13 @@ public interface DataExcelRepository extends BaseRepository<TBDatasourceExcel, S
      * @return
      */
     List<TBDatasourceExcel> findAllByDatasourceId(String datasourceId);
+
+    /**
+     * 根据数据源id和sheetName查找实体
+     * @param id
+     * @param sheetName
+     * @return
+     */
+    @Query(value = "SELECT * FROM T_R_DATASOURCE_EXCEL WHERE DATASOURCE_ID = :id AND SHEET_NAME= :sheetName" , nativeQuery = true)
+    TBDatasourceExcel findByIdAndSheetName(@Param(value = "id")String id, @Param(value = "sheetName")String sheetName);
 }

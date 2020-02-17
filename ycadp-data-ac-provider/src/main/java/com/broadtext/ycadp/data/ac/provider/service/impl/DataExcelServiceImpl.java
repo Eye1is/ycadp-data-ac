@@ -30,4 +30,9 @@ public class DataExcelServiceImpl extends BaseServiceImpl<TBDatasourceExcel, Str
     public List<TBDatasourceExcel> getListByDataSourceId(String datasourceId) {
         return excelRepository.findAllByDatasourceId(datasourceId);
     }
+
+    @Override
+    public TBDatasourceExcel findByIdAndSheetName(String id, String sheetName) {
+        return excelRepository.findByIdAndSheetName(id, sheetName);
+    }
 }

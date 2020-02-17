@@ -23,4 +23,12 @@ public interface DataExcelService extends BaseService<TBDatasourceExcel, String>
      * @return
      */
     List<TBDatasourceExcel> getListByDataSourceId(String datasourceId);
+
+    /**
+     * 根据数据源id和sheetName获取实体
+     * @param id
+     * @param sheetName
+     * @return
+     */
+    TBDatasourceExcel findByIdAndSheetName(String id, String sheetName);
 }

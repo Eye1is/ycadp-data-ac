@@ -13,19 +13,11 @@ import com.broadtext.ycadp.data.ac.api.vo.*;
 import com.broadtext.ycadp.data.ac.provider.service.*;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
-import net.sourceforge.pinyin4j.PinyinHelper;
-import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
-import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
-import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
-import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -914,9 +906,45 @@ public class DataacController {
                 wb = new HSSFWorkbook(is);
             } else if (".xlsx".equals(extString)) {
                 wb = new XSSFWorkbook(is);
+            } else if (".csv".equals(extString)) {
+                ArrayList<ArrayList<String>> arList = new ArrayList<ArrayList<String>>();
+                ArrayList<String> al = null;
+                String thisLine;
+                FileInputStream fileInputStream = new FileInputStream(file);
+                DataInputStream myInput = new DataInputStream(fileInputStream);
+                while ((thisLine = myInput.readLine()) != null) {
+                    al = new ArrayList<String>();
+                    String strar[] = thisLine.split(",");
+                    for (int j = 0; j < strar.length; j++) {
+                        // My Attempt
+                        String edit = strar[j].replace('\n', ' ');
+                        al.add(edit);
+                    }
+                    arList.add(al);
+                }
+                //填充进workbook
+                wb = new HSSFWorkbook();
+                Sheet sheet = wb.createSheet("new sheet");
+//                HSSFSheet sheet = wb.createSheet("new sheet");
+                for (int k = 0; k < arList.size(); k++) {
+                    ArrayList<String> ardata = (ArrayList<String>) arList.get(k);
+                    Row row = sheet.createRow((short) 0 + k);
+//                    HSSFRow row = sheet.createRow((short) 0 + k);
+                    for (int p = 0; p < ardata.size(); p++) {
+                        System.out.print(ardata.get(p));
+                        Cell cell = row.createCell((short) p);
+//                        HSSFCell cell = row.createCell((short) p);
+                        cell.setCellValue(ardata.get(p).toString());
+                    }
+                }
+
+                FileOutputStream fileOut = new FileOutputStream(fileName.substring(0,fileName.lastIndexOf("."))+ ".xls");
+                wb.write(fileOut);
+                fileOut.close();
             } else {
                 wb = null;
             }
+            is.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -941,6 +969,7 @@ public class DataacController {
         } else {//无中文
             tableName = sheetName;
         }
+        tableName = tableName.toLowerCase();
         tableName += System.currentTimeMillis() / 1000;//加上时间戳
         tableName = tableName.replaceAll(" ", "");
 //        System.out.println("-----------表名为：" + tableName);

@@ -10,11 +10,13 @@ package com.broadtext.ycadp.data.ac.provider.controller;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
+import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceExcel;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldInfoVo;
+import com.broadtext.ycadp.data.ac.provider.service.DataExcelService;
 import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.provider.service.DataacService;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +45,11 @@ public class DataacInfoController {
     @Autowired
     private DataacInfoService postgresql;
     @Autowired
+    private DataacInfoService excel;
+    @Autowired
     private DataacService dataacService;
+    @Autowired
+    private DataExcelService dataExcelService;
 
     @GetMapping("/data/getType/{id}")
     public RespEntity getFieldTypeById(@PathVariable(value = "id") String id) {
@@ -63,6 +69,7 @@ public class DataacInfoController {
     }
 
     /**
+     * 根据数据源id和表名获取该表中的所有字段名
      * @param id
      * @param tableName
      * @return
@@ -82,6 +89,12 @@ public class DataacInfoController {
                     break;
                 case DataSourceType.PostgreSQL:
                     allFields = postgresql.getAllFields(id, tableName);
+                    break;
+                case DataSourceType.EXCEL:
+                    //先根据sheetName获取sheetTableName
+                    TBDatasourceExcel byIdAndSheetName = dataExcelService.findByIdAndSheetName(id, tableName);
+                    String sheetTableName = byIdAndSheetName.getSheetTableName();
+                    allFields = excel.getAllFields(id, sheetTableName);
                     break;
                 default:
                     break;

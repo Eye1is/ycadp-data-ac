@@ -331,7 +331,7 @@ public class DataacController {
             TBDatasourceConfig datasourceConfig = dataacService.updateOne(dasource);
             return new RespEntity(RespCode.SUCCESS, datasourceConfig);
         } else {//未生成过资产，允许修改excel文件
-            if (multipartFile == null) {
+            if (multipartFile.isEmpty()) {
                 dasource.setDatasourceName(infoVo.getDatasourceName())
                         .setRemark(infoVo.getRemark())
                         .setPackageId(infoVo.getPackageId());

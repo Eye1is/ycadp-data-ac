@@ -316,13 +316,13 @@ public class DataacController {
     /**
      * 编辑excel数据源
      *
-     * @param id
      * @param multipartFile
      * @param infoVo
      * @return
      */
-    @PutMapping("/data/datasource/excel/{id}")
-    public RespEntity updateDatasourceExcel(@PathVariable("id") String id, @RequestParam("file") MultipartFile multipartFile, ExcelBaseInfoVo infoVo) {
+    @PostMapping("/data/datasource/excel/edit")
+    public RespEntity updateDatasourceExcel(@RequestParam("file") MultipartFile multipartFile, ExcelBaseInfoVo infoVo) {
+        String id = infoVo.getId();
         TBDatasourceConfig dasource = dataacService.findById(id);
         if (infoVo.getFlag().equals("1")) {//生成过资产
             dasource.setDatasourceName(infoVo.getDatasourceName())

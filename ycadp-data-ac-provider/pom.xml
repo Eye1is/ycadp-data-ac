@@ -13,6 +13,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<ycadp-role.version>0.0.1-SNAPSHOT</ycadp-role.version>
 	</properties>
 
 	<dependencies>
@@ -55,6 +56,21 @@
 			<groupId>com.belerweb</groupId>
 			<artifactId>pinyin4j</artifactId>
 			<version>2.5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.broadtext</groupId>
+			<artifactId>ycadp-role-api</artifactId>
+			<version>${ycadp-role.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.broadtext</groupId>
+			<artifactId>ycadp-userroledept-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.broadtext</groupId>
+			<artifactId>ycadp-org-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

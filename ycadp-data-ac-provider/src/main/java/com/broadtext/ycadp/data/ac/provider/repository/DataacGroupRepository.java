@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author xuchenglong
  */
-public interface DataacGroupRespository extends BaseRepository<TBDatasourceGroup,String>{
+public interface DataacGroupRepository extends BaseRepository<TBDatasourceGroup,String>{
     /**
      * 获取排序之后的组list
      * @return

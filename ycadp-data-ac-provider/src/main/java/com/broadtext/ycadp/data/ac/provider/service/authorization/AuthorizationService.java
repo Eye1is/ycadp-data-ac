@@ -7,7 +7,11 @@
 
 package com.broadtext.ycadp.data.ac.provider.service.authorization;
 
+import com.broadtext.ycadp.data.ac.api.entity.TBPermitContrast;
 import com.broadtext.ycadp.data.ac.api.vo.AuthorizationVo;
+import com.broadtext.ycadp.data.ac.api.vo.PermitVo;
+
+import java.util.List;
 
 public interface AuthorizationService {
 
@@ -26,4 +30,13 @@ public interface AuthorizationService {
      * @return
      */
     AuthorizationVo findAuthorizationList(String groupId, String modularName);
+
+    /**
+     * 查出aclDetail表中的该user的全部实体
+     * @param accessor 当前用户id
+     * @return 权限集合
+     */
+    List<PermitVo> findAuthorizationListWithAccessor(String accessor, String groupId, String modularName);
+
+    List<TBPermitContrast> findAllPermitList();
 }

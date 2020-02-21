@@ -7,18 +7,21 @@
 
 package com.broadtext.ycadp.data.ac.provider.service.authorization.impl;
 
-import com.broadtext.ycadp.OrgApi;
 import com.broadtext.ycadp.UserRoleDeptApi;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.constants.AuthorizationConstants;
 import com.broadtext.ycadp.data.ac.api.entity.TBAclDetail;
+import com.broadtext.ycadp.data.ac.api.entity.TBPermitContrast;
 import com.broadtext.ycadp.data.ac.api.entity.TBPermitPolicy;
 import com.broadtext.ycadp.data.ac.api.vo.AuthorizationVo;
 import com.broadtext.ycadp.data.ac.api.vo.PermitValueVo;
+import com.broadtext.ycadp.data.ac.api.vo.PermitVo;
 import com.broadtext.ycadp.data.ac.provider.repository.AuthorizationRepository;
+import com.broadtext.ycadp.data.ac.provider.repository.PermitContrastRepository;
 import com.broadtext.ycadp.data.ac.provider.repository.PermitPolicyRepository;
 import com.broadtext.ycadp.data.ac.provider.service.authorization.AuthorizationService;
 import com.broadtext.ycadp.entity.User;
+import com.broadtext.ycadp.org.api.OrgApi;
 import com.broadtext.ycadp.org.api.vo.TSOrgGroupVo;
 import com.broadtext.ycadp.org.api.vo.TSOrgVo;
 import org.apache.commons.lang.StringUtils;
@@ -40,6 +43,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     private AuthorizationRepository authorizationRepository;
     @Autowired
     private PermitPolicyRepository permitPolicyRepository;
+    @Autowired
+    private PermitContrastRepository permitContrastRepository;
     @Autowired
     private OrgApi orgApi;
     @Autowired
@@ -255,5 +260,15 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         aclDetail.setGroupId(groupId);
         aclDetail.setModularName(modularName);
         return aclDetail;
+    }
+
+    @Override
+    public List<PermitVo> findAuthorizationListWithAccessor(String accessor, String groupId, String modularName) {
+        return authorizationRepository.findAuthorizationListWithAccessor(accessor,groupId,modularName);
+    }
+
+    @Override
+    public List<TBPermitContrast> findAllPermitList() {
+        return permitContrastRepository.findAll();
     }
 }

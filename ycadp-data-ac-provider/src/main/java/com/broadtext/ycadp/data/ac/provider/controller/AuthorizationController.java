@@ -12,7 +12,6 @@ import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.vo.AuthorizationVo;
 import com.broadtext.ycadp.data.ac.provider.service.authorization.AuthorizationService;
-import com.broadtext.ycadp.org.api.OrgApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;

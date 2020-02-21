@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author xuchenglong
  */
-public interface DataacPackageRespository extends BaseRepository<TBDatasourcePackage,String>{
+public interface DataacPackageRepository extends BaseRepository<TBDatasourcePackage,String>{
     /**
      * 获取跟某个groupID对应的经过排序的包list
      * @param groupId

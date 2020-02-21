@@ -7,6 +7,7 @@
 
 package com.broadtext.ycadp.data.ac.provider.service.authorization.impl;
 
+import com.broadtext.ycadp.OrgApi;
 import com.broadtext.ycadp.UserRoleDeptApi;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.constants.AuthorizationConstants;
@@ -18,7 +19,6 @@ import com.broadtext.ycadp.data.ac.provider.repository.AuthorizationRepository;
 import com.broadtext.ycadp.data.ac.provider.repository.PermitPolicyRepository;
 import com.broadtext.ycadp.data.ac.provider.service.authorization.AuthorizationService;
 import com.broadtext.ycadp.entity.User;
-import com.broadtext.ycadp.org.api.OrgApi;
 import com.broadtext.ycadp.org.api.vo.TSOrgGroupVo;
 import com.broadtext.ycadp.org.api.vo.TSOrgVo;
 import lombok.extern.slf4j.Slf4j;

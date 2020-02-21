@@ -2,6 +2,7 @@ package com.broadtext.ycadp.data.ac.api;
 
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
+import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceExcel;
 import com.broadtext.ycadp.data.ac.api.hystrix.DataAcFallbackFactor;
 import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
@@ -145,4 +146,13 @@ public interface DataAcApi {
      */
     @GetMapping("/data/distinctFields")
     RespEntity<List<String>> getDistinctFields(@RequestParam(value="datasourceId") String datasourceId,@RequestParam(value="sql") String sql);
+
+    /**
+     * 根据数据源id和sheet名称获取excel映射关系实体
+     * @param id
+     * @param sheetName
+     * @return
+     */
+    @GetMapping("/data/excel")
+    RespEntity<TBDatasourceExcel> getExcelMappingEntity(@RequestParam(value = "id") String id, @RequestParam(value = "sheetName") String sheetName);
 }

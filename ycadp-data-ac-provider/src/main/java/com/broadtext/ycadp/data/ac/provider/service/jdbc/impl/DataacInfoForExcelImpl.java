@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Excel数据源连接的具体实现
@@ -38,27 +35,202 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
 
     @Override
     public List getAllData(TBDatasourceConfig tbDatasourceConfig, String sql) throws Exception {
+        System.out.println(" === " + sql);
+        tbDatasourceConfig.setConnectionIp("192.168.16.171");
+        tbDatasourceConfig.setConnectionPort(5432);
+        tbDatasourceConfig.setSchemaDesc("postgres");
+        tbDatasourceConfig.setDatasourceUserName("postgres");
+        tbDatasourceConfig.setDatasourcePasswd("postgres");
+        JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            connection = jdbcUtils.getConnection();
+            ps = connection.prepareStatement(sql);
+            rs = ps.executeQuery();
+            if (rs == null) {
+                return Collections.EMPTY_LIST;
+            }
+            ResultSetMetaData md = rs.getMetaData(); //得到结果集(rs)的结构信息，比如字段数、字段名等
+            int columnCount = md.getColumnCount(); //返回此 ResultSet 对象中的列数
+            List<Map<String, Object>> list = new ArrayList<>();
+            Map<String, Object> rowData;
+            while (rs.next()) {
+                rowData = new LinkedHashMap<>(columnCount);
+                for (int i = 1; i <= columnCount; i++) {
+                    if (rs.getObject(i) == null) {
+                        rowData.put(md.getColumnLabel(i), "");
+                    } else {
+                        rowData.put(md.getColumnLabel(i), rs.getObject(i));
+                    }
+
+                }
+                list.add(rowData);
+            }
+            return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(ps);
+            jdbcUtils.close();
+        }
         return null;
     }
 
     @Override
     public List<Map<String, Object>> getAllDataWithDict(String datasourceId, String sql, Map<String, List<FieldDictVo>> dictMap) throws Exception {
+        System.out.println(" === " + sql);
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull) {
+            TBDatasourceConfig tbDatasourceConfig = new TBDatasourceConfig();
+            tbDatasourceConfig.setDatasourceType(DataSourceType.EXCEL);
+            tbDatasourceConfig.setConnectionIp("192.168.16.171");
+            tbDatasourceConfig.setConnectionPort(5432);
+            tbDatasourceConfig.setSchemaDesc("postgres");
+            tbDatasourceConfig.setDatasourceUserName("postgres");
+            tbDatasourceConfig.setDatasourcePasswd("postgres");
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                ps = connection.prepareStatement(sql);
+                rs = ps.executeQuery();
+                if (rs == null) {
+                    return Collections.EMPTY_LIST;
+                }
+                ResultSetMetaData md = rs.getMetaData(); //得到结果集(rs)的结构信息，比如字段数、字段名等
+                int columnCount = md.getColumnCount(); //返回此 ResultSet 对象中的列数
+                List<Map<String, Object>> list = new ArrayList<>();
+                Map<String, Object> rowData;
+                while (rs.next()) {
+                    rowData = new LinkedHashMap<String, Object>(columnCount);
+                    for (int i = 1; i <= columnCount; i++) {
+                        if (rs.getObject(i) == null) {
+                            rowData.put(md.getColumnLabel(i), "");
+                        } else {
+                            if (null != dictMap && 0 < dictMap.size()) {
+                                if (dictMap.containsKey(md.getColumnLabel(i))) {
+                                    boolean isDict = false;
+                                    List<FieldDictVo> dicts = dictMap.get(md.getColumnLabel(i));
+                                    for (FieldDictVo dict : dicts) {
+                                        if (dict.getDictValue().equals(rs.getString(i))) {
+                                            rowData.put(md.getColumnLabel(i), dict.getDictText());
+                                            isDict = true;
+                                        }
+                                    }
+                                    if(!isDict){
+                                        rowData.put(md.getColumnLabel(i), rs.getObject(i));
+                                    }
+                                } else {
+                                    rowData.put(md.getColumnLabel(i), rs.getObject(i));
+                                }
+                            } else {
+                                rowData.put(md.getColumnLabel(i), rs.getObject(i));
+                            }
+                        }
+
+                    }
+                    list.add(rowData);
+                }
+                return list;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        }
         return null;
     }
 
     @Override
     public List<FieldDictVo> getDictData(String datasourceId, String dictSql, String key) throws Exception {
-        return null;
+        List<FieldDictVo> list = new ArrayList<>();
+        List<Map<String, Object>> data = getAllDataWithDict(datasourceId,dictSql.replace("?", key), null);
+        for (Map<String, Object> map : data) {
+            list.add(new FieldDictVo(map.get("_value").toString(),
+                    map.get("_text").toString()));
+        }
+        return list;
     }
 
     @Override
     public Integer getDataCount(TBDatasourceConfig tbDatasourceConfig, String sql) throws Exception {
-        return null;
+        tbDatasourceConfig.setConnectionIp("192.168.16.171");
+        tbDatasourceConfig.setConnectionPort(5432);
+        tbDatasourceConfig.setSchemaDesc("postgres");
+        tbDatasourceConfig.setDatasourceUserName("postgres");
+        tbDatasourceConfig.setDatasourcePasswd("postgres");
+        JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            connection = jdbcUtils.getConnection();
+            ps = connection.prepareStatement("SELECT COUNT(1) RECORD FROM (" + sql + ") DATACOUNT");
+            rs = ps.executeQuery();
+            if (rs == null) {
+                return 0;
+            }
+            int rowCount = 0;
+            if (rs.next()) {
+                rowCount = rs.getInt("RECORD");
+            }
+            return rowCount;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(ps);
+            jdbcUtils.close();
+        }
+        return 0;
     }
 
     @Override
-    public Integer getDataCount(String id, String sql) throws Exception {
-        return null;
+    public Integer getDataCount(String datasourceId, String sql) throws Exception {
+        Optional<TBDatasourceConfig> byId = dataacRepository.findById(datasourceId);
+        boolean isNotNull = byId.isPresent();
+        if (isNotNull) {
+//            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
+            TBDatasourceConfig tbDatasourceConfig = new TBDatasourceConfig();
+            tbDatasourceConfig.setDatasourceType(DataSourceType.EXCEL);
+            tbDatasourceConfig.setConnectionIp("192.168.16.171");
+            tbDatasourceConfig.setConnectionPort(5432);
+            tbDatasourceConfig.setSchemaDesc("postgres");
+            tbDatasourceConfig.setDatasourceUserName("postgres");
+            tbDatasourceConfig.setDatasourcePasswd("postgres");
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                ps = connection.prepareStatement("SELECT COUNT(1) RECORD FROM (" + sql + ") DATACOUNT");
+                rs = ps.executeQuery();
+                if (rs == null) {
+                    return 0;
+                }
+                int rowCount = 0;
+                if (rs.next()) {
+                    rowCount = rs.getInt("RECORD");
+                }
+                return rowCount;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        }
+        return 0;
     }
 
     @Override

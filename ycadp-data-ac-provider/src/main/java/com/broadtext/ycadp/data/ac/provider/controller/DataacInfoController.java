@@ -129,6 +129,9 @@ public class DataacInfoController {
             case DataSourceType.PostgreSQL:
                 dictFields = postgresql.getDictData(datasourceId, dictSql, dictKey);
                 break;
+            case DataSourceType.EXCEL:
+                dictFields = excel.getDictData(datasourceId, dictSql, dictKey);
+                break;
             default:
                 break;
         }
@@ -261,5 +264,21 @@ public class DataacInfoController {
                 break;
         }
         return new RespEntity(RespCode.SUCCESS, distinctFields);
+    }
+
+    /**
+     * 根据数据源id和sheet名称获取excel映射关系实体
+     * @param id
+     * @param sheetName
+     * @return
+     */
+    @GetMapping("/data/excel")
+    public RespEntity getExcelMappingEntity(String id, String sheetName) {
+        TBDatasourceExcel byIdAndSheetName = dataExcelService.findByIdAndSheetName(id, sheetName);
+        if (byIdAndSheetName != null) {
+            return new RespEntity(RespCode.SUCCESS, byIdAndSheetName);
+        } else {
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        }
     }
 }

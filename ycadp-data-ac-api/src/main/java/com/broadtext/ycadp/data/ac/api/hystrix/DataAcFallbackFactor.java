@@ -3,6 +3,7 @@ package com.broadtext.ycadp.data.ac.api.hystrix;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.DataAcApi;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
+import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceExcel;
 import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
@@ -95,6 +96,11 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi> {
 
             @Override
             public RespEntity<List<String>> getDistinctFields(String datasourceId, String sql) {
+                return null;
+            }
+
+            @Override
+            public RespEntity<TBDatasourceExcel> getExcelMappingEntity(String id, String sheetName) {
                 return null;
             }
         };

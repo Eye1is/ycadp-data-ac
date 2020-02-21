@@ -1,4 +1,4 @@
-package com.broadtext.ycadp.data.ac;
+package com.broadtext.ycadp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

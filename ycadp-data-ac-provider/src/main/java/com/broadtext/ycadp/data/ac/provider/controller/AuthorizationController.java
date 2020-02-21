@@ -96,7 +96,7 @@ public class AuthorizationController {
             String groupId = vo.getGroupId();
             String modularName = vo.getModularName();
             String userId = CurrentUserUtils.getUser().getUserId();
-            List<PermitVo> permitList;
+            List<PermitVo> permitList = Lists.newArrayList();
             Map<String, Object> map = new HashMap<>();
             //查询步骤
             //1.userId就是权限对象,可以查出aclDetail表中的该user的全部实体
@@ -105,10 +105,15 @@ public class AuthorizationController {
             if (StringUtils.isEmpty(userId)) {
                 return new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE);
             } else {
-                permitList = authorizationService.findAuthorizationListWithAccessor(userId, groupId, modularName);
+                List<Map<String, String>> nPermitList = authorizationService.findAuthorizationListWithAccessor(userId, groupId, modularName);
+                for (Map<String, String> stringMap : nPermitList) {
+                    PermitVo permitVo = new PermitVo();
+                    permitVo.setOperateName(stringMap.get("OPERATE_NAME"));
+                    permitVo.setOperateCode(stringMap.get("OPERATE_CODE"));
+                    permitList.add(permitVo);
+                }
                 if (!ArrayUtil.isEmpty(permitList)){
                     map.put("permitList",permitList);
-                    respEntity = new RespEntity<>(RespCode.SUCCESS,map);
                 } else {
                     List<TBPermitContrast> permitContrasts = authorizationService.findAllPermitList();
                     List<PermitVo> newPermitList = Lists.newArrayList();
@@ -119,8 +124,8 @@ public class AuthorizationController {
                         newPermitList.add(permitVo);
                     }
                     map.put("permitList",newPermitList);
-                    respEntity = new RespEntity<>(RespCode.SUCCESS,map);
                 }
+                respEntity = new RespEntity<>(RespCode.SUCCESS,map);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

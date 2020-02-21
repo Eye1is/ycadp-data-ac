@@ -12,6 +12,7 @@ import com.broadtext.ycadp.data.ac.api.vo.AuthorizationVo;
 import com.broadtext.ycadp.data.ac.api.vo.PermitVo;
 
 import java.util.List;
+import java.util.Map;
 
 public interface AuthorizationService {
 
@@ -36,7 +37,7 @@ public interface AuthorizationService {
      * @param accessor 当前用户id
      * @return 权限集合
      */
-    List<PermitVo> findAuthorizationListWithAccessor(String accessor, String groupId, String modularName);
+    List<Map<String, String>>  findAuthorizationListWithAccessor(String accessor, String groupId, String modularName);
 
     List<TBPermitContrast> findAllPermitList();
 }

@@ -161,6 +161,9 @@ public class DataacInfoController {
             case DataSourceType.PostgreSQL:
                 dictMapFields = postgresql.getAllDataWithDict(datasourceId, sql, dictMap);
                 break;
+            case DataSourceType.EXCEL:
+                dictMapFields = excel.getAllDataWithDict(datasourceId, sql, dictMap);
+                break;
             default:
                 break;
         }

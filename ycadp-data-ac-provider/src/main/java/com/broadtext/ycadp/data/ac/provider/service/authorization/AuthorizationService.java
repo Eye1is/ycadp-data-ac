@@ -25,5 +25,5 @@ public interface AuthorizationService {
      * @param modularName
      * @return
      */
-    AuthorizationVo findDriverAuthorizationList(String groupId, String modularName);
+    AuthorizationVo findAuthorizationList(String groupId, String modularName);
 }

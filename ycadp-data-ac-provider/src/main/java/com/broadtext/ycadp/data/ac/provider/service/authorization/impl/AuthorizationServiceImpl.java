@@ -7,6 +7,7 @@
 
 package com.broadtext.ycadp.data.ac.provider.service.authorization.impl;
 
+import com.broadtext.ycadp.OrgApi;
 import com.broadtext.ycadp.UserRoleDeptApi;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.constants.AuthorizationConstants;
@@ -18,23 +19,21 @@ import com.broadtext.ycadp.data.ac.provider.repository.AuthorizationRepository;
 import com.broadtext.ycadp.data.ac.provider.repository.PermitPolicyRepository;
 import com.broadtext.ycadp.data.ac.provider.service.authorization.AuthorizationService;
 import com.broadtext.ycadp.entity.User;
-import com.broadtext.ycadp.org.api.OrgApi;
 import com.broadtext.ycadp.org.api.vo.TSOrgGroupVo;
 import com.broadtext.ycadp.org.api.vo.TSOrgVo;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
-@Slf4j
 @Transactional
+@SuppressWarnings("all")
 public class AuthorizationServiceImpl implements AuthorizationService {
 
     @Autowired
@@ -42,12 +41,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     @Autowired
     private PermitPolicyRepository permitPolicyRepository;
     @Autowired
-    private UserRoleDeptApi userRoleDeptApi;
-    @Autowired
     private OrgApi orgApi;
+    @Autowired
+    private UserRoleDeptApi userRoleDeptApi;
 
     @Override
-    public AuthorizationVo findDriverAuthorizationList(String groupId, String modularName) {
+    public AuthorizationVo findAuthorizationList(String groupId, String modularName) {
         Map<String, List<PermitValueVo>> dataMap = new HashMap<>();
 
         AuthorizationVo authorizationVo = new AuthorizationVo();

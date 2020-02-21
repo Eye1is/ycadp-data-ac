@@ -42,13 +42,13 @@ public class AuthorizationController {
      * @return 数据信息
      */
     @GetMapping("/authorization/echo")
-    public RespEntity findDriverAuthorizationList(AuthorizationVo vo, HttpServletRequest request) {
+    public RespEntity findAuthorizationList(AuthorizationVo vo, HttpServletRequest request) {
         if (vo == null || StringUtils.isEmpty(vo.getGroupId()) || StringUtils.isEmpty(vo.getModularName())) {
             return new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE);
         }
         AuthorizationVo authorizationList = null;
         try {
-            authorizationList = authorizationService.findDriverAuthorizationList(vo.getGroupId(), vo.getModularName());
+            authorizationList = authorizationService.findAuthorizationList(vo.getGroupId(), vo.getModularName());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return new RespEntity<Object>(DataacRespCode.DATAAC_RESP_CODE);

@@ -905,41 +905,6 @@ public class DataacController {
                 wb = new HSSFWorkbook(is);
             } else if (".xlsx".equals(extString)) {
                 wb = new XSSFWorkbook(is);
-            } else if (".csv".equals(extString)) {
-                ArrayList<ArrayList<String>> arList = new ArrayList<ArrayList<String>>();
-                ArrayList<String> al = null;
-                String thisLine;
-                FileInputStream fileInputStream = new FileInputStream(file);
-                DataInputStream myInput = new DataInputStream(fileInputStream);
-                while ((thisLine = myInput.readLine()) != null) {
-                    al = new ArrayList<String>();
-                    String strar[] = thisLine.split(",");
-                    for (int j = 0; j < strar.length; j++) {
-                        // My Attempt
-                        String edit = strar[j].replace('\n', ' ');
-                        al.add(edit);
-                    }
-                    arList.add(al);
-                }
-                //填充进workbook
-                wb = new HSSFWorkbook();
-                Sheet sheet = wb.createSheet("new sheet");
-//                HSSFSheet sheet = wb.createSheet("new sheet");
-                for (int k = 0; k < arList.size(); k++) {
-                    ArrayList<String> ardata = (ArrayList<String>) arList.get(k);
-                    Row row = sheet.createRow((short) 0 + k);
-//                    HSSFRow row = sheet.createRow((short) 0 + k);
-                    for (int p = 0; p < ardata.size(); p++) {
-                        System.out.print(ardata.get(p));
-                        Cell cell = row.createCell((short) p);
-//                        HSSFCell cell = row.createCell((short) p);
-                        cell.setCellValue(ardata.get(p).toString());
-                    }
-                }
-
-                FileOutputStream fileOut = new FileOutputStream(fileName.substring(0,fileName.lastIndexOf("."))+ ".xls");
-                wb.write(fileOut);
-                fileOut.close();
             } else {
                 wb = null;
             }
@@ -953,7 +918,7 @@ public class DataacController {
     }
 
     /**
-     * 生成执行sql（1.建表sql  2.备注sql）
+     * 生成建表执行sql（1.建表sql  2.备注sql）
      *
      * @param sheetName
      * @param headerValues
@@ -978,16 +943,28 @@ public class DataacController {
         for (int i = 0; i < headerValues.size(); i++) {
             newNameList.add(excelToolService.getFullSpellPingYin(headerValues.get(i)));
         }
-        for (int j = 0; j < newNameList.size(); j++) {
-            String dealedStr = newNameList.get(j);
-            if (dealedStr.contains("(") || dealedStr.contains(")")) {
-                if (dealedStr.contains("(")) {
-                    dealedStr = dealedStr.replaceAll("\\(", "_");
-                }
-                if (dealedStr.contains(")")) {
-                    dealedStr = dealedStr.replaceAll("\\)", "_");
+        //检查nameList中是否有重复数据，因为忽略了特殊符号
+        int temp;
+        for (int i = 0; i < newNameList.size(); i++) {
+            temp = 0;
+            for (int j = i + 1; j < newNameList.size(); j++) {
+                if (newNameList.get(j).equals(newNameList.get(i))) {
+                    temp += 1;
+                    String newValue = newNameList.get(j) + String.valueOf(temp);
+                    newNameList.set(j, newValue);
                 }
             }
+        }
+        for (int j = 0; j < newNameList.size(); j++) {
+            String dealedStr = newNameList.get(j);
+//            if (dealedStr.contains("(") || dealedStr.contains(")")) {
+//                if (dealedStr.contains("(")) {
+//                    dealedStr = dealedStr.replaceAll("\\(", "_");
+//                }
+//                if (dealedStr.contains(")")) {
+//                    dealedStr = dealedStr.replaceAll("\\)", "_");
+//                }
+//            }
             sql += dealedStr + " varchar,";
             commentSql += "comment on column " + tableName + "." + dealedStr + " is '" + headerValues.get(j) + "';";
         }
@@ -1042,7 +1019,6 @@ public class DataacController {
      */
     @PostMapping("/data/datasource/xcltest")
     public RespEntity xclTest(@RequestParam("file") MultipartFile multipartFile) {
-
         String str = "jhghjfv你好hjk,";
 
         String testStr = "gongzuoliang(shi)";

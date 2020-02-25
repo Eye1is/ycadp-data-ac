@@ -73,8 +73,9 @@ public class ExcelToolServiceImpl implements ExcelToolService {
                     e.printStackTrace();
                 }
             } else {
-                // 如果不是汉字字符，直接拼接
-                sb.append(arr[i]);
+                // 如果不是汉字字符，直接忽略
+//                sb.append(arr[i]);
+                continue;
             }
         }
         return sb.toString();

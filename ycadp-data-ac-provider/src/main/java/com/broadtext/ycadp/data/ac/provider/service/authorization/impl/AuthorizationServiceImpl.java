@@ -263,7 +263,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     }
 
     @Override
-    public List<PermitVo> findAuthorizationListWithAccessor(String accessor, String groupId, String modularName) {
+    public List<Map<String, String>>  findAuthorizationListWithAccessor(String accessor, String groupId, String modularName) {
         return authorizationRepository.findAuthorizationListWithAccessor(accessor,groupId,modularName);
     }
 

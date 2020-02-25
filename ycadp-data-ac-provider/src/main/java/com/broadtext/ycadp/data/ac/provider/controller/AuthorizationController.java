@@ -12,6 +12,7 @@ import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBPermitContrast;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.vo.AuthorizationVo;
+import com.broadtext.ycadp.data.ac.api.vo.EchoAuthorizationVo;
 import com.broadtext.ycadp.data.ac.api.vo.PermitVo;
 import com.broadtext.ycadp.data.ac.provider.service.authorization.AuthorizationService;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
@@ -54,15 +55,21 @@ public class AuthorizationController {
         if (vo == null || StringUtils.isEmpty(vo.getGroupId()) || StringUtils.isEmpty(vo.getModularName())) {
             return new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE);
         }
-        AuthorizationVo authorizationList = null;
+        AuthorizationVo authorizationList;
+        EchoAuthorizationVo echoAuthorizationVo = new EchoAuthorizationVo();
         try {
             authorizationList = authorizationService.findAuthorizationList(vo.getGroupId(), vo.getModularName());
+            if (authorizationList!=null) {
+                echoAuthorizationVo.setGroupId(authorizationList.getGroupId());
+                echoAuthorizationVo.setModularName(authorizationList.getModularName());
+                echoAuthorizationVo.setData(authorizationList.getData());
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return new RespEntity<Object>(DataacRespCode.DATAAC_RESP_CODE);
+            return new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE);
         }
 
-        return new RespEntity<Object>(RespCode.SUCCESS, authorizationList);
+        return new RespEntity<Object>(RespCode.SUCCESS, echoAuthorizationVo);
     }
 
     /**
@@ -96,7 +103,7 @@ public class AuthorizationController {
             String groupId = vo.getGroupId();
             String modularName = vo.getModularName();
             String userId = CurrentUserUtils.getUser().getUserId();
-            List<PermitVo> permitList;
+            List<PermitVo> permitList = Lists.newArrayList();
             Map<String, Object> map = new HashMap<>();
             //查询步骤
             //1.userId就是权限对象,可以查出aclDetail表中的该user的全部实体
@@ -105,10 +112,15 @@ public class AuthorizationController {
             if (StringUtils.isEmpty(userId)) {
                 return new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE);
             } else {
-                permitList = authorizationService.findAuthorizationListWithAccessor(userId, groupId, modularName);
+                List<Map<String, String>> nPermitList = authorizationService.findAuthorizationListWithAccessor(userId, groupId, modularName);
+                for (Map<String, String> stringMap : nPermitList) {
+                    PermitVo permitVo = new PermitVo();
+                    permitVo.setOperateName(stringMap.get("OPERATE_NAME"));
+                    permitVo.setOperateCode(stringMap.get("OPERATE_CODE"));
+                    permitList.add(permitVo);
+                }
                 if (!ArrayUtil.isEmpty(permitList)){
                     map.put("permitList",permitList);
-                    respEntity = new RespEntity<>(RespCode.SUCCESS,map);
                 } else {
                     List<TBPermitContrast> permitContrasts = authorizationService.findAllPermitList();
                     List<PermitVo> newPermitList = Lists.newArrayList();
@@ -119,8 +131,8 @@ public class AuthorizationController {
                         newPermitList.add(permitVo);
                     }
                     map.put("permitList",newPermitList);
-                    respEntity = new RespEntity<>(RespCode.SUCCESS,map);
                 }
+                respEntity = new RespEntity<>(RespCode.SUCCESS,map);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

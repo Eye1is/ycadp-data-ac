@@ -12,6 +12,7 @@ import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.entity.TBPermitContrast;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.vo.AuthorizationVo;
+import com.broadtext.ycadp.data.ac.api.vo.EchoAuthorizationVo;
 import com.broadtext.ycadp.data.ac.api.vo.PermitVo;
 import com.broadtext.ycadp.data.ac.provider.service.authorization.AuthorizationService;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
@@ -54,15 +55,21 @@ public class AuthorizationController {
         if (vo == null || StringUtils.isEmpty(vo.getGroupId()) || StringUtils.isEmpty(vo.getModularName())) {
             return new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE);
         }
-        AuthorizationVo authorizationList = null;
+        AuthorizationVo authorizationList;
+        EchoAuthorizationVo echoAuthorizationVo = new EchoAuthorizationVo();
         try {
             authorizationList = authorizationService.findAuthorizationList(vo.getGroupId(), vo.getModularName());
+            if (authorizationList!=null) {
+                echoAuthorizationVo.setGroupId(authorizationList.getGroupId());
+                echoAuthorizationVo.setModularName(authorizationList.getModularName());
+                echoAuthorizationVo.setData(authorizationList.getData());
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return new RespEntity<Object>(DataacRespCode.DATAAC_RESP_CODE);
+            return new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE);
         }
 
-        return new RespEntity<Object>(RespCode.SUCCESS, authorizationList);
+        return new RespEntity<Object>(RespCode.SUCCESS, echoAuthorizationVo);
     }
 
     /**

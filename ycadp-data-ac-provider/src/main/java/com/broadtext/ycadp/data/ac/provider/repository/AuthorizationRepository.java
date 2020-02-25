@@ -33,8 +33,8 @@ public interface AuthorizationRepository extends BaseRepository<TBAclDetail, Str
     /**
      * 根据accessor,groupId,modularName查询
      * @param accessor 用户id(访问对象)
-     * @param groupId 用户id(访问对象)
-     * @param modularName 用户id(访问对象)
+     * @param groupId groupId(组id)
+     * @param modularName modularName(模块名)
      * @return 权限集合
      */
     @Query(value = "select c.OPERATE_NAME,c.OPERATE_CODE from T_B_ACL_DETAIL a " +

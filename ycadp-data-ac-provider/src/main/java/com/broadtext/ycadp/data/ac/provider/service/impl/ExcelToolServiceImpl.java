@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.*;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * excel工具接口实现类
@@ -53,7 +55,17 @@ public class ExcelToolServiceImpl implements ExcelToolService {
 
     @Override
     public String getFullSpellPingYin(String chinese) {
-        //只取汉字，不取中文标点符号
+        //如果不包含汉字，那么直接去掉特殊字符返回
+        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]");
+        Matcher m = p.matcher(chinese);
+        if (!m.find()) {
+            String regEx="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+            Pattern pp = Pattern.compile(regEx);
+            Matcher mm = pp.matcher(chinese);
+            chinese=mm.replaceAll("").trim();
+            return chinese;
+        }
+        //包含汉字，则只取汉字，（不取中文标点符号、以及其他任何字母和符号）
         StringBuffer b = new StringBuffer();
         for (int i = 0; i < chinese.length(); i++) {
             char t = chinese.charAt(i);

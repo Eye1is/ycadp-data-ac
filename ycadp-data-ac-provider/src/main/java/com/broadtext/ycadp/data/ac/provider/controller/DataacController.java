@@ -931,11 +931,21 @@ public class DataacController {
         if (m.find()) {//有中文
             tableName = excelToolService.getFullSpellPingYin(sheetName);
         } else {//无中文
+            //去掉所有特殊字符
             tableName = sheetName;
+            String regEx="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+            Pattern pp = Pattern.compile(regEx);
+            Matcher mm = pp.matcher(tableName);
+            tableName=mm.replaceAll("").trim();
+        }
+        //长度过长则截取
+        if (tableName.length() > 40) {
+            tableName = tableName.substring(0, 40);
         }
         tableName = tableName.toLowerCase();
         tableName += System.currentTimeMillis() / 1000;//加上时间戳
         tableName = tableName.replaceAll(" ", "");
+        tableName = "t_" + tableName;
 //        System.out.println("-----------表名为：" + tableName);
         String sql = "create table " + tableName + " ( ";
         String commentSql = "comment on table " + tableName + " is '" + sheetName + "';";
@@ -1019,19 +1029,13 @@ public class DataacController {
      */
     @PostMapping("/data/datasource/xcltest")
     public RespEntity xclTest(@RequestParam("file") MultipartFile multipartFile) {
-        String str = "jhghjfv你好hjk,";
-
-        String testStr = "gongzuoliang(shi)";
-        if (testStr.contains("(") || testStr.contains(")")) {
-            if (testStr.contains("(")) {
-                testStr = testStr.replaceAll("\\(", "_");
-            }
-            if (testStr.contains(")")) {
-                testStr = testStr.replaceAll("\\)", "_");
-            }
-        }
-        str = str.substring(0, str.length() - 1);
-        return new RespEntity(RespCode.SUCCESS, testStr);
+        String str = "部门业绩（第一季度）";
+        String regEx ="[^a-zA-Z0-9]";
+//        String regEx="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+        Pattern p = Pattern.compile(regEx);
+        Matcher m = p.matcher(str);
+        System.out.println(m.replaceAll("").trim());
+        return new RespEntity(RespCode.SUCCESS);
 //        return new RespEntity(RespCode.SUCCESS, multipartFile.getOriginalFilename());
     }
 

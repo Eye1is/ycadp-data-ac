@@ -53,6 +53,17 @@ public class ExcelToolServiceImpl implements ExcelToolService {
 
     @Override
     public String getFullSpellPingYin(String chinese) {
+        //只取汉字，不取中文标点符号
+        StringBuffer b = new StringBuffer();
+        for (int i = 0; i < chinese.length(); i++) {
+            char t = chinese.charAt(i);
+            String reg = "[\u4e00-\u9fa5]";
+            String str = String.valueOf(t);
+            if (str.matches(".*" + reg + ".*")) {
+                b.append(str);
+            }
+        }
+        chinese = b.toString();
         // 用StringBuffer（字符串缓冲）来接收处理的数据
         StringBuffer sb = new StringBuffer();
         //字符串转换字节数组
@@ -65,7 +76,6 @@ public class ExcelToolServiceImpl implements ExcelToolService {
         //定义字符的输出格式
         defaultFormat.setVCharType(HanyuPinyinVCharType.WITH_U_AND_COLON);
         for (int i = 0; i < arr.length; i++) {
-            //判断是否是汉子字符
             if (arr[i] > 128) {
                 try {
                     sb.append(capitalize(PinyinHelper.toHanyuPinyinStringArray(arr[i], defaultFormat)[0]));

@@ -762,6 +762,9 @@ public class DataacController {
                                 cell.setCellType(Cell.CELL_TYPE_STRING);
                                 if (cell.getRichStringCellValue() != null) {
                                     cellValue = cell.getRichStringCellValue().getString();
+                                    if (cellValue.contains("'")) {
+                                        cellValue = cellValue.replace("'", "“");
+                                    }
                                 }
                             }
                             insertSql += "'" + cellValue + "',";

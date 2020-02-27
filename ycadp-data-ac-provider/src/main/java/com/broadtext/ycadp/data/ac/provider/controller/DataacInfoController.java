@@ -91,10 +91,10 @@ public class DataacInfoController {
                     allFields = postgresql.getAllFields(id, tableName);
                     break;
                 case DataSourceType.EXCEL:
-                    //先根据sheetName获取sheetTableName
-                    TBDatasourceExcel byIdAndSheetName = dataExcelService.findByIdAndSheetName(id, tableName);
-                    String sheetTableName = byIdAndSheetName.getSheetTableName();
-                    allFields = excel.getAllFields(id, sheetTableName);
+//                    //先根据sheetName获取sheetTableName
+//                    TBDatasourceExcel byIdAndSheetName = dataExcelService.findByIdAndSheetName(id, tableName);
+//                    String sheetTableName = byIdAndSheetName.getSheetTableName();
+                    allFields = excel.getAllFields(id, tableName);
                     break;
                 default:
                     break;

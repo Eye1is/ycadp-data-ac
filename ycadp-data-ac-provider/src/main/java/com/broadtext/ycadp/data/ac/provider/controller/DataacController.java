@@ -933,6 +933,10 @@ public class DataacController {
         String tableName = "";
         if (m.find()) {//有中文
             tableName = excelToolService.getFullSpellPingYin(sheetName);
+            String regEx="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+            Pattern pp = Pattern.compile(regEx);
+            Matcher mm = pp.matcher(tableName);
+            tableName=mm.replaceAll("").trim();
         } else {//无中文
             //去掉所有特殊字符
             tableName = sheetName;
@@ -954,7 +958,12 @@ public class DataacController {
         String commentSql = "comment on table " + tableName + " is '" + sheetName + "';";
         List<String> newNameList = new ArrayList<>();
         for (int i = 0; i < headerValues.size(); i++) {
-            newNameList.add(excelToolService.getFullSpellPingYin(headerValues.get(i)));
+            String temp = excelToolService.getFullSpellPingYin(headerValues.get(i));
+            String regEx="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+            Pattern pp = Pattern.compile(regEx);
+            Matcher mm = pp.matcher(temp);
+            temp=mm.replaceAll("").trim();
+            newNameList.add(temp);
         }
         //检查nameList中是否有重复数据，因为忽略了特殊符号
         int temp;
@@ -1032,13 +1041,19 @@ public class DataacController {
      */
     @PostMapping("/data/datasource/xcltest")
     public RespEntity xclTest(@RequestParam("file") MultipartFile multipartFile) {
-        String str = "部门业绩（第一季度）";
-        String regEx ="[^a-zA-Z0-9]";
-//        String regEx="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
-        Pattern p = Pattern.compile(regEx);
-        Matcher m = p.matcher(str);
-        System.out.println(m.replaceAll("").trim());
-        return new RespEntity(RespCode.SUCCESS);
+        String str = "部门吕业绿绩女（第一季度）";
+        String fullSpellPingYin = excelToolService.getPingYin(str);
+//        String regEx ="[^a-zA-Z0-9]";
+////        String regEx="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+//        Pattern p = Pattern.compile(regEx);
+//        Matcher m = p.matcher(str);
+//        System.out.println(m.replaceAll("").trim());
+        String regEx="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+        Pattern pp = Pattern.compile(regEx);
+        Matcher mm = pp.matcher(fullSpellPingYin);
+        fullSpellPingYin=mm.replaceAll("").trim();
+        System.out.println(fullSpellPingYin);
+        return new RespEntity(RespCode.SUCCESS, fullSpellPingYin);
 //        return new RespEntity(RespCode.SUCCESS, multipartFile.getOriginalFilename());
     }
 

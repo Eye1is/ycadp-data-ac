@@ -13,18 +13,22 @@ import com.broadtext.ycadp.data.ac.api.vo.*;
 import com.broadtext.ycadp.data.ac.provider.service.*;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.csource.common.MyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +54,92 @@ public class DataacController {
     private ExcelToolService excelToolService;
     @Autowired
     private DataExcelService dataExcelService;
+    @Autowired
+    private FileUploadOrDownloadService fileUploadOrDownloadService;
+
+
+    /**
+     * 上传接口测试(建议这样实现)
+     * @param multipartFile
+     * @return
+     */
+    @PostMapping("/app/analyse/test")
+    public String text(MultipartFile multipartFile){
+        String fileKey = "";
+        try {
+            fileKey = fileUploadOrDownloadService.uploadSingleFile(multipartFile);
+        } catch (IOException | MyException e) {
+            e.printStackTrace();
+        }
+        return fileKey;
+    }
+
+    /**
+     * 下载接口测试(建议这样实现)
+     * @param fileKey
+     * @param response
+     */
+    @GetMapping("/app/analyse/test2")
+    public void test(String fileKey, HttpServletResponse response){
+        File file = null;
+        OutputStream outputStream = null;
+        InputStream inputStream = null;
+        String fileName = "测试.xlsx";
+        try {
+            file =  fileUploadOrDownloadService.downloadSingleFile(fileKey,fileName);
+            //文件传回前台
+            /* 第二步：根据已存在的文件，创建文件输入流 */
+            inputStream = new BufferedInputStream(new FileInputStream(file));
+            /* 第三步：创建缓冲区，大小为流的最大字符数 */
+            byte[] buffer = new byte[inputStream.available()]; // int available() 返回值为流中尚未读取的字节的数量
+            /* 第四步：从文件输入流读字节流到缓冲区 */
+            if (buffer.length > 0) {
+                inputStream.read(buffer);
+            }
+
+            fileName = file.getName();// 获取文件名
+            response.reset();
+            response.addHeader("Content-Disposition",
+                    "attachment;filename=" + new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
+            response.addHeader("Content-Length", "" + file.length());
+            /* 第六步：创建文件输出流 */
+            outputStream = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            /* 第七步：把缓冲区的内容写入文件输出流 */
+            outputStream.write(buffer);
+            /* 第八步：刷空输出流，并输出所有被缓存的字节 */
+            outputStream.flush();
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        } finally {
+
+            /* 第九步：关闭输出流 */
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+            /* 第十步：关闭输入流 */
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+            /* 第十一步：删除本地文件 */
+            if (file != null) {
+                try {
+                    FileUtils.deleteDirectory(file.getParentFile().getParentFile());
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        }
+    }
 
     /**
      * 新增数据源

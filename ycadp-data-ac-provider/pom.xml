@@ -13,6 +13,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<ycadp-fastdfs.version>0.0.1-SNAPSHOT</ycadp-fastdfs.version>
 	</properties>
 
 	<dependencies>
@@ -64,6 +65,16 @@
 		<dependency>
 			<groupId>com.broadtext</groupId>
 			<artifactId>ycadp-org-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.broadtext</groupId>
+			<artifactId>ycadp-fastdfs</artifactId>
+			<version>${ycadp-fastdfs.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.broadtext</groupId>
+			<artifactId>ycadp-drive-api</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>

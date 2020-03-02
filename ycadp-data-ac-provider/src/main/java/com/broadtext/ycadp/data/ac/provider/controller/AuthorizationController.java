@@ -122,14 +122,7 @@ public class AuthorizationController {
                 if (!ArrayUtil.isEmpty(permitList)){
                     map.put("permitList",permitList);
                 } else {
-                    List<TBPermitContrast> permitContrasts = authorizationService.findAllPermitList();
                     List<PermitVo> newPermitList = Lists.newArrayList();
-                    for (TBPermitContrast permitContrast : permitContrasts) {
-                        PermitVo permitVo = new PermitVo();
-                        permitVo.setOperateCode(permitContrast.getOperateCode());
-                        permitVo.setOperateName(permitContrast.getOperateName());
-                        newPermitList.add(permitVo);
-                    }
                     map.put("permitList",newPermitList);
                 }
                 respEntity = new RespEntity<>(RespCode.SUCCESS,map);

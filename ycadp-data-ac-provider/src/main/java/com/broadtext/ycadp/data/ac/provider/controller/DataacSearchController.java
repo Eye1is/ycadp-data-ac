@@ -122,19 +122,19 @@ public class DataacSearchController {
 //                        List<String> sheetNameList = new ArrayList<>();
                         for (TBDatasourceExcel e : listByDataSourceId) {
 //                            sheetTableNameList.add(e.getSheetTableName());
-                            list.add(e.getSheetName());
+                            list.add(e.getSheetTableName());
                         }
                         map.put("list", list);
                     } else if (!"".equals(tableName)) {//有筛选条件
                         for (TBDatasourceExcel e : listByDataSourceId) {
-                            if (e.getSheetName().contains(tableName)) {
-                                list.add(e.getSheetName());
+                            if (e.getSheetTableName().contains(tableName)) {
+                                list.add(e.getSheetTableName());
                             }
                         }
                         map.put("list", list);
                     } else {//无筛选条件查询所有
                         for (TBDatasourceExcel e : listByDataSourceId) {
-                            list.add(e.getSheetName());
+                            list.add(e.getSheetTableName());
                         }
                         map.put("list", list);
                     }

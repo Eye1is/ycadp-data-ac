@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.*;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * excel工具接口实现类
@@ -53,6 +55,27 @@ public class ExcelToolServiceImpl implements ExcelToolService {
 
     @Override
     public String getFullSpellPingYin(String chinese) {
+        //如果不包含汉字，那么直接去掉特殊字符返回
+        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]");
+        Matcher m = p.matcher(chinese);
+        if (!m.find()) {
+            String regEx="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+            Pattern pp = Pattern.compile(regEx);
+            Matcher mm = pp.matcher(chinese);
+            chinese=mm.replaceAll("").trim();
+            return chinese;
+        }
+        //包含汉字，则只取汉字，（不取中文标点符号、以及其他任何字母和符号）
+        StringBuffer b = new StringBuffer();
+        for (int i = 0; i < chinese.length(); i++) {
+            char t = chinese.charAt(i);
+            String reg = "[\u4e00-\u9fa5]";
+            String str = String.valueOf(t);
+            if (str.matches(".*" + reg + ".*")) {
+                b.append(str);
+            }
+        }
+        chinese = b.toString();
         // 用StringBuffer（字符串缓冲）来接收处理的数据
         StringBuffer sb = new StringBuffer();
         //字符串转换字节数组
@@ -65,7 +88,6 @@ public class ExcelToolServiceImpl implements ExcelToolService {
         //定义字符的输出格式
         defaultFormat.setVCharType(HanyuPinyinVCharType.WITH_U_AND_COLON);
         for (int i = 0; i < arr.length; i++) {
-            //判断是否是汉子字符
             if (arr[i] > 128) {
                 try {
                     sb.append(capitalize(PinyinHelper.toHanyuPinyinStringArray(arr[i], defaultFormat)[0]));
@@ -73,8 +95,9 @@ public class ExcelToolServiceImpl implements ExcelToolService {
                     e.printStackTrace();
                 }
             } else {
-                // 如果不是汉字字符，直接拼接
-                sb.append(arr[i]);
+                // 如果不是汉字字符，直接忽略
+//                sb.append(arr[i]);
+                continue;
             }
         }
         return sb.toString();

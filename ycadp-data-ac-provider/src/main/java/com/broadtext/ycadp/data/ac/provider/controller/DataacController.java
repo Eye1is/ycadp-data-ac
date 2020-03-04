@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -332,8 +334,14 @@ public class DataacController {
                     dataSourceListVo.setConnectionPort(tbDatasourceConfig.getConnectionPort());
                     dataSourceListVo.setSchemaDesc(tbDatasourceConfig.getSchemaDesc());
                     dataSourceListVo.setPackageId(tbDatasourceConfig.getPackageId());
+                    dataSourceListVo.setCreatedTime(tbDatasourceConfig.getCreatedTime());
                     list.add(dataSourceListVo);
                 }
+                list.sort((o1, o2) -> {
+                    Date createdTime1 = o1.getCreatedTime();
+                    Date createdTime2 = o2.getCreatedTime();
+                    return createdTime2.compareTo(createdTime1);
+                });
                 map.put("list", list);
                 respEntity = new RespEntity<>(RespCode.SUCCESS, map);
             } else {

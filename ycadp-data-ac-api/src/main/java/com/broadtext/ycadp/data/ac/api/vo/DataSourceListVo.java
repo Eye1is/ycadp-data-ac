@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.Date;
+
 /**
  * 数据源列表业务类
  * @author PC-Xuchenglong
@@ -35,4 +37,6 @@ public class DataSourceListVo {
     /** 数据包ID*/
     @Builder.Default
     private String packageId = "";
+    /** 创建时间 */
+    private Date createdTime;
 }

@@ -29,10 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -820,6 +817,9 @@ public class DataacController {
                     headerValue.clear();
                     //获取最大行数
                     rownum = sheet.getPhysicalNumberOfRows();
+                    if (rownum == 0) {
+                        continue;//忽略空sheet页
+                    }
                     row = sheet.getRow(0);//拿第一行 表头
                     //获取最大列数
                     if (row != null) {

@@ -313,6 +313,55 @@ public class DataacController {
     }
 
     /**
+     * 查询数据源的三级结构
+     * @return
+     */
+    @GetMapping("/data/treeDatasource")
+    public RespEntity getTreeDataResources(){
+        List<TreeGroupVo> resultList = new ArrayList<>();
+        List<TBDatasourceGroup> groups = dataacGroupService.getListBySortNum();
+        for (TBDatasourceGroup g : groups) {
+            List<TBDatasourcePackage> packages = dataacPackageService.getOrderedListByGroupId(g.getId());
+            TreeGroupVo groupVo = new TreeGroupVo();
+            List<TreePackageVo> packageVoList = new ArrayList<>();
+            for (TBDatasourcePackage p : packages) {
+                List<TBDatasourceConfig> datasources = dataacService.getDatasourceByPackageId(p.getId());
+                TreePackageVo packageVo = new TreePackageVo();
+                List<DataSourceListVo> dataSourceListVos = datasourceToDatasourceVo(datasources);
+                packageVo.setId(p.getId());
+                packageVo.setGroupId(p.getGroupId());
+                packageVo.setPackageName(p.getPackageName());
+                packageVo.setSortNum(p.getSortNum());
+                packageVo.setDataSourceVoList(dataSourceListVos);
+                packageVoList.add(packageVo);
+            }
+            groupVo.setId(g.getId());
+            groupVo.setGroupName(g.getGroupName());
+            groupVo.setSortNum(g.getSortNum());
+            groupVo.setPackageVoList(packageVoList);
+            resultList.add(groupVo);
+        }
+        return new RespEntity(RespCode.SUCCESS, resultList);
+    }
+
+    /**
+     * entity转vo
+     * @param datasources
+     * @return
+     */
+    private List<DataSourceListVo> datasourceToDatasourceVo(List<TBDatasourceConfig> datasources) {
+        List<DataSourceListVo> resultList = new ArrayList<>();
+        for (TBDatasourceConfig t : datasources) {
+            DataSourceListVo vo = new DataSourceListVo();
+            vo.setId(t.getId());
+            vo.setDatasourceName(t.getDatasourceName());
+            vo.setDatasourceType(t.getDatasourceType());
+            resultList.add(vo);
+        }
+        return resultList;
+    }
+
+    /**
      * 查询数据源列表
      *
      * @param packageId

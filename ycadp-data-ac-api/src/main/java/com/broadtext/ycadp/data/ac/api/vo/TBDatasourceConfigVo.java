@@ -1,10 +1,13 @@
 package com.broadtext.ycadp.data.ac.api.vo;
 
+import com.broadtext.ycadp.data.ac.api.annotation.CryptField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import javax.validation.constraints.Size;
 
 /**
  * 数据源配置业务类
@@ -27,6 +30,7 @@ public class TBDatasourceConfigVo {
     /** 数据源用户名 */
     private String datasourceUserName = "";
     /** 数据源密码 */
+    @CryptField
     private String datasourcePasswd = "";
     /** 数据库驱动类 */
     private String datasourceDriverClass = "";

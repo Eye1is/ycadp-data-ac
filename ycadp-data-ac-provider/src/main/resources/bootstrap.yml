@@ -21,7 +21,7 @@ eureka:
   client:
     service-url:
       defaultZone:  http://${eurekaServerIp}:8761/eureka/
-
-
+crypt:
+  seckey: broadtext
 
 YCKafkaProject: yc.kafka.project

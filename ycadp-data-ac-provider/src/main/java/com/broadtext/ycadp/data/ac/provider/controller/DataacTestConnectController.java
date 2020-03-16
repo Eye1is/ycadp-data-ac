@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
+import com.broadtext.ycadp.data.ac.api.annotation.DecryptMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +38,7 @@ public class DataacTestConnectController {
      * @param datasourceConfig 数据源对象
      * @return RespEntity
      */
+    @DecryptMethod
     @PostMapping("/data/connecttest")
     public RespEntity connectDatasource(@RequestBody TBDatasourceConfig datasourceConfig){
         try {

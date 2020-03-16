@@ -1,6 +1,7 @@
 package com.broadtext.ycadp.data.ac.api.entity;
 
 import com.broadtext.ycadp.base.entity.AbstractBaseEntity;
+import com.broadtext.ycadp.data.ac.api.annotation.CryptField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -8,6 +9,7 @@ import lombok.experimental.Accessors;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.Size;
 
 /**
  * 数据源实体
@@ -36,6 +38,7 @@ public class TBDatasourceConfig extends AbstractBaseEntity{
     @Column(name = "DATASOURCE_USER_NAME")
     private String datasourceUserName;
     /** 数据源密码 */
+    @CryptField
     @Column(name = "DATASOURCE_PASSWD")
     private String datasourcePasswd;
     /** 数据库驱动类 */

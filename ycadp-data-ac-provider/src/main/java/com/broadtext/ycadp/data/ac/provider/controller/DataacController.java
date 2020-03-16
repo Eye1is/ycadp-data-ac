@@ -3,6 +3,7 @@ package com.broadtext.ycadp.data.ac.provider.controller;
 import com.broadtext.ycadp.base.entity.ListPager;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
+import com.broadtext.ycadp.data.ac.api.annotation.EncryptMethod;
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceExcel;
@@ -30,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -149,6 +149,7 @@ public class DataacController {
      * @param datasourceConfig
      * @return
      */
+    @EncryptMethod
     @PostMapping("/data/datasource")
     public RespEntity addDatasource(@RequestBody TBDatasourceConfigVo datasourceConfig) {
         RespEntity respEntity = null;
@@ -386,8 +387,9 @@ public class DataacController {
      * @param datasourceConfig
      * @return
      */
+    @EncryptMethod
     @PutMapping("/data/datasource/{id}")
-    public RespEntity updateDatasource(@PathVariable("id") String id, @RequestBody TBDatasourceConfigVo datasourceConfig) {
+    public RespEntity updateDatasource(@RequestBody TBDatasourceConfigVo datasourceConfig,@PathVariable("id") String id) {
         RespEntity respEntity = null;
         TBDatasourceConfig dasource = dataacService.findById(id);
         if (dasource != null) {

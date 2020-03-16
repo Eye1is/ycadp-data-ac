@@ -18,8 +18,6 @@ import java.lang.annotation.Target;
 
 /**
  * 字段加解密
- * @author seawish
- * @date 2019/8/19
  */
 @Documented
 @Target({ElementType.METHOD})

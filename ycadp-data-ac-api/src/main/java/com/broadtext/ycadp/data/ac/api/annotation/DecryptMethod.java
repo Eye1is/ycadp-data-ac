@@ -18,9 +18,6 @@ import java.lang.annotation.Target;
 
 /**
  * 注解需要加解密参数的方法，实现自动加解密。
- *
- * @author seawish.zheng
- * @date 2019/8/16
  */
 @Documented
 @Target({ElementType.METHOD})

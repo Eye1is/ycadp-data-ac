@@ -12,8 +12,6 @@ import org.springframework.core.annotation.Order;
 import java.lang.annotation.*;
 /**
  * 字段加解密
- * @author seawish.zheng
- * @date 2019/8/19
  */
 @Documented
 @Target({ElementType.FIELD})

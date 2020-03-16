@@ -231,6 +231,8 @@ public class DataacInfoController {
             case DataSourceType.PostgreSQL:
                 dataCount = postgresql.getDataCount(datasourceId, countSql);
                 break;
+            case DataSourceType.EXCEL:
+                dataCount = excel.getDataCount(datasourceId, countSql);
             default:
                 break;
         }

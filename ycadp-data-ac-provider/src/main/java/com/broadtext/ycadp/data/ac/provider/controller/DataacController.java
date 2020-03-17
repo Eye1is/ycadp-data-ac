@@ -3,7 +3,6 @@ package com.broadtext.ycadp.data.ac.provider.controller;
 import com.broadtext.ycadp.base.entity.ListPager;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
-import com.broadtext.ycadp.data.ac.api.annotation.EncryptMethod;
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceExcel;
@@ -12,7 +11,6 @@ import com.broadtext.ycadp.data.ac.api.entity.TBDatasourcePackage;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.vo.*;
 import com.broadtext.ycadp.data.ac.provider.service.*;
-import com.broadtext.ycadp.data.ac.provider.utils.AesUtil;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -62,8 +60,6 @@ public class DataacController {
     @Autowired
     private FileUploadOrDownloadService fileUploadOrDownloadService;
 
-    @Value("${crypt.seckey}")
-    private String secretKey;
     /**
      * 上传接口测试(建议这样实现)
      * @param multipartFile
@@ -153,7 +149,6 @@ public class DataacController {
      * @param datasourceConfig
      * @return
      */
-    @EncryptMethod
     @PostMapping("/data/datasource")
     public RespEntity addDatasource(@RequestBody TBDatasourceConfigVo datasourceConfig) {
         RespEntity respEntity = null;
@@ -450,11 +445,7 @@ public class DataacController {
             dasource.setConnectionIp(datasourceConfig.getConnectionIp());
             dasource.setConnectionPort(datasourceConfig.getConnectionPort());
             dasource.setDatasourceUserName(datasourceConfig.getDatasourceUserName());
-            if (datasourceConfig.getDatasourcePasswd().equals(dasource.getDatasourcePasswd())) {
-                dasource.setDatasourcePasswd(datasourceConfig.getDatasourcePasswd());
-            } else {
-                dasource.setDatasourcePasswd(AesUtil.encrypt(datasourceConfig.getDatasourcePasswd(),secretKey));
-            }
+            dasource.setDatasourcePasswd(datasourceConfig.getDatasourcePasswd());
             dasource.setDictSql(datasourceConfig.getDictSql());
             dasource.setRemark(datasourceConfig.getRemark());
             dasource.setSchemaDesc(datasourceConfig.getSchemaDesc());

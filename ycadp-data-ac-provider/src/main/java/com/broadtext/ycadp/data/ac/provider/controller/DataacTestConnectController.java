@@ -38,7 +38,6 @@ public class DataacTestConnectController {
      * @param datasourceConfig 数据源对象
      * @return RespEntity
      */
-    @DecryptMethod
     @PostMapping("/data/connecttest")
     public RespEntity connectDatasource(@RequestBody TBDatasourceConfig datasourceConfig){
         try {

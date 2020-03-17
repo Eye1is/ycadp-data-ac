@@ -11,6 +11,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.broadtext.ycadp.data.ac.api.annotation.DecryptMethod;
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,6 +21,8 @@ import java.sql.SQLException;
  * @author ouhaoliang
  */
 public class JDBCUtils {
+    @Value("${crypt.seckey}")
+    private String secretKey;
     /**
      * 连接池中连接最大数量
      */
@@ -84,7 +87,8 @@ public class JDBCUtils {
         }
         //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
         datasourceInner.setUsername(tbDatasourceConfig.getDatasourceUserName());//用户名
-        datasourceInner.setPassword(tbDatasourceConfig.getDatasourcePasswd());//密码
+        String decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), secretKey);
+        datasourceInner.setPassword(decrypt);//密码
         //配置初始化大小、最小、最大
         datasourceInner.setInitialSize(2);
         datasourceInner.setMaxActive(maxActive);

@@ -8,10 +8,8 @@
 package com.broadtext.ycadp.data.ac.provider.utils;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.broadtext.ycadp.data.ac.api.annotation.DecryptMethod;
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -21,8 +19,6 @@ import java.sql.SQLException;
  * @author ouhaoliang
  */
 public class JDBCUtils {
-    @Value("${crypt.seckey}")
-    private String secretKey;
     /**
      * 连接池中连接最大数量
      */
@@ -49,6 +45,7 @@ public class JDBCUtils {
     private final Integer maxPoolPsPerConnSize = 20;
 
     public JDBCUtils(TBDatasourceConfig tbDatasourceConfig){
+        String decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), "broadtext");
         switch(tbDatasourceConfig.getDatasourceType()){
             case DataSourceType.MYSQL:
                 datasourceInner.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp()
@@ -59,6 +56,7 @@ public class JDBCUtils {
                 //检验连接是否有效的查询语句。如果数据库Driver支持ping()方法,
                 //则优先使用ping()方法进行检查,否则使用validationQuery查询进行检查。(Oracle jdbc Driver目前不支持ping方法)
                 datasourceInner.setValidationQuery("select 1");
+                datasourceInner.setPassword(decrypt);//密码
                 break;
             case DataSourceType.ORACLE:
                 datasourceInner.setUrl("jdbc:oracle:thin:@" + tbDatasourceConfig.getConnectionIp()
@@ -66,6 +64,7 @@ public class JDBCUtils {
                         + tbDatasourceConfig.getSchemaDesc());//url
                 //Oracle的验证语句
                 datasourceInner.setValidationQuery("select 1 FROM DUAL");
+                datasourceInner.setPassword(decrypt);//密码
                 break;
             case DataSourceType.PostgreSQL:
                 datasourceInner.setUrl("jdbc:postgresql://" + tbDatasourceConfig.getConnectionIp()
@@ -73,6 +72,7 @@ public class JDBCUtils {
                         + tbDatasourceConfig.getSchemaDesc());//url
                 //PostgreSQL的验证语句
                 datasourceInner.setValidationQuery("select version();");
+                datasourceInner.setPassword(decrypt);//密码
                 break;
             case DataSourceType.EXCEL:
                 datasourceInner.setUrl("jdbc:postgresql://" + tbDatasourceConfig.getConnectionIp()
@@ -80,6 +80,7 @@ public class JDBCUtils {
                         + tbDatasourceConfig.getSchemaDesc());//url
                 //PostgreSQL的验证语句
                 datasourceInner.setValidationQuery("select version();");
+                datasourceInner.setPassword(tbDatasourceConfig.getDatasourcePasswd());//密码
                 break;
             default:
                 datasourceInner.setUrl(null);
@@ -87,8 +88,6 @@ public class JDBCUtils {
         }
         //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
         datasourceInner.setUsername(tbDatasourceConfig.getDatasourceUserName());//用户名
-        String decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), secretKey);
-        datasourceInner.setPassword(decrypt);//密码
         //配置初始化大小、最小、最大
         datasourceInner.setInitialSize(2);
         datasourceInner.setMaxActive(maxActive);

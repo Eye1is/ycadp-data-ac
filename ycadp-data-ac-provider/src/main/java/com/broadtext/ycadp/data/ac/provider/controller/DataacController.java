@@ -12,6 +12,7 @@ import com.broadtext.ycadp.data.ac.api.entity.TBDatasourcePackage;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.vo.*;
 import com.broadtext.ycadp.data.ac.provider.service.*;
+import com.broadtext.ycadp.data.ac.provider.utils.AesUtil;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -23,6 +24,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.csource.common.MyException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,7 +62,8 @@ public class DataacController {
     @Autowired
     private FileUploadOrDownloadService fileUploadOrDownloadService;
 
-
+    @Value("${crypt.seckey}")
+    private String secretKey;
     /**
      * 上传接口测试(建议这样实现)
      * @param multipartFile
@@ -437,7 +440,6 @@ public class DataacController {
      * @param datasourceConfig
      * @return
      */
-    @EncryptMethod
     @PutMapping("/data/datasource/{id}")
     public RespEntity updateDatasource(@RequestBody TBDatasourceConfigVo datasourceConfig,@PathVariable("id") String id) {
         RespEntity respEntity = null;
@@ -448,7 +450,11 @@ public class DataacController {
             dasource.setConnectionIp(datasourceConfig.getConnectionIp());
             dasource.setConnectionPort(datasourceConfig.getConnectionPort());
             dasource.setDatasourceUserName(datasourceConfig.getDatasourceUserName());
-            dasource.setDatasourcePasswd(datasourceConfig.getDatasourcePasswd());
+            if (datasourceConfig.getDatasourcePasswd().equals(dasource.getDatasourcePasswd())) {
+                dasource.setDatasourcePasswd(datasourceConfig.getDatasourcePasswd());
+            } else {
+                dasource.setDatasourcePasswd(AesUtil.encrypt(datasourceConfig.getDatasourcePasswd(),secretKey));
+            }
             dasource.setDictSql(datasourceConfig.getDictSql());
             dasource.setRemark(datasourceConfig.getRemark());
             dasource.setSchemaDesc(datasourceConfig.getSchemaDesc());

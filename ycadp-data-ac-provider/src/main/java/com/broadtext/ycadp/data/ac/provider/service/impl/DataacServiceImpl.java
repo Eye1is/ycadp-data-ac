@@ -43,4 +43,10 @@ public class DataacServiceImpl extends BaseServiceImpl<TBDatasourceConfig,String
     public List<TBDatasourceConfig> getDatasourceByPackageId(String packageId) {
         return dataacRepository.findByPackageId(packageId);
     }
+
+    @Override
+    public List<TBDatasourceConfig> findByName(String name) {
+        return dataacRepository.findByName(name);
+    }
+
 }

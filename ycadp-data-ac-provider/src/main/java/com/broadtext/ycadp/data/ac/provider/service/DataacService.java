@@ -31,4 +31,11 @@ public interface DataacService extends BaseService<TBDatasourceConfig,String>{
      * @return
      */
     List<TBDatasourceConfig> getDatasourceByPackageId(String packageId);
+
+    /**
+     * 根据数据源名称查找实体
+     * @param name
+     * @return
+     */
+    List<TBDatasourceConfig> findByName(String name);
 }

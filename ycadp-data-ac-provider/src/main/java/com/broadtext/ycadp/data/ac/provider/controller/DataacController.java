@@ -16,6 +16,7 @@ import com.broadtext.ycadp.data.ac.provider.utils.AesUtil;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -147,6 +148,26 @@ public class DataacController {
     }
 
     /**
+     * 校验重名
+     * @param name
+     * @param flag
+     * @return
+     */
+    private String checkDataSourceName(String name, Integer flag) {
+        List<TBDatasourceConfig> byName = dataacService.findByName(name);
+        if (byName.size() > 0) {
+            if (flag >= 1) {
+                name = name.substring(0, name.length() - Integer.toString(flag).length() - 2);
+            }
+            flag += 1;
+            name = name + "(" + Integer.toString(flag) + ")";
+            return checkDataSourceName(name, flag);
+        } else {
+            return name;
+        }
+    }
+
+    /**
      * 新增数据源
      *
      * @param datasourceConfig
@@ -157,7 +178,7 @@ public class DataacController {
     public RespEntity addDatasource(@RequestBody TBDatasourceConfigVo datasourceConfig) {
         RespEntity respEntity = null;
         TBDatasourceConfig dasource = new TBDatasourceConfig();
-        dasource.setDatasourceName(datasourceConfig.getDatasourceName());
+        dasource.setDatasourceName(checkDataSourceName(datasourceConfig.getDatasourceName(), 0));
         dasource.setDatasourceType(datasourceConfig.getDatasourceType());
         dasource.setConnectionIp(datasourceConfig.getConnectionIp());
         dasource.setConnectionPort(datasourceConfig.getConnectionPort());
@@ -169,8 +190,8 @@ public class DataacController {
         dasource.setPackageId(datasourceConfig.getPackageId());
         TBDatasourceConfig result = dataacService.addOne(dasource);
         if (result != null) {
-            datasourceConfig.setId(result.getId());
-            respEntity = new RespEntity(RespCode.SUCCESS, datasourceConfig);
+//            datasourceConfig.setId(result.getId());
+            respEntity = new RespEntity(RespCode.SUCCESS, result);
         } else {
             respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
@@ -196,7 +217,7 @@ public class DataacController {
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！");
         }
         TBDatasourceConfig datasourceConfig = new TBDatasourceConfig();
-        datasourceConfig.setDatasourceName(infoVo.getDatasourceName())
+        datasourceConfig.setDatasourceName(checkDataSourceName(infoVo.getDatasourceName(), 0))
                 .setRemark(infoVo.getRemark())
                 .setCloudUrl(infoVo.getCloudUrl())
                 .setPackageId(infoVo.getPackageId())

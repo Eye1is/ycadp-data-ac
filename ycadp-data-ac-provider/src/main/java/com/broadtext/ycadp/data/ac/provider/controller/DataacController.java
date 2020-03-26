@@ -81,18 +81,18 @@ public class DataacController {
     }
 
     /**
-     * 下载接口测试(建议这样实现)
-     * @param fileKey
+     * excel下载（fastdfs实现方式）
+     * @param cloudUrl
      * @param response
      */
-    @GetMapping("/app/analyse/test2")
-    public void test(String fileKey, HttpServletResponse response){
+    @GetMapping("/data/datasource/downloadExcel")
+    public void test(String cloudUrl, HttpServletResponse response){
         File file = null;
         OutputStream outputStream = null;
         InputStream inputStream = null;
         String fileName = "测试.xlsx";
         try {
-            file =  fileUploadOrDownloadService.downloadSingleFile(fileKey,fileName);
+            file =  fileUploadOrDownloadService.downloadSingleFile(cloudUrl,fileName);
             //文件传回前台
             /* 第二步：根据已存在的文件，创建文件输入流 */
             inputStream = new BufferedInputStream(new FileInputStream(file));
@@ -207,6 +207,14 @@ public class DataacController {
      */
     @PostMapping("/data/datasource/excel")
     public RespEntity addDatasourceExcel(@RequestParam("file") MultipartFile multipartFile, ExcelBaseInfoVo infoVo) {
+        String fileKey = "";
+        try {
+            fileKey = fileUploadOrDownloadService.uploadSingleFile(multipartFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (MyException e) {
+            e.printStackTrace();
+        }
         String excelName = multipartFile.getOriginalFilename();
         Map<String, String> analysisMap = analysisExcel(multipartFile);
         if (analysisMap.containsKey("errorValue")) {
@@ -219,7 +227,7 @@ public class DataacController {
         TBDatasourceConfig datasourceConfig = new TBDatasourceConfig();
         datasourceConfig.setDatasourceName(checkDataSourceName(infoVo.getDatasourceName(), 0))
                 .setRemark(infoVo.getRemark())
-                .setCloudUrl(infoVo.getCloudUrl())
+                .setCloudUrl(fileKey)
                 .setPackageId(infoVo.getPackageId())
                 .setDatasourceType(DataSourceType.EXCEL)
                 .setSchemaDesc(excelName);
@@ -514,6 +522,15 @@ public class DataacController {
                 TBDatasourceConfig datasourceConfig = dataacService.updateOne(dasource);
                 return new RespEntity(RespCode.SUCCESS, datasourceConfig);
             } else {
+                //上传新excel文件到fastdfs
+                String fileKey = "";
+                try {
+                    fileKey = fileUploadOrDownloadService.uploadSingleFile(multipartFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (MyException e) {
+                    e.printStackTrace();
+                }
                 //先删除pg数据库中的excel表数据
                 List<TBDatasourceExcel> listByDataSourceId = dataExcelService.getListByDataSourceId(id);
                 List<String> tableNameList = new ArrayList<>();
@@ -545,7 +562,7 @@ public class DataacController {
                 dasource.setDatasourceName(infoVo.getDatasourceName())
                         .setRemark(infoVo.getRemark())
                         .setPackageId(infoVo.getPackageId())
-                        .setCloudUrl(infoVo.getCloudUrl())
+                        .setCloudUrl(fileKey)
                         .setSchemaDesc(excelName);
                 TBDatasourceConfig dataConfigResult = dataacService.updateOne(dasource);
                 if (dataConfigResult.getId() != null) {
@@ -631,8 +648,22 @@ public class DataacController {
                     return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "添加excel数据源映射关系实体失败！！");
                 }
             }
+            //上传新excel文件到fastdfs
+            String fileKey = "";
+            try {
+                fileKey = fileUploadOrDownloadService.uploadSingleFile(multipartFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (MyException e) {
+                e.printStackTrace();
+            }
+            TBDatasourceConfig dasource = dataacService.findById(id);
+            dasource.setCloudUrl(fileKey);
+            dataacService.updateOne(dasource);
+            return new RespEntity(RespCode.SUCCESS);
+        } else {
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "sheet名称不允许发生变化，请检查");
         }
-        return new RespEntity(RespCode.SUCCESS);
     }
 
     /**

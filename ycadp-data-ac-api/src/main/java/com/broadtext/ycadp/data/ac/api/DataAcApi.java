@@ -161,5 +161,5 @@ public interface DataAcApi {
      * @return
      */
     @GetMapping("/data/datasource/datasourceName")
-    RespEntity<String> findDatasourceId();
+    RespEntity<Map> findDatasourceId();
 }

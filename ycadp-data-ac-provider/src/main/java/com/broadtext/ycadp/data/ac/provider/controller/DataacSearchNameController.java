@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据接入通过名称查询数据源id Controller
@@ -37,6 +39,7 @@ public class DataacSearchNameController {
 
         RespEntity respEntity = null;
         String datasourceId="";
+        String packageId="";
         try{
             //查找组
             List<TBDatasourceGroup> tbDatasourceGroup=dataacGroupService.findByName("云驰平台");
@@ -48,6 +51,7 @@ public class DataacSearchNameController {
                 if (tbDatasourcePackage.size() > 0) {
                     for(TBDatasourcePackage item : tbDatasourcePackage){
                         if(item.getPackageName().equals("默认包")){
+                            packageId=item.getId();
                             List<TBDatasourceConfig> tbDatasourceConfig = dataacService.getDatasourceByPackageId(item.getId());
                             if(tbDatasourceConfig.size()>0){
                                 for(TBDatasourceConfig items :tbDatasourceConfig){
@@ -60,7 +64,10 @@ public class DataacSearchNameController {
                     }
                 }
             }
-            respEntity = new RespEntity<>(RespCode.SUCCESS,datasourceId);
+            Map<String,String> map=new HashMap<>();
+            map.put("datasourceId",datasourceId);
+            map.put("packageId",packageId);
+            respEntity = new RespEntity<>(RespCode.SUCCESS,map);
         } catch (Exception e) {
             respEntity = new RespEntity<>(DataacRespCode.DATAAC_RESP_CODE, "查询出错");
         }

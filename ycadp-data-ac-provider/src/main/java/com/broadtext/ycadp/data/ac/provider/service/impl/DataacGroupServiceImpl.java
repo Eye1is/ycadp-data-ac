@@ -18,6 +18,8 @@ import java.util.List;
 @Service
 @Transactional
 public class DataacGroupServiceImpl extends BaseServiceImpl<TBDatasourceGroup,String, DataacGroupRepository> implements DataacGroupService{
+
+
     @Autowired
     private DataacGroupRepository groupRespository;
 
@@ -25,4 +27,11 @@ public class DataacGroupServiceImpl extends BaseServiceImpl<TBDatasourceGroup,St
     public List<TBDatasourceGroup> getListBySortNum() {
         return groupRespository.getListBySortNum();
     }
+
+    @Override
+    public List<TBDatasourceGroup> findByName(String name) {
+        return groupRespository.findByName(name);
+    }
+
+
 }

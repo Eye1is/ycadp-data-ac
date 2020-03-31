@@ -155,4 +155,11 @@ public interface DataAcApi {
      */
     @GetMapping("/data/excel")
     RespEntity<TBDatasourceExcel> getExcelMappingEntity(@RequestParam(value = "id") String id, @RequestParam(value = "sheetName") String sheetName);
+
+    /**
+     * 根据组名，包名，数据源名称查找数据源
+     * @return
+     */
+    @GetMapping("/data/datasource/datasourceName")
+    RespEntity<String> findDatasourceId();
 }

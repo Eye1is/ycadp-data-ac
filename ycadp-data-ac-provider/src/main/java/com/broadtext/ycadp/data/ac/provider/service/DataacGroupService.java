@@ -16,4 +16,10 @@ public interface DataacGroupService extends BaseService<TBDatasourceGroup,String
      * @return
      */
     List<TBDatasourceGroup> getListBySortNum();
+    /**
+     * 根据数据源名称组查找实体
+     * @param name
+     * @return
+     */
+    List<TBDatasourceGroup> findByName(String name);
 }

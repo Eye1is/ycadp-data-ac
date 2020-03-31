@@ -22,6 +22,11 @@ public class DataacPackageServiceImpl extends BaseServiceImpl<TBDatasourcePackag
     private DataacPackageRepository packageRespository;
 
     @Override
+    public List<TBDatasourcePackage> findByGroupId(String groupId) {
+        return packageRespository.findByGroupId(groupId);
+    }
+
+    @Override
     public List<TBDatasourcePackage> getOrderedListByGroupId(String groupId) {
         return packageRespository.getOrderedListByGroupId(groupId);
     }

@@ -31,4 +31,11 @@ public interface DataacPackageRepository extends BaseRepository<TBDatasourcePack
     @Modifying
     @Query(value = "DELETE FROM T_B_DATASOURCE_PACKAGE WHERE GROUP_ID= :groupId", nativeQuery = true)
     void removePackageByGroupId(@Param("groupId") String groupId);
+
+    /**
+     * 通过名称获取
+     * @return
+     */
+    @Query(value = "SELECT * FROM T_B_DATASOURCE_PACKAGE WHERE GROUP_ID= :groupId", nativeQuery = true)
+    List<TBDatasourcePackage> findByGroupId(@Param("groupId") String groupId);
 }

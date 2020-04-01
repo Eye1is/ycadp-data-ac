@@ -25,4 +25,7 @@ public interface DataacRepository extends BaseRepository<TBDatasourceConfig,Stri
 
     @Query(value = "SELECT * FROM T_B_DATASOURCE_CONFIG WHERE PACKAGE_ID = :packageId", nativeQuery = true)
     List<TBDatasourceConfig> findByPackageId(@Param("packageId") String packageId);
+
+    @Query(value = "SELECT * FROM T_B_DATASOURCE_CONFIG WHERE DATASOURCE_NAME = :name", nativeQuery = true)
+    List<TBDatasourceConfig> findByName(@Param("name") String name);
 }

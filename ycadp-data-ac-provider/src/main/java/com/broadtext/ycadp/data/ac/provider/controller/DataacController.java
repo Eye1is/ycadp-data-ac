@@ -958,23 +958,25 @@ public class DataacController {
                     for (int j = 0; j < column; j++) {
                         Cell cell = row.getCell(j);
                         Cell valueCell = secondRow.getCell(j);
-                        if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                            if (valueCell != null) {
-                                if (valueCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                                    if (HSSFDateUtil.isCellDateFormatted(valueCell)) {//日期型
-                                        cellType = "2";
-                                    } else {//数值型
-                                        cellType = "3";
-                                    }
-                                } else {//文本
-                                    cellType = "1";
+                        if (valueCell != null) {
+                            if (valueCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                if (HSSFDateUtil.isCellDateFormatted(valueCell)) {//日期型
+                                    cellType = "2";
+                                } else {//数值型
+                                    cellType = "3";
                                 }
-                            } else {
+                            } else if (valueCell.getCellType() == Cell.CELL_TYPE_FORMULA) {//公式型
+                                cellType = "4";
+                            } else {//文本
                                 cellType = "1";
                             }
-                        }else {
+                        } else {
                             cellType = "1";
                         }
+//                        if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+//                        }else {
+//                            cellType = "1";
+//                        }
                         String cellValue = cell.getRichStringCellValue().getString();
                         headerValue.put(cellValue, cellType);
                     }
@@ -1003,6 +1005,9 @@ public class DataacController {
                                         double numericCellValue = cell.getNumericCellValue();
                                         insertSql += "'" + numericCellValue + "',";
                                     }
+                                } else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+                                    double formulaCellValue = cell.getNumericCellValue();
+                                    insertSql += "'" + formulaCellValue + "',";
                                 } else {//文本
                                     cellValue = cell.getRichStringCellValue().getString();
                                     if (cellValue.contains("'")) {
@@ -1239,7 +1244,7 @@ public class DataacController {
             String dealedStr = newNameList.get(link);
             if (e.getValue().equals("2")) {
                 sql += dealedStr + " date,";
-            } else if (e.getValue().equals("3")) {
+            } else if (e.getValue().equals("3")||e.getValue().equals("4")) {
                 sql += dealedStr + " NUMERIC,";
             } else {
                 sql += dealedStr + " varchar,";

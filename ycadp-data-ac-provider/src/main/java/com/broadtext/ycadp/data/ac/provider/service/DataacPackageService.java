@@ -23,4 +23,10 @@ public interface DataacPackageService extends BaseService<TBDatasourcePackage,St
      * @param groupId
      */
     void removePackageByGroupId(String groupId);
+    /**
+     * 根据数据源名称包查找实体
+     * @param groupId
+     * @return
+     */
+    List<TBDatasourcePackage> findByGroupId(String groupId);
 }

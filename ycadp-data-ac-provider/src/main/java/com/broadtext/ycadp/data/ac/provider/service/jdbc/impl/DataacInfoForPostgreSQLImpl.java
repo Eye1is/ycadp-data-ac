@@ -255,39 +255,15 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
             ResultSet rs = null;
             try {
                 connection = jdbcUtils.getConnection();
-                ps = connection.prepareStatement("SELECT" +
-                        "A .attnum," +
-                        "A .attname," +
-                        "concat_ws (" +
-                        "''," +
-                        "T .typname," +
-                        "SUBSTRING (" +
-                        "format_type (A .atttypid, A .atttypmod)" +
-                        "FROM" +
-                        "'\\(.*\\)'" +
-                        ")" +
-                        ") AS TYPE," +
-                        "d.description" +
-                        "FROM" +
-                        "pg_class C," +
-                        "pg_attribute A," +
-                        "pg_type T," +
-                        "pg_description d " +
-                        "WHERE" +
-                        "C .relname = '" + table + "'" +
-                        "AND A .attnum > 0" +
-                        "AND A .attrelid = C .oid" +
-                        "AND A .atttypid = T .oid" +
-                        "AND d.objoid = A .attrelid" +
-                        "AND d.objsubid = A .attnum");
+                ps = connection.prepareStatement("SELECT a.attname as \"字段名\",col_description(a.attrelid,a.attnum) as \"注释\",concat_ws('',t.typname,SUBSTRING(format_type(a.atttypid,a.atttypmod) from '\\(.*\\)')) as \"字段类型\" FROM pg_class as c,pg_attribute as a, pg_type as t WHERE c.relname = '"+table+"' and a.atttypid = t.oid and a.attrelid = c.oid and a.attnum>0");
                 rs = ps.executeQuery();
                 List<FieldInfoVo> list = new ArrayList<FieldInfoVo>();
                 FieldInfoVo field;
                 while (rs.next()) {
                     field = new FieldInfoVo();
-                    field.setFieldName(rs.getString(2));
+                    field.setFieldName(rs.getString(1));
                     field.setFieldType(rs.getString(3));
-                    field.setFieldDesign(rs.getString(4));
+                    field.setFieldDesign(rs.getString(2));
                     list.add(field);
                 }
                 return list;

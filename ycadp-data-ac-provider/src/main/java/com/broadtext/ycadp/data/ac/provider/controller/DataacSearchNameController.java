@@ -55,7 +55,7 @@ public class DataacSearchNameController {
                             List<TBDatasourceConfig> tbDatasourceConfig = dataacService.getDatasourceByPackageId(item.getId());
                             if(tbDatasourceConfig.size()>0){
                                 for(TBDatasourceConfig items :tbDatasourceConfig){
-                                    if(items.getDatasourceName().equals("activiti")){
+                                    if(items.getDatasourceName().equals("onlinedevelop")){
                                         datasourceId=items.getId();
                                     }
                                 }

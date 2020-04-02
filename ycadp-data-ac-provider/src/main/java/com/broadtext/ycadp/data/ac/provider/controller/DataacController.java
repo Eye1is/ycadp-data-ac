@@ -5,10 +5,7 @@ import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.data.ac.api.annotation.EncryptMethod;
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
-import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
-import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceExcel;
-import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceGroup;
-import com.broadtext.ycadp.data.ac.api.entity.TBDatasourcePackage;
+import com.broadtext.ycadp.data.ac.api.entity.*;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.vo.*;
 import com.broadtext.ycadp.data.ac.provider.service.*;
@@ -61,6 +58,8 @@ public class DataacController {
     private DataExcelService dataExcelService;
     @Autowired
     private FileUploadOrDownloadService fileUploadOrDownloadService;
+    @Autowired
+    private ImportRecordService importRecordService;
     @Value("${crypt.seckey}")
     private String secretKey;
     /**
@@ -217,8 +216,8 @@ public class DataacController {
         String excelName = multipartFile.getOriginalFilename();
         Map<String, String> analysisMap = analysisExcel(multipartFile);
         if (analysisMap.containsKey("errorValue")) {
-            System.out.println("sql执行出现错误！！");
-            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "sql执行出现错误！！");
+            System.out.println(analysisMap.get("errorValue"));
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, analysisMap.get("errorValue"));
         } else if (analysisMap.containsKey("exceptionValue")) {
             System.out.println("解析excel文件过程出现异常！！");
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！");
@@ -232,6 +231,12 @@ public class DataacController {
                 .setSchemaDesc(excelName);
         TBDatasourceConfig dataConfigResult = dataacService.addOne(datasourceConfig);
         if (dataConfigResult.getId() != null) {
+            TBImportRecord importRecord = new TBImportRecord();
+            importRecord.setDatasourceId(dataConfigResult.getId())
+                    .setFileName(excelName)
+                    .setFileSize(String.valueOf(multipartFile.getSize()/1024))
+                    .setCloudUrl(fileKey);
+            importRecordService.addOne(importRecord);
             for (Map.Entry<String, String> entry : analysisMap.entrySet()) {
                 TBDatasourceExcel excelEntity = new TBDatasourceExcel();
                 excelEntity.setDatasourceId(dataConfigResult.getId())
@@ -278,6 +283,7 @@ public class DataacController {
                 dataExcelService.deleteByDatasourceId(id);
             }
             dataacService.removeOne(id);
+            importRecordService.deleteByDatasourceId(id);
             RespEntity respEntity = new RespEntity(RespCode.SUCCESS);
             return respEntity;
         } catch (Exception e) {
@@ -285,6 +291,31 @@ public class DataacController {
             RespEntity respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE, e.getMessage());
             return respEntity;
         }
+    }
+
+    /**
+     * 删除导入记录
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/data/datasource/importrecord/{id}")
+    public RespEntity deleteImportRecord(@PathVariable("id") String id) {
+        boolean b = importRecordService.removeOne(id);
+        if (b) {
+            return new RespEntity(RespCode.SUCCESS);
+        } else {
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        }
+    }
+
+    /**
+     * 查询导入记录列表
+     * @param datasourceId
+     * @return
+     */
+    @GetMapping("/data/datasource/importrecord")
+    public RespEntity getImportRecord(String datasourceId) {
+        return new RespEntity(RespCode.SUCCESS, importRecordService.getListOrderByTime(datasourceId));
     }
 
 
@@ -552,8 +583,8 @@ public class DataacController {
                 String excelName = multipartFile.getOriginalFilename();
                 Map<String, String> analysisMap = analysisExcel(multipartFile);
                 if (analysisMap.containsKey("errorValue")) {
-                    System.out.println("sql执行出现错误！！");
-                    return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "sql执行出现错误！！");
+                    System.out.println(analysisMap.get("errorValue"));
+                    return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, analysisMap.get("errorValue"));
                 } else if (analysisMap.containsKey("exceptionValue")) {
                     System.out.println("解析excel文件过程出现异常！！");
                     return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！");
@@ -631,8 +662,8 @@ public class DataacController {
             String excelName = multipartFile.getOriginalFilename();
             Map<String, String> analysisMap = analysisExcel(multipartFile);
             if (analysisMap.containsKey("errorValue")) {
-                System.out.println("sql执行出现错误！！");
-                return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "sql执行出现错误！！");
+                System.out.println(analysisMap.get("errorValue"));
+                return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, analysisMap.get("errorValue"));
             } else if (analysisMap.containsKey("exceptionValue")) {
                 System.out.println("解析excel文件过程出现异常！！");
                 return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！");
@@ -659,6 +690,12 @@ public class DataacController {
             TBDatasourceConfig dasource = dataacService.findById(id);
             dasource.setCloudUrl(fileKey);
             dataacService.updateOne(dasource);
+            TBImportRecord importRecord = new TBImportRecord();
+            importRecord.setDatasourceId(id)
+                    .setFileName(excelName)
+                    .setFileSize(String.valueOf(multipartFile.getSize()/1024))
+                    .setCloudUrl(fileKey);
+            importRecordService.addOne(importRecord);
             return new RespEntity(RespCode.SUCCESS);
         } else {
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "sheet名称不允许发生变化，请检查");
@@ -894,7 +931,7 @@ public class DataacController {
     /**
      * 解析Excel文件
      * 1.将其真实数据放入postgres数据库中，每个sheet对应一张表
-     * 2.将excel名与postgres库中表的映射关系放入ac库中
+     *
      * ----返回各个sheet的名称list，用在在ac库的映射表中
      *
      * @param multipartFile
@@ -990,7 +1027,56 @@ public class DataacController {
                     //开始insert数据
                     String cellValue = "";
                     insertSql = "insert into " + tableName + " values ";
+                    String tempInsertSql = "";
+//                    Iterator<Row> rowItr = sheet.rowIterator();
+//                    while (rowItr.hasNext()) {
+//                        tempInsertSql = "";
+//                        row = rowItr.next();
+//                        insertSql += "(";
+//                        for (int j = 0; j < column; j++) {
+//                            Cell cell = row.getCell(j);
+//                            if (cell != null) {
+//                                if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+//                                    if (HSSFDateUtil.isCellDateFormatted(cell)) {//日期型
+//                                        Date d = HSSFDateUtil.getJavaDate(cell.getNumericCellValue());
+//                                        String format = new SimpleDateFormat("yyyy-MM-dd").format(d);
+//                                        tempInsertSql += "'" + format + "',";
+//                                    } else {//数值型
+//                                        double numericCellValue = cell.getNumericCellValue();
+//                                        tempInsertSql += "'" + numericCellValue + "',";
+//                                    }
+//                                } else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+//                                    double formulaCellValue = cell.getNumericCellValue();
+//                                    tempInsertSql += "'" + formulaCellValue + "',";
+//                                } else {//文本
+//                                    cellValue = cell.getRichStringCellValue().getString();
+//                                    if (cellValue.equals("")) {
+//
+//                                    }
+//                                    if (cellValue.contains("'")) {
+//                                        cellValue = cellValue.replace("'", "“");
+//                                    }
+//                                    tempInsertSql += "'" + cellValue + "',";
+//                                }
+////                                cell.setCellType(Cell.CELL_TYPE_STRING);
+////                                if (cell.getRichStringCellValue() != null) {
+////                                    cellValue = cell.getRichStringCellValue().getString();
+////                                    if (cellValue.contains("'")) {
+////                                        cellValue = cellValue.replace("'", "“");
+////                                    }
+////                                }
+////                                insertSql += "'" + cellValue + "',";
+//                            } else {
+//                                tempInsertSql += "'" + cellValue + "',";
+//                            }
+//                        }
+//                        insertSql += tempInsertSql;
+//                        insertSql = insertSql.substring(0, insertSql.length() - 1);
+//                        insertSql += "),";
+//                    }
+                    boolean blankJudgeFlag = false;
                     for (int i = 1; i < rownum; i++) {
+                        tempInsertSql = "";
                         row = sheet.getRow(i);
                         insertSql += "(";
                         for (int j = 0; j < column; j++) {
@@ -1000,20 +1086,24 @@ public class DataacController {
                                     if (HSSFDateUtil.isCellDateFormatted(cell)) {//日期型
                                         Date d = HSSFDateUtil.getJavaDate(cell.getNumericCellValue());
                                         String format = new SimpleDateFormat("yyyy-MM-dd").format(d);
-                                        insertSql += "'" + format + "',";
+                                        tempInsertSql += "'" + format + "',";
                                     } else {//数值型
                                         double numericCellValue = cell.getNumericCellValue();
-                                        insertSql += "'" + numericCellValue + "',";
+                                        tempInsertSql += "'" + numericCellValue + "',";
                                     }
                                 } else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
                                     double formulaCellValue = cell.getNumericCellValue();
-                                    insertSql += "'" + formulaCellValue + "',";
+                                    tempInsertSql += "'" + formulaCellValue + "',";
                                 } else {//文本
                                     cellValue = cell.getRichStringCellValue().getString();
+                                    if (cellValue.equals("")) {
+                                        blankJudgeFlag = true;
+                                        break;
+                                    }
                                     if (cellValue.contains("'")) {
                                         cellValue = cellValue.replace("'", "“");
                                     }
-                                    insertSql += "'" + cellValue + "',";
+                                    tempInsertSql += "'" + cellValue + "',";
                                 }
 //                                cell.setCellType(Cell.CELL_TYPE_STRING);
 //                                if (cell.getRichStringCellValue() != null) {
@@ -1024,11 +1114,19 @@ public class DataacController {
 //                                }
 //                                insertSql += "'" + cellValue + "',";
                             } else {
-                                insertSql += "'" + cellValue + "',";
+                                tempInsertSql += "'" + cellValue + "',";
                             }
                         }
+                        if (blankJudgeFlag) {
+                            errorMessage += "第" + String.valueOf(n + 1) + "个sheet中第" + String.valueOf(i + 1) + "行数据不符合规范！";
+                            break;
+                        }
+                        insertSql += tempInsertSql;
                         insertSql = insertSql.substring(0, insertSql.length() - 1);
                         insertSql += "),";
+                    }
+                    if (blankJudgeFlag) {
+                        break;
                     }
                     insertSql = insertSql.substring(0, insertSql.length() - 1);
                     System.out.println("----------插入数据sql为：" + insertSql);
@@ -1038,11 +1136,13 @@ public class DataacController {
                         sheetAndTableName.put(sheetName, tableName);
                     } else {
                         errorMessage += "第" + String.valueOf(tableSuccessValue + 1) + "个sheet建表失败\n";
+                        break;
                     }
                     if (dataSqlFlag) {
                         tableDataSuccessValue += 1;
                     } else {
                         errorMessage += "第" + String.valueOf(tableDataSuccessValue + 1) + "个sheet建表之后插入数据失败\n";
+                        break;
                     }
                 }
                 if (tableSuccessValue == numberOfSheets) {

@@ -3,6 +3,7 @@ package com.broadtext.ycadp.data.ac.provider.controller;
 import com.broadtext.ycadp.base.entity.ListPager;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
+import com.broadtext.ycadp.core.common.listquery.Criteria;
 import com.broadtext.ycadp.data.ac.api.annotation.EncryptMethod;
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.*;
@@ -310,12 +311,43 @@ public class DataacController {
 
     /**
      * 查询导入记录列表
+     *
      * @param datasourceId
      * @return
      */
     @GetMapping("/data/datasource/importrecord")
-    public RespEntity getImportRecord(String datasourceId) {
-        return new RespEntity(RespCode.SUCCESS, importRecordService.getListOrderByTime(datasourceId));
+    public RespEntity getImportRecord(String datasourceId, String isPage, ListPager<TBImportRecord> pager) {
+        RespEntity respEntity = null;
+        Criteria<TBImportRecord> criteria = new Criteria<>();
+        try {
+            if (StringUtils.isEmpty(pager.getSort())) {
+                pager.setSort("createdTime,desc");
+            }
+            ListPager<TBImportRecord> resultPager = new ListPager<>();
+            if ("false".equals(isPage)) {
+                //不分页
+                List<TBImportRecord> listOrderByTime = importRecordService.getListOrderByTime(datasourceId);
+                resultPager.setList(listOrderByTime);
+                resultPager.setPages(listOrderByTime.size());
+                resultPager.setPageSize(listOrderByTime.size());
+                resultPager.setPageNum(1);
+                respEntity = new RespEntity(RespCode.SUCCESS, resultPager);
+            } else {
+                //分页
+                pager = importRecordService.getListByFilter(criteria, pager);
+                List<TBImportRecord> list = pager.getList();
+                resultPager.setList(list);
+                resultPager.setPages(pager.getPages());
+                resultPager.setPageSize(pager.getPageSize());
+                resultPager.setPageNum(pager.getPageNum());
+                resultPager.setTotal(pager.getTotal());
+                respEntity = new RespEntity(RespCode.SUCCESS, resultPager);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            respEntity = new RespEntity(DataacRespCode.DATAAC_RESP_CODE, e.getMessage());
+        }
+        return respEntity;
     }
 
 

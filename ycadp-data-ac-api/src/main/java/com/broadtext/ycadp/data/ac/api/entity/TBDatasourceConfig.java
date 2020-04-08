@@ -68,5 +68,8 @@ public class TBDatasourceConfig extends AbstractBaseEntity{
     /** 排序字段 */
     @Column(name = "SORT_NUM")
     private String sortNum;
+    /** 编码 */
+    @Column(name = "CODE")
+    private String code;
 
 }

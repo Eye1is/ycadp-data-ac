@@ -187,6 +187,7 @@ public class DataacController {
         dasource.setRemark(datasourceConfig.getRemark());
         dasource.setSchemaDesc(datasourceConfig.getSchemaDesc());
         dasource.setPackageId(datasourceConfig.getPackageId());
+        dasource.setCode("AC_"+System.currentTimeMillis());
         TBDatasourceConfig result = dataacService.addOne(dasource);
         if (result != null) {
 //            datasourceConfig.setId(result.getId());
@@ -228,7 +229,7 @@ public class DataacController {
                 .setRemark(infoVo.getRemark())
                 .setCloudUrl(fileKey)
                 .setPackageId(infoVo.getPackageId())
-                .setDatasourceType(DataSourceType.EXCEL)
+                .setDatasourceType(DataSourceType.EXCEL).setCode("AC_"+System.currentTimeMillis())
                 .setSchemaDesc(excelName);
         TBDatasourceConfig dataConfigResult = dataacService.addOne(datasourceConfig);
         if (dataConfigResult.getId() != null) {

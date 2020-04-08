@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import javax.persistence.Column;
 import javax.validation.constraints.Size;
 
 /**
@@ -51,4 +52,6 @@ public class TBDatasourceConfigVo {
     /** 数据包ID*/
     @Builder.Default
     private String packageId = "";
+    /** 编码 */
+    private String code;
 }

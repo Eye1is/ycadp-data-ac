@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -166,6 +167,19 @@ public class DataacController {
         }
     }
 
+    @GetMapping("/data/code")
+    public RespEntity code(){
+        try {
+            String code = "AC_"+System.currentTimeMillis();
+            Map<String, String> map = new ConcurrentHashMap<>();
+            map.put("code",code);
+            return new RespEntity(RespCode.SUCCESS,map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
+        }
+    }
+
     /**
      * 新增数据源
      *
@@ -187,7 +201,7 @@ public class DataacController {
         dasource.setRemark(datasourceConfig.getRemark());
         dasource.setSchemaDesc(datasourceConfig.getSchemaDesc());
         dasource.setPackageId(datasourceConfig.getPackageId());
-        dasource.setCode("AC_"+System.currentTimeMillis());
+        dasource.setCode(datasourceConfig.getCode());
         TBDatasourceConfig result = dataacService.addOne(dasource);
         if (result != null) {
 //            datasourceConfig.setId(result.getId());
@@ -229,7 +243,7 @@ public class DataacController {
                 .setRemark(infoVo.getRemark())
                 .setCloudUrl(fileKey)
                 .setPackageId(infoVo.getPackageId())
-                .setDatasourceType(DataSourceType.EXCEL).setCode("AC_"+System.currentTimeMillis())
+                .setDatasourceType(DataSourceType.EXCEL).setCode(infoVo.getCode())
                 .setSchemaDesc(excelName);
         TBDatasourceConfig dataConfigResult = dataacService.addOne(datasourceConfig);
         if (dataConfigResult.getId() != null) {

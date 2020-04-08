@@ -12,4 +12,5 @@ public class ExcelBaseInfoVo {
     String cloudUrl;
     String flag;
     String packageId;
+    String code;
 }

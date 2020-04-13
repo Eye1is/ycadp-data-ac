@@ -66,6 +66,15 @@ public class JDBCUtils {
                 datasourceInner.setValidationQuery("select 1 FROM DUAL");
                 datasourceInner.setPassword(decrypt);//密码
                 break;
+            case DataSourceType.DB2:
+                datasourceInner.setUrl("jdbc:db2://" + tbDatasourceConfig.getConnectionIp()
+                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                        + tbDatasourceConfig.getSchemaDesc() + ":currentSchema=" + tbDatasourceConfig.getDb2Schema()+";");//url
+                datasourceInner.setDriverClassName("com.ibm.db2.jcc.DB2Driver");
+                //DB2的验证语句
+                datasourceInner.setValidationQuery("select 1 from sysibm.sysdummy1;");
+                datasourceInner.setPassword(decrypt);//密码
+                break;
             case DataSourceType.PostgreSQL:
                 datasourceInner.setUrl("jdbc:postgresql://" + tbDatasourceConfig.getConnectionIp()
                         + ":" + tbDatasourceConfig.getConnectionPort() + "/"

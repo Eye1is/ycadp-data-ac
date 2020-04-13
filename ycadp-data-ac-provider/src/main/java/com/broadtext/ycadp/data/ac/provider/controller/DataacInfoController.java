@@ -45,6 +45,8 @@ public class DataacInfoController {
     @Autowired
     private DataacInfoService postgresql;
     @Autowired
+    private DataacInfoService db2;
+    @Autowired
     private DataacInfoService excel;
     @Autowired
     private DataacService dataacService;
@@ -86,6 +88,9 @@ public class DataacInfoController {
                     break;
                 case DataSourceType.ORACLE:
                     allFields = oracle.getAllFields(id, tableName);
+                    break;
+                case DataSourceType.DB2:
+                    allFields = db2.getAllFields(id, tableName);
                     break;
                 case DataSourceType.PostgreSQL:
                     allFields = postgresql.getAllFields(id, tableName);
@@ -129,6 +134,9 @@ public class DataacInfoController {
             case DataSourceType.PostgreSQL:
                 dictFields = postgresql.getDictData(datasourceId, dictSql, dictKey);
                 break;
+            case DataSourceType.DB2:
+                dictFields = db2.getDictData(datasourceId, dictSql, dictKey);
+                break;
             case DataSourceType.EXCEL:
                 dictFields = excel.getDictData(datasourceId, dictSql, dictKey);
                 break;
@@ -157,6 +165,9 @@ public class DataacInfoController {
                 break;
             case DataSourceType.ORACLE:
                 dictMapFields = oracle.getAllDataWithDict(datasourceId, sql, dictMap);
+                break;
+            case DataSourceType.DB2:
+                dictMapFields = db2.getAllDataWithDict(datasourceId, sql, dictMap);
                 break;
             case DataSourceType.PostgreSQL:
                 dictMapFields = postgresql.getAllDataWithDict(datasourceId, sql, dictMap);
@@ -191,6 +202,9 @@ public class DataacInfoController {
                 break;
             case DataSourceType.ORACLE:
                 dataCount = oracle.getDataCount(id, sql);
+                break;
+            case DataSourceType.DB2:
+                dataCount = db2.getDataCount(id, sql);
                 break;
             case DataSourceType.PostgreSQL:
                 dataCount = postgresql.getDataCount(id, sql);
@@ -228,6 +242,9 @@ public class DataacInfoController {
             case DataSourceType.ORACLE:
                 dataCount = oracle.getDataCount(datasourceId, countSql);
                 break;
+            case DataSourceType.DB2:
+                dataCount = db2.getDataCount(datasourceId, countSql);
+                break;
             case DataSourceType.PostgreSQL:
                 dataCount = postgresql.getDataCount(datasourceId, countSql);
                 break;
@@ -261,6 +278,9 @@ public class DataacInfoController {
                 break;
             case DataSourceType.ORACLE:
                 distinctFields = oracle.getDistinctFields(datasourceId, sql);
+                break;
+            case DataSourceType.DB2:
+                distinctFields = db2.getDistinctFields(datasourceId, sql);
                 break;
             case DataSourceType.PostgreSQL:
                 distinctFields = postgresql.getDistinctFields(datasourceId, sql);

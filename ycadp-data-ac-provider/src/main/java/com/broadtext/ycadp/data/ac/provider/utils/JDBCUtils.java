@@ -70,7 +70,7 @@ public class JDBCUtils {
                 datasourceInner.setUrl("jdbc:db2://" + tbDatasourceConfig.getConnectionIp()
                         + ":" + tbDatasourceConfig.getConnectionPort() + "/"
                         + tbDatasourceConfig.getSchemaDesc() + ":currentSchema=" + tbDatasourceConfig.getDb2Schema()+";");//url
-                datasourceInner.setDriverClassName("com.ibm.db2.jcc.DB2Driver");
+                datasourceInner.setDriverClassName("com.ibm.db2.jcc.DB2Driver");//db2要指定驱动名不然就默认COM.ibm.db2.jdbc.app.DB2DriverE
                 //DB2的验证语句
                 datasourceInner.setValidationQuery("select 1 from sysibm.sysdummy1;");
                 datasourceInner.setPassword(decrypt);//密码

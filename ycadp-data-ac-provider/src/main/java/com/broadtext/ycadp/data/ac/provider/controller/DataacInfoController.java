@@ -20,6 +20,7 @@ import com.broadtext.ycadp.data.ac.provider.service.DataExcelService;
 import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.provider.service.DataacService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -159,6 +160,7 @@ public class DataacInfoController {
         String sql = dictMapVo.getSql();
         Map<String, List<FieldDictVo>> dictMap = dictMapVo.getDictMap();
         String datasourceType = dataacService.getFieldTypeById(dictMapVo.getDatasourceId());
+        datasourceType = StringUtils.isEmpty(datasourceType) ? DataSourceType.PostgreSQL : datasourceType;
         switch (datasourceType) {
             case DataSourceType.MYSQL:
                 dictMapFields = mysql.getAllDataWithDict(datasourceId, sql, dictMap);
@@ -235,6 +237,7 @@ public class DataacInfoController {
         String countSql = strings.get(1);
         String datasourceType = dataacService.getFieldTypeById(datasourceId);
         Integer dataCount = 0;
+        datasourceType = StringUtils.isEmpty(datasourceType) ? DataSourceType.PostgreSQL : datasourceType;
         switch (datasourceType) {
             case DataSourceType.MYSQL:
                 dataCount = mysql.getDataCount(datasourceId, countSql);

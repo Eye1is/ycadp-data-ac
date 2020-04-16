@@ -45,7 +45,13 @@ public class JDBCUtils {
     private final Integer maxPoolPsPerConnSize = 20;
 
     public JDBCUtils(TBDatasourceConfig tbDatasourceConfig){
-        String decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), "broadtext");
+        String decrypt = "";
+        if(tbDatasourceConfig.getId() != null && !"".equals(tbDatasourceConfig.getId())){
+            decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), "broadtext");
+        }else{
+            decrypt = tbDatasourceConfig.getDatasourcePasswd();
+        }
+//        String decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), "broadtext");
         switch(tbDatasourceConfig.getDatasourceType()){
             case DataSourceType.MYSQL:
                 datasourceInner.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp()

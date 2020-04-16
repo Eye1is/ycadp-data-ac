@@ -8,6 +8,7 @@
 package com.broadtext.ycadp.data.ac.provider.service.jdbc.impl;
 
 import com.broadtext.ycadp.core.common.service.BaseServiceImpl;
+import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.constants.PostgresqlCheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
@@ -191,6 +192,7 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
             tbDatasourceConfig.setSchemaDesc(schemaDesc);
             tbDatasourceConfig.setDatasourceUserName(datasourceUserName);
             tbDatasourceConfig.setDatasourcePasswd(datasourcePasswd);
+            tbDatasourceConfig.setDatasourceType(DataSourceType.PostgreSQL);
             JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
             Connection connection;
             PreparedStatement ps = null;
@@ -317,6 +319,7 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
             tbDatasourceConfig.setSchemaDesc(schemaDesc);
             tbDatasourceConfig.setDatasourceUserName(datasourceUserName);
             tbDatasourceConfig.setDatasourcePasswd(datasourcePasswd);
+            tbDatasourceConfig.setDatasourceType(DataSourceType.PostgreSQL);
             JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
             Connection connection;
             PreparedStatement ps = null;

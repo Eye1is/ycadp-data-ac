@@ -22,7 +22,7 @@ public class JDBCUtils {
     /**
      * 连接池中连接最大数量
      */
-    private final Integer maxActive = 20;
+    private final Integer maxActive = 500;
     /**
      * 配置从连接池获取连接等待超时的时间
      */
@@ -70,7 +70,7 @@ public class JDBCUtils {
                 datasourceInner.setUrl("jdbc:db2://" + tbDatasourceConfig.getConnectionIp()
                         + ":" + tbDatasourceConfig.getConnectionPort() + "/"
                         + tbDatasourceConfig.getSchemaDesc() + ":currentSchema=" + tbDatasourceConfig.getDb2Schema()+";");//url
-                datasourceInner.setDriverClassName("com.ibm.db2.jcc.DB2Driver");//db2要指定驱动名不然就默认COM.ibm.db2.jdbc.app.DB2DriverE
+                datasourceInner.setDriverClassName("com.ibm.db2.jcc.DB2Driver");//db2要指定驱动名不然就默认COM.ibm.db2.jdbc.app.DB2Driver
                 //DB2的验证语句
                 datasourceInner.setValidationQuery("select 1 from sysibm.sysdummy1;");
                 datasourceInner.setPassword(decrypt);//密码
@@ -98,7 +98,7 @@ public class JDBCUtils {
         //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
         datasourceInner.setUsername(tbDatasourceConfig.getDatasourceUserName());//用户名
         //配置初始化大小、最小、最大
-        datasourceInner.setInitialSize(2);
+        datasourceInner.setInitialSize(30);
         datasourceInner.setMaxActive(maxActive);
         datasourceInner.setMinIdle(0);
         datasourceInner.setMaxWait(maxWait);

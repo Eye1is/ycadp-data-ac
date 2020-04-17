@@ -263,7 +263,7 @@ public class DataacInfoForDB2Impl extends BaseServiceImpl<TBDatasourceConfig, St
                 while (rs.next()) {
                     field = new FieldInfoVo();
                     field.setFieldName(rs.getString(1));
-                    field.setFieldType(rs.getString(5));
+                    field.setFieldType(rs.getString(17));
                     field.setFieldDesign(rs.getString(4));
                     list.add(field);
                 }

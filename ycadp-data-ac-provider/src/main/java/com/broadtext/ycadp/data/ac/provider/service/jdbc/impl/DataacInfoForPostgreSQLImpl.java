@@ -8,6 +8,7 @@
 package com.broadtext.ycadp.data.ac.provider.service.jdbc.impl;
 
 import com.broadtext.ycadp.core.common.service.BaseServiceImpl;
+import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.constants.PostgresqlCheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
@@ -16,6 +17,7 @@ import com.broadtext.ycadp.data.ac.provider.repository.DataacRepository;
 import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.provider.utils.JDBCUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +45,17 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
 
     @Autowired
     private DataacRepository dataacRepository;
+    @Value("${dataac.datasourceIp}")
+    private String datasourceIp;
+    @Value("${dataac.datasourcePort}")
+    private Integer datasourcePort;
+    @Value("${dataac.schemaDesc}")
+    private String schemaDesc;
+    @Value("${dataac.datasourceUserName}")
+    private String datasourceUserName;
+    @Value("${dataac.datasourcePasswd}")
+    private String datasourcePasswd;
+
 
     @Override
     public List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig) {
@@ -172,6 +185,67 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
                 JdbcUtils.closeStatement(ps);
                 jdbcUtils.close();
             }
+        } else {
+            TBDatasourceConfig tbDatasourceConfig = new TBDatasourceConfig();
+            tbDatasourceConfig.setConnectionIp(datasourceIp);
+            tbDatasourceConfig.setConnectionPort(datasourcePort);
+            tbDatasourceConfig.setSchemaDesc(schemaDesc);
+            tbDatasourceConfig.setDatasourceUserName(datasourceUserName);
+            tbDatasourceConfig.setDatasourcePasswd(datasourcePasswd);
+            tbDatasourceConfig.setDatasourceType(DataSourceType.PostgreSQL);
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                ps = connection.prepareStatement(sql);
+                rs = ps.executeQuery();
+                if (rs == null) {
+                    return Collections.EMPTY_LIST;
+                }
+                ResultSetMetaData md = rs.getMetaData(); //得到结果集(rs)的结构信息，比如字段数、字段名等
+                int columnCount = md.getColumnCount(); //返回此 ResultSet 对象中的列数
+                List<Map<String, Object>> list = new ArrayList<>();
+                Map<String, Object> rowData;
+                while (rs.next()) {
+                    rowData = new LinkedHashMap<String, Object>(columnCount);
+                    for (int i = 1; i <= columnCount; i++) {
+                        if (rs.getObject(i) == null) {
+                            rowData.put(md.getColumnLabel(i), "");
+                        } else {
+                            if (null != dictMap && 0 < dictMap.size()) {
+                                if (dictMap.containsKey(md.getColumnLabel(i))) {
+                                    boolean isDict = false;
+                                    List<FieldDictVo> dicts = dictMap.get(md.getColumnLabel(i));
+                                    for (FieldDictVo dict : dicts) {
+                                        if (dict.getDictValue().equals(rs.getString(i))) {
+                                            rowData.put(md.getColumnLabel(i), dict.getDictText());
+                                            isDict = true;
+                                        }
+                                    }
+                                    if (!isDict) {
+                                        rowData.put(md.getColumnLabel(i), rs.getObject(i));
+                                    }
+                                } else {
+                                    rowData.put(md.getColumnLabel(i), rs.getObject(i));
+                                }
+                            } else {
+                                rowData.put(md.getColumnLabel(i), rs.getObject(i));
+                            }
+                        }
+
+                    }
+                    list.add(rowData);
+                }
+                return list;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
         }
         return null;
     }
@@ -218,6 +292,34 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
         boolean isNotNull = byId.isPresent();
         if (isNotNull) {
             TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
+            JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
+            Connection connection;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try {
+                connection = jdbcUtils.getConnection();
+                ps = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                rs = ps.executeQuery();
+                if (rs == null) {
+                    return 0;
+                }
+                rs.last();
+                return rs.getRow();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(ps);
+                jdbcUtils.close();
+            }
+        } else {
+            TBDatasourceConfig tbDatasourceConfig = new TBDatasourceConfig();
+            tbDatasourceConfig.setConnectionIp(datasourceIp);
+            tbDatasourceConfig.setConnectionPort(datasourcePort);
+            tbDatasourceConfig.setSchemaDesc(schemaDesc);
+            tbDatasourceConfig.setDatasourceUserName(datasourceUserName);
+            tbDatasourceConfig.setDatasourcePasswd(datasourcePasswd);
+            tbDatasourceConfig.setDatasourceType(DataSourceType.PostgreSQL);
             JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
             Connection connection;
             PreparedStatement ps = null;

@@ -22,7 +22,7 @@ public class JDBCUtils {
     /**
      * 连接池中连接最大数量
      */
-    private final Integer maxActive = 20;
+    private final Integer maxActive = 500;
     /**
      * 配置从连接池获取连接等待超时的时间
      */
@@ -45,7 +45,13 @@ public class JDBCUtils {
     private final Integer maxPoolPsPerConnSize = 20;
 
     public JDBCUtils(TBDatasourceConfig tbDatasourceConfig){
-        String decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), "broadtext");
+        String decrypt = "";
+        if(tbDatasourceConfig.getId() != null && !"".equals(tbDatasourceConfig.getId())){
+            decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), "broadtext");
+        }else{
+            decrypt = tbDatasourceConfig.getDatasourcePasswd();
+        }
+//        String decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), "broadtext");
         switch(tbDatasourceConfig.getDatasourceType()){
             case DataSourceType.MYSQL:
                 datasourceInner.setUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp()
@@ -64,6 +70,15 @@ public class JDBCUtils {
                         + tbDatasourceConfig.getSchemaDesc());//url
                 //Oracle的验证语句
                 datasourceInner.setValidationQuery("select 1 FROM DUAL");
+                datasourceInner.setPassword(decrypt);//密码
+                break;
+            case DataSourceType.DB2:
+                datasourceInner.setUrl("jdbc:db2://" + tbDatasourceConfig.getConnectionIp()
+                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                        + tbDatasourceConfig.getSchemaDesc() + ":currentSchema=" + tbDatasourceConfig.getDb2Schema()+";");//url
+                datasourceInner.setDriverClassName("com.ibm.db2.jcc.DB2Driver");//db2要指定驱动名不然就默认COM.ibm.db2.jdbc.app.DB2Driver
+                //DB2的验证语句
+                datasourceInner.setValidationQuery("select 1 from sysibm.sysdummy1;");
                 datasourceInner.setPassword(decrypt);//密码
                 break;
             case DataSourceType.PostgreSQL:
@@ -89,7 +104,7 @@ public class JDBCUtils {
         //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
         datasourceInner.setUsername(tbDatasourceConfig.getDatasourceUserName());//用户名
         //配置初始化大小、最小、最大
-        datasourceInner.setInitialSize(2);
+        datasourceInner.setInitialSize(30);
         datasourceInner.setMaxActive(maxActive);
         datasourceInner.setMinIdle(0);
         datasourceInner.setMaxWait(maxWait);

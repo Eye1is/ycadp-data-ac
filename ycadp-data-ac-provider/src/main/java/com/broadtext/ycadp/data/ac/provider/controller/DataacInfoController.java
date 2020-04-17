@@ -20,6 +20,7 @@ import com.broadtext.ycadp.data.ac.provider.service.DataExcelService;
 import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.provider.service.DataacService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +45,8 @@ public class DataacInfoController {
     private DataacInfoService oracle;
     @Autowired
     private DataacInfoService postgresql;
+    @Autowired
+    private DataacInfoService db2;
     @Autowired
     private DataacInfoService excel;
     @Autowired
@@ -87,6 +90,9 @@ public class DataacInfoController {
                 case DataSourceType.ORACLE:
                     allFields = oracle.getAllFields(id, tableName);
                     break;
+                case DataSourceType.DB2:
+                    allFields = db2.getAllFields(id, tableName);
+                    break;
                 case DataSourceType.PostgreSQL:
                     allFields = postgresql.getAllFields(id, tableName);
                     break;
@@ -129,6 +135,9 @@ public class DataacInfoController {
             case DataSourceType.PostgreSQL:
                 dictFields = postgresql.getDictData(datasourceId, dictSql, dictKey);
                 break;
+            case DataSourceType.DB2:
+                dictFields = db2.getDictData(datasourceId, dictSql, dictKey);
+                break;
             case DataSourceType.EXCEL:
                 dictFields = excel.getDictData(datasourceId, dictSql, dictKey);
                 break;
@@ -151,12 +160,16 @@ public class DataacInfoController {
         String sql = dictMapVo.getSql();
         Map<String, List<FieldDictVo>> dictMap = dictMapVo.getDictMap();
         String datasourceType = dataacService.getFieldTypeById(dictMapVo.getDatasourceId());
+        datasourceType = StringUtils.isEmpty(datasourceType) ? DataSourceType.PostgreSQL : datasourceType;
         switch (datasourceType) {
             case DataSourceType.MYSQL:
                 dictMapFields = mysql.getAllDataWithDict(datasourceId, sql, dictMap);
                 break;
             case DataSourceType.ORACLE:
                 dictMapFields = oracle.getAllDataWithDict(datasourceId, sql, dictMap);
+                break;
+            case DataSourceType.DB2:
+                dictMapFields = db2.getAllDataWithDict(datasourceId, sql, dictMap);
                 break;
             case DataSourceType.PostgreSQL:
                 dictMapFields = postgresql.getAllDataWithDict(datasourceId, sql, dictMap);
@@ -192,6 +205,9 @@ public class DataacInfoController {
             case DataSourceType.ORACLE:
                 dataCount = oracle.getDataCount(id, sql);
                 break;
+            case DataSourceType.DB2:
+                dataCount = db2.getDataCount(id, sql);
+                break;
             case DataSourceType.PostgreSQL:
                 dataCount = postgresql.getDataCount(id, sql);
                 break;
@@ -221,12 +237,16 @@ public class DataacInfoController {
         String countSql = strings.get(1);
         String datasourceType = dataacService.getFieldTypeById(datasourceId);
         Integer dataCount = 0;
+        datasourceType = StringUtils.isEmpty(datasourceType) ? DataSourceType.PostgreSQL : datasourceType;
         switch (datasourceType) {
             case DataSourceType.MYSQL:
                 dataCount = mysql.getDataCount(datasourceId, countSql);
                 break;
             case DataSourceType.ORACLE:
                 dataCount = oracle.getDataCount(datasourceId, countSql);
+                break;
+            case DataSourceType.DB2:
+                dataCount = db2.getDataCount(datasourceId, countSql);
                 break;
             case DataSourceType.PostgreSQL:
                 dataCount = postgresql.getDataCount(datasourceId, countSql);
@@ -261,6 +281,9 @@ public class DataacInfoController {
                 break;
             case DataSourceType.ORACLE:
                 distinctFields = oracle.getDistinctFields(datasourceId, sql);
+                break;
+            case DataSourceType.DB2:
+                distinctFields = db2.getDistinctFields(datasourceId, sql);
                 break;
             case DataSourceType.PostgreSQL:
                 distinctFields = postgresql.getDistinctFields(datasourceId, sql);

@@ -31,6 +31,8 @@ public class DataacTestConnectController {
     @Autowired
     private DataacInfoService oracle;
     @Autowired
+    private DataacInfoService db2;
+    @Autowired
     private DataacInfoService postgresql;
 
     /**
@@ -49,6 +51,9 @@ public class DataacTestConnectController {
             switch (datasourceType) {
                 case DataSourceType.MYSQL:
                     map = mysql.check(datasourceConfig);
+                    break;
+                case DataSourceType.DB2:
+                    map = db2.check(datasourceConfig);
                     break;
                 case DataSourceType.ORACLE:
                     map = oracle.check(datasourceConfig);

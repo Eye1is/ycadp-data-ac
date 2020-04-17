@@ -36,6 +36,8 @@ public class DataacSearchController {
     @Autowired
     private DataacInfoService oracle;
     @Autowired
+    private DataacInfoService db2;
+    @Autowired
     private DataacInfoService postgresql;
     @Autowired
     private DataacService dataacService;
@@ -93,6 +95,25 @@ public class DataacSearchController {
                         map.put("list", listContains);
                     } else {//无筛选条件查询所有
                         list = oracle.getAllTables(datasource);
+                        map.put("list", list);
+                    }
+                    break;
+                case DataSourceType.DB2:
+                    if (tableName == null) {//无筛选条件查询所有
+                        list = db2.getAllTables(datasource);
+                        map.put("list", list);
+                    } else if (!"".equals(tableName)) {//有筛选条件
+                        list = db2.getAllTables(datasource);
+                        if (list.size() > 0) {
+                            for (String str : list) {
+                                if (str.contains(tableName)) {
+                                    listContains.add(str);
+                                }
+                            }
+                        }
+                        map.put("list", listContains);
+                    } else {//无筛选条件查询所有
+                        list = db2.getAllTables(datasource);
                         map.put("list", list);
                     }
                     break;
@@ -179,6 +200,9 @@ public class DataacSearchController {
                 case DataSourceType.ORACLE:
                     sql = oracle.getLimitString(sql, skipResults, maxResults);
                     break;
+                case DataSourceType.DB2:
+                    sql = db2.getLimitString(sql, skipResults, maxResults);
+                    break;
                 case DataSourceType.PostgreSQL:
                     sql = postgresql.getLimitString(sql, skipResults, maxResults);
                     break;
@@ -200,6 +224,10 @@ public class DataacSearchController {
                 case DataSourceType.ORACLE:
                     allData = oracle.getAllData(datasource, sql);
                     count = oracle.getDataCount(datasource, sqlTotal);
+                    break;
+                case DataSourceType.DB2:
+                    allData = db2.getAllData(datasource, sql);
+                    count = db2.getDataCount(datasource, sqlTotal);
                     break;
                 case DataSourceType.PostgreSQL:
                     allData = postgresql.getAllData(datasource, sql);

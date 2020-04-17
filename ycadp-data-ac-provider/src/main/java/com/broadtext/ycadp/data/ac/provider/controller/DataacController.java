@@ -12,6 +12,7 @@ import com.broadtext.ycadp.data.ac.api.vo.*;
 import com.broadtext.ycadp.data.ac.provider.service.*;
 import com.broadtext.ycadp.data.ac.provider.utils.AesUtil;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
+import com.broadtext.ycadp.data.ac.provider.utils.JDBCUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -22,6 +23,7 @@ import org.apache.poi.xssf.usermodel.*;
 import org.csource.common.MyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -266,6 +269,74 @@ public class DataacController {
             return new RespEntity(RespCode.SUCCESS, dataConfigResult);
         } else {
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "添加数据源实体失败！！");
+        }
+    }
+
+    /**
+     * excel中所有sheet表
+     * @param id
+     * @return
+     */
+    @GetMapping("/data/datasource/excelSheetList")
+    public RespEntity excelSheet(String id) {
+        List<TBDatasourceExcel> listByDataSourceId = dataExcelService.getListByDataSourceId(id);
+        return new RespEntity(RespCode.SUCCESS, listByDataSourceId);
+    }
+
+    /**
+     * excel表数据展示
+     * @param id
+     * @param sheetName
+     * @return
+     */
+    @GetMapping("/data/datasource/excelDataView")
+    public RespEntity excelDataView(String id,String sheetName) {
+        TBDatasourceExcel dSource = dataExcelService.findByIdAndSheetName(id, sheetName);
+        String sheetTableName = dSource.getSheetTableName();
+        PostgreConfigVo pVo = new PostgreConfigVo();
+        pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
+                .setUser("postgres")
+                .setPwd("postgres");
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(pVo.getUrl(), pVo.getUser(), pVo.getPwd());
+            String sql = "select * from public." + sheetTableName;
+            ps = connection.prepareStatement(sql);
+            rs = ps.executeQuery();
+            if (rs == null) {
+                return new RespEntity(RespCode.SUCCESS);
+            }
+            ResultSetMetaData md = rs.getMetaData(); //得到结果集(rs)的结构信息，比如字段数、字段名等
+            int columnCount = md.getColumnCount(); //返回此 ResultSet 对象中的列数
+            List<Map<String, Object>> list = new ArrayList<>();
+            Map<String, Object> rowData;
+            while (rs.next()) {
+                rowData = new LinkedHashMap<String, Object>(columnCount);
+                for (int i = 1; i <= columnCount; i++) {
+                    if (rs.getObject(i) == null) {
+                        rowData.put(md.getColumnLabel(i), "");
+                    } else {
+                        rowData.put(md.getColumnLabel(i), rs.getObject(i));
+                    }
+
+                }
+                list.add(rowData);
+            }
+            connection.close();
+            return new RespEntity(RespCode.SUCCESS, list);
+        } catch (ClassNotFoundException e) {
+            System.out.println("装在jdbc驱动失败");
+            e.printStackTrace();
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, e.getMessage());
+        } finally {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(ps);
         }
     }
 

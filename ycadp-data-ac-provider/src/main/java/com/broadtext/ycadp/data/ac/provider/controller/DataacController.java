@@ -286,12 +286,21 @@ public class DataacController {
 
     /**
      * excel表数据展示
+     *
      * @param id
      * @param sheetName
      * @return
      */
     @GetMapping("/data/datasource/excelDataView")
-    public RespEntity excelDataView(String id,String sheetName) {
+    public RespEntity excelDataView(HttpServletRequest request, String id, String sheetName) {
+        Integer count = 0;
+        String isPage = request.getParameter("isPage");
+        String pageNum = request.getParameter("pageNum");
+        String pageSize = request.getParameter("pageSize");
+        Integer pSizes = pageSize == null || "".equals(pageSize) ? 1 : Integer.parseInt(pageSize);
+        int pNum = (pageNum == null || "".equals(pageNum) ? 0 : Integer.parseInt(pageNum));
+        int pSize = (pageSize == null || "".equals(pageSize) ? 0 : Integer.parseInt(pageSize));
+
         TBDatasourceExcel dSource = dataExcelService.findByIdAndSheetName(id, sheetName);
         String sheetTableName = dSource.getSheetTableName();
         PostgreConfigVo pVo = new PostgreConfigVo();
@@ -305,6 +314,9 @@ public class DataacController {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(pVo.getUrl(), pVo.getUser(), pVo.getPwd());
             String sql = "select * from public." + sheetTableName;
+            if("true".equals(isPage)){
+                sql += " limit " + pSize + " offset " + (pNum-1) * pSize;
+            }
             ps = connection.prepareStatement(sql);
             rs = ps.executeQuery();
             if (rs == null) {

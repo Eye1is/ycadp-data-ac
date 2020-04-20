@@ -293,6 +293,7 @@ public class DataacController {
      */
     @GetMapping("/data/datasource/excelDataView")
     public RespEntity excelDataView(HttpServletRequest request, String id, String sheetName) {
+//        List<Map<String,Object>> resultData = new LinkedList<Map<String,Object>>();
         Integer count = 0;
         String isPage = request.getParameter("isPage");
         String pageNum = request.getParameter("pageNum");
@@ -314,10 +315,11 @@ public class DataacController {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(pVo.getUrl(), pVo.getUser(), pVo.getPwd());
             String sql = "select * from public." + sheetTableName;
+            count = getDataCount(sql);
             if("true".equals(isPage)){
                 sql += " limit " + pSize + " offset " + (pNum-1) * pSize;
             }
-            ps = connection.prepareStatement(sql);
+            ps = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs = ps.executeQuery();
             if (rs == null) {
                 return new RespEntity(RespCode.SUCCESS);
@@ -339,7 +341,13 @@ public class DataacController {
                 list.add(rowData);
             }
             connection.close();
-            return new RespEntity(RespCode.SUCCESS, list);
+            Map<String,Object> map = new HashMap<String,Object>();
+            map.put("list", list);
+            map.put("total", count);
+            map.put("pages", Math.ceil(count / pSizes));
+            map.put("pageNum", pageNum);
+            map.put("pageSize", pageSize);
+            return new RespEntity(RespCode.SUCCESS, map);
         } catch (ClassNotFoundException e) {
             System.out.println("装在jdbc驱动失败");
             e.printStackTrace();
@@ -351,6 +359,40 @@ public class DataacController {
             JdbcUtils.closeResultSet(rs);
             JdbcUtils.closeStatement(ps);
         }
+    }
+
+    /**
+     * 获取excel表大小
+     * @param sql
+     * @return
+     */
+    public int getDataCount(String sql) {
+        PostgreConfigVo pVo = new PostgreConfigVo();
+        pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
+                .setUser("postgres")
+                .setPwd("postgres");
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int count = 0;
+        try {
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(pVo.getUrl(), pVo.getUser(), pVo.getPwd());
+            ps = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            rs = ps.executeQuery();
+            if (rs == null) {
+                return 0;
+            }
+            rs.last();
+            count = rs.getRow();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(ps);
+        }
+        return count;
     }
 
     /**

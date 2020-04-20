@@ -761,42 +761,33 @@ public class DataacController {
             }
         }
         if (compareNum == size) {//校验sheet名称无误，开始全量更新
-            //先删除pg数据库中的excel表数据
+            //先清空pg数据库中的excel表数据
             List<String> tableNameList = new ArrayList<>();
             for (TBDatasourceExcel e : listByDataSourceId) {
                 tableNameList.add(e.getSheetTableName());
             }
-            String dropTableSql = "DROP TABLE ";
+            String cleanTableSql = "TRUNCATE TABLE ";
             for (int i = 0; i < tableNameList.size(); i++) {
-                dropTableSql += tableNameList.get(i) + ",";
+                cleanTableSql += tableNameList.get(i) + ",";
             }
-            dropTableSql = dropTableSql.substring(0, dropTableSql.length() - 1);
+            cleanTableSql = cleanTableSql.substring(0, cleanTableSql.length() - 1);
             PostgreConfigVo pVo = new PostgreConfigVo();
             pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
                     .setUser("postgres")
                     .setPwd("postgres");
-            boolean b = excelToolService.generateDataInPostgre(pVo, dropTableSql);
-            //再删除原有的映射关系和excel数据
-            dataExcelService.deleteByDatasourceId(id);
+            boolean b = excelToolService.generateDataInPostgre(pVo, cleanTableSql);
+//            //再删除原有的映射关系和excel数据
+//            dataExcelService.deleteByDatasourceId(id);
             //然后添加各项数据
             String excelName = multipartFile.getOriginalFilename();
-            Map<String, String> analysisMap = analysisExcel(multipartFile);
+//            Map<String, String> analysisMap = analysisExcel(multipartFile);
+            Map<String, String> analysisMap = analysisExcelUpdate(multipartFile,id);
             if (analysisMap.containsKey("errorValue")) {
                 System.out.println(analysisMap.get("errorValue"));
                 return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, analysisMap.get("errorValue"));
             } else if (analysisMap.containsKey("exceptionValue")) {
                 System.out.println("解析excel文件过程出现异常！！");
                 return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！");
-            }
-            for (Map.Entry<String, String> entry : analysisMap.entrySet()) {
-                TBDatasourceExcel excelEntity = new TBDatasourceExcel();
-                excelEntity.setDatasourceId(id)
-                        .setSheetName(entry.getKey())
-                        .setSheetTableName(entry.getValue());
-                TBDatasourceExcel excelMappingResult = dataExcelService.addOne(excelEntity);
-                if (excelMappingResult.getId() == null) {
-                    return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "添加excel数据源映射关系实体失败！！");
-                }
             }
             //上传新excel文件到fastdfs
             String fileKey = "";
@@ -1269,6 +1260,134 @@ public class DataacController {
                     System.out.println("-----------执行建表sql成功！！------------");
                 } else {
                     System.out.println("---------" + errorMessage + "----------");
+                }
+                if (tableDataSuccessValue == numberOfSheets) {
+                    System.out.println("-----------执行插入数据sql成功！！------------");
+                } else {
+                    System.out.println("---------" + errorMessage + "----------");
+                }
+                if (!errorMessage.equals("")) {
+                    sheetAndTableName.put("errorValue", errorMessage);
+                }
+            }
+            //处理系统生成的临时文件
+            File f = new File(file.toURI());
+            if (f.delete()) {
+                System.out.println("临时文件删除成功");
+            } else {
+                System.out.println("临时文件删除失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            sheetAndTableName.put("exceptionValue", e.getMessage());
+        }
+        return sheetAndTableName;
+    }
+
+    /**
+     * excel导入的解析方法（只插入数据不建表）
+     * @param multipartFile
+     * @param id
+     * @return
+     */
+    public Map<String, String> analysisExcelUpdate(MultipartFile multipartFile, String id) {
+        //配置我们的postgreSql数据库链接信息
+        PostgreConfigVo pVo = new PostgreConfigVo();
+        pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
+                .setUser("postgres")
+                .setPwd("postgres");
+        //开始处理MultipartFile
+        File file = null;
+        Map<String, String> sheetAndTableName = new HashMap<>();//放最终返回的执行结果状态
+        String insertSql = "";
+        boolean dataSqlFlag = false;
+        try {
+            file = multipartFileToFile(multipartFile);
+            Workbook wb = null;
+            Sheet sheet = null;
+            Row secondRow = null;
+            Row row = null;
+            wb = readExcel(file, multipartFile.getOriginalFilename());
+            if (wb != null) {
+                int numberOfSheets = wb.getNumberOfSheets();
+                String sheetName = "";
+                int rownum = 0;
+                int column = 0;
+                int tableDataSuccessValue = 0;//最终是否成功插入数据的标志符
+                String errorMessage = "";//拼接所有的错误信息
+                for (int n = 0; n < numberOfSheets; n++) {
+                    sheet = wb.getSheetAt(n);
+                    sheetName = sheet.getSheetName();
+                    String tableName=dataExcelService.findByIdAndSheetName(id, sheetName).getSheetTableName();
+                    rownum = sheet.getPhysicalNumberOfRows();
+                    if (rownum == 0) {
+                        continue;//忽略空sheet页
+                    }
+                    row = sheet.getRow(0);//拿第一行 表头
+                    //获取最大列数
+                    if (row != null) {
+                        column = row.getPhysicalNumberOfCells();
+                    } else {
+                        column = 0;
+                    }
+                    String cellValue = "";
+                    insertSql = "insert into " + tableName + " values ";
+                    String tempInsertSql = "";
+                    boolean blankJudgeFlag = false;
+                    for (int i = 1; i < rownum; i++) {
+                        tempInsertSql = "";
+                        row = sheet.getRow(i);
+                        insertSql += "(";
+                        for (int j = 0; j < column; j++) {
+                            Cell cell = row.getCell(j);
+                            if (cell != null) {
+                                if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    if (HSSFDateUtil.isCellDateFormatted(cell)) {//日期型
+                                        Date d = HSSFDateUtil.getJavaDate(cell.getNumericCellValue());
+                                        String format = new SimpleDateFormat("yyyy-MM-dd").format(d);
+                                        tempInsertSql += "'" + format + "',";
+                                    } else {//数值型
+                                        double numericCellValue = cell.getNumericCellValue();
+                                        tempInsertSql += "'" + numericCellValue + "',";
+                                    }
+                                } else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+                                    double formulaCellValue = cell.getNumericCellValue();
+                                    tempInsertSql += "'" + formulaCellValue + "',";
+                                } else {//文本
+                                    cellValue = cell.getRichStringCellValue().getString();
+                                    if (cellValue.equals("")) {
+                                        blankJudgeFlag = true;
+                                        break;
+                                    }
+                                    if (cellValue.contains("'")) {
+                                        cellValue = cellValue.replace("'", "“");
+                                    }
+                                    tempInsertSql += "'" + cellValue + "',";
+                                }
+                            } else {
+                                tempInsertSql += "'" + cellValue + "',";
+                            }
+                        }
+                        if (blankJudgeFlag) {
+                            errorMessage += "第" + String.valueOf(n + 1) + "个sheet中第" + String.valueOf(i + 1) + "行数据不符合规范！";
+                            break;
+                        }
+                        insertSql += tempInsertSql;
+                        insertSql = insertSql.substring(0, insertSql.length() - 1);
+                        insertSql += "),";
+                    }
+                    if (blankJudgeFlag) {
+                        break;
+                    }
+                    insertSql = insertSql.substring(0, insertSql.length() - 1);
+                    System.out.println("----------插入数据sql为：" + insertSql);
+                    dataSqlFlag = excelToolService.generateDataInPostgre(pVo, insertSql);
+                    if (dataSqlFlag) {
+                        tableDataSuccessValue += 1;
+                    } else {
+                        errorMessage += "第" + String.valueOf(tableDataSuccessValue + 1) + "个sheet插入数据失败\n";
+                        break;
+                    }
                 }
                 if (tableDataSuccessValue == numberOfSheets) {
                     System.out.println("-----------执行插入数据sql成功！！------------");

@@ -492,8 +492,9 @@ public class DataacController {
                 respEntity = new RespEntity(RespCode.SUCCESS, resultPager);
             } else {
                 //分页
-                pager = importRecordService.getListByFilter(criteria, pager);
-                List<TBImportRecord> list = pager.getList();
+//                pager = importRecordService.getListByFilter(criteria, pager);
+//                List<TBImportRecord> list = pager.getList();
+                List<TBImportRecord> list = importRecordService.getListOrderByTime(datasourceId);
                 resultPager.setList(list);
                 resultPager.setPages(pager.getPages());
                 resultPager.setPageSize(pager.getPageSize());

@@ -8,6 +8,7 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Service;
 
 import java.sql.*;
@@ -152,13 +153,33 @@ public class ExcelToolServiceImpl implements ExcelToolService {
             coon.commit();
             coon.close();
         } catch (ClassNotFoundException e) {
-            System.out.println("装在jdbc驱动失败");
+            System.out.println("装载jdbc驱动失败");
             e.printStackTrace();
+            try {
+                coon.rollback();//回滚
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
             return false;
         } catch (SQLException e) {
             System.out.println("无法连接数据库");
             e.printStackTrace();
+            try {
+                coon.rollback();//回滚
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
             return false;
+        } finally {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(stmt);
+            if (coon != null) {
+                try {
+                    coon.close();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
         return true;
     }

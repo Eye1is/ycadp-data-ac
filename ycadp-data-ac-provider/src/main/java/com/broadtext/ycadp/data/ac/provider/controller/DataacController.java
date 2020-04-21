@@ -308,12 +308,13 @@ public class DataacController {
         pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
                 .setUser("postgres")
                 .setPwd("postgres");
-        Connection connection;
+        Connection connection = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(pVo.getUrl(), pVo.getUser(), pVo.getPwd());
+            connection.setAutoCommit(false);
             String sql = "select * from public." + sheetTableName;
             count = getDataCount(sql);
             if("true".equals(isPage)){
@@ -340,7 +341,6 @@ public class DataacController {
                 }
                 list.add(rowData);
             }
-            connection.close();
             Map<String,Object> map = new HashMap<String,Object>();
             map.put("list", list);
             map.put("total", count);
@@ -349,15 +349,32 @@ public class DataacController {
             map.put("pageSize", pageSize);
             return new RespEntity(RespCode.SUCCESS, map);
         } catch (ClassNotFoundException e) {
-            System.out.println("装在jdbc驱动失败");
+            System.out.println("装载jdbc驱动失败");
             e.printStackTrace();
+            try {
+                connection.rollback();//回滚
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, e.getMessage());
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();//回滚
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, e.getMessage());
         } finally {
             JdbcUtils.closeResultSet(rs);
             JdbcUtils.closeStatement(ps);
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 

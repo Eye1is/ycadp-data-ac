@@ -320,6 +320,14 @@ public class DataacController {
             if("true".equals(isPage)){
                 sql += " limit " + pSize + " offset " + (pNum-1) * pSize;
             }
+            ps = connection.prepareStatement("SELECT a.attname as \"字段名\",col_description(a.attrelid,a.attnum) as \"注释\",concat_ws('',t.typname,SUBSTRING(format_type(a.atttypid,a.atttypmod) from '\\(.*\\)')) as \"字段类型\" FROM pg_class as c,pg_attribute as a, pg_type as t WHERE c.relname = '"+sheetTableName+"' and a.atttypid = t.oid and a.attrelid = c.oid and a.attnum>0");
+            rs = ps.executeQuery();
+            Map<String, String> remarkMap = new ConcurrentHashMap<>();
+            while (rs.next()) {
+                String remarks = rs.getString(2);
+                String fieldName = rs.getString(1);
+                remarkMap.put(fieldName,remarks);
+            }
             ps = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs = ps.executeQuery();
             if (rs == null) {
@@ -341,8 +349,18 @@ public class DataacController {
                 }
                 list.add(rowData);
             }
+            List<Map<String, Object>> newList = new LinkedList<>();
+            for (Map<String, Object> map : list) {
+                Map<String, Object> hashMap = new ConcurrentHashMap<>();
+                for (String s : map.keySet()) {
+                    if (remarkMap.containsKey(s)){
+                        hashMap.put(remarkMap.get(s),map.get(s));
+                    }
+                }
+                newList.add(hashMap);
+            }
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("list", list);
+            map.put("list", newList);
             map.put("total", count);
             map.put("pages", Math.ceil(count / pSizes));
             map.put("pageNum", pageNum);

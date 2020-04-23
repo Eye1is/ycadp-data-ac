@@ -351,7 +351,7 @@ public class DataacController {
             }
             List<Map<String, Object>> newList = new LinkedList<>();
             for (Map<String, Object> map : list) {
-                Map<String, Object> hashMap = new ConcurrentHashMap<>();
+                Map<String, Object> hashMap = new LinkedHashMap<>();
                 for (String s : map.keySet()) {
                     if (remarkMap.containsKey(s)){
                         hashMap.put(remarkMap.get(s),map.get(s));

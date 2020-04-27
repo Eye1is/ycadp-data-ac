@@ -271,4 +271,14 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     public List<TBPermitContrast> findAllPermitList() {
         return permitContrastRepository.findAll();
     }
+
+    public List<TBPermitPolicy> findPermitPolicyByName(String name1, String name2) {
+        return permitPolicyRepository.findAllByNames(name1, name2);
+    }
+
+    @Override
+    public List<TBAclDetail> findByModulePermitUser(String moduleName, String permitId, String userId) {
+        return authorizationRepository.findAllByModulePermitUser(moduleName, permitId, userId);
+    }
+
 }

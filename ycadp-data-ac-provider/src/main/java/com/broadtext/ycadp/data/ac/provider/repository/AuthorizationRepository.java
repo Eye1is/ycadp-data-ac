@@ -11,6 +11,7 @@ import com.broadtext.ycadp.core.common.repository.BaseRepository;
 import com.broadtext.ycadp.data.ac.api.entity.TBAclDetail;
 import com.broadtext.ycadp.data.ac.api.vo.PermitVo;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -42,4 +43,7 @@ public interface AuthorizationRepository extends BaseRepository<TBAclDetail, Str
             "join T_B_PERMIT_CONTRAST c on b.CONTRAST_ID = c.ID where " +
             "a.ACCESSOR = :accessor and a.GROUP_ID = :groupId and a.MODULAR_NAME = :modularName", nativeQuery = true)
     List<Map<String, String>>  findAuthorizationListWithAccessor(String accessor, String groupId, String modularName);
+
+    @Query(value = "SELECT * FROM T_B_ACL_DETAIL WHERE MODULAR_NAME=:moduleName and PERMIT_POLICY_ID=:permitId and ACCESSOR=:userId", nativeQuery = true)
+    List<TBAclDetail> findAllByModulePermitUser(@Param("moduleName") String moduleName, @Param("permitId") String permitId, @Param("userId") String userId);
 }

@@ -10,9 +10,11 @@ import com.broadtext.ycadp.data.ac.api.entity.*;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.vo.*;
 import com.broadtext.ycadp.data.ac.provider.service.*;
+import com.broadtext.ycadp.data.ac.provider.service.authorization.AuthorizationService;
 import com.broadtext.ycadp.data.ac.provider.utils.AesUtil;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
 import com.broadtext.ycadp.data.ac.provider.utils.JDBCUtils;
+import com.broadtext.ycadp.util.userutil.CurrentUserUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -65,6 +67,8 @@ public class DataacController {
     private FileUploadOrDownloadService fileUploadOrDownloadService;
     @Autowired
     private ImportRecordService importRecordService;
+    @Autowired
+    private AuthorizationService authorizationService;
     @Value("${crypt.seckey}")
     private String secretKey;
     /**
@@ -1077,31 +1081,48 @@ public class DataacController {
      */
     @GetMapping("/data/datasource/tree")
     public RespEntity viewTree() {
-        List<GroupVo> groupVoList = new ArrayList<>();
-        List<TBDatasourceGroup> groupList = dataacGroupService.getListBySortNum();//排序过的组List
-        List<TBDatasourcePackage> packageList;
-        for (TBDatasourceGroup g : groupList) {
-            GroupVo gVo = new GroupVo();
-            gVo.setId(g.getId());
-            gVo.setGroupName(g.getGroupName());
-            gVo.setSortNum(g.getSortNum());
-            List<PackageVo> packageVoList = new ArrayList<>();
-            packageList = dataacPackageService.getOrderedListByGroupId(g.getId());
-            for (TBDatasourcePackage p : packageList) {
-                PackageVo pVo = new PackageVo();
-                pVo.setId(p.getId());
-                pVo.setGroupId(g.getId());
-                pVo.setPackageName(p.getPackageName());
-                pVo.setSortNum(p.getSortNum());
-                packageVoList.add(pVo);
-            }
-            gVo.setPackageVoList(packageVoList);
-            groupVoList.add(gVo);
+        List<TBPermitPolicy> permitPolicyByName = authorizationService.findPermitPolicyByName("管理员", "编辑者");
+        List<String> permitIdList = new ArrayList<>();
+        for (TBPermitPolicy p : permitPolicyByName) {
+            permitIdList.add(p.getId());
         }
-        if (!ArrayUtil.isEmpty(groupVoList)) {
-            return new RespEntity(RespCode.SUCCESS, groupVoList);
-        } else {
+        String userId = CurrentUserUtils.getUser().getUserId();
+        List<TBAclDetail> resList = new ArrayList<>();
+        for (String s : permitIdList) {
+            resList.addAll(authorizationService.findByModulePermitUser("dataac", s, userId));
+        }
+        if (resList.size() < 1) {
             return new RespEntity(RespCode.SUCCESS, new ArrayList<>());
+        } else {
+            List<String> groupIdList = new ArrayList<>();
+            for (TBAclDetail d : resList) {
+                groupIdList.add(d.getGroupId());
+            }
+            List<GroupVo> groupVoList = new ArrayList<>();
+            List<TBDatasourceGroup> groupList = dataacGroupService.getListBySortNum();//排序过的组List
+            for (TBDatasourceGroup t : groupList) {
+                if (!groupIdList.contains(t.getId())) groupList.remove(t);
+            }
+            List<TBDatasourcePackage> packageList;
+            for (TBDatasourceGroup g : groupList) {
+                GroupVo gVo = new GroupVo();
+                gVo.setId(g.getId());
+                gVo.setGroupName(g.getGroupName());
+                gVo.setSortNum(g.getSortNum());
+                List<PackageVo> packageVoList = new ArrayList<>();
+                packageList = dataacPackageService.getOrderedListByGroupId(g.getId());
+                for (TBDatasourcePackage p : packageList) {
+                    PackageVo pVo = new PackageVo();
+                    pVo.setId(p.getId());
+                    pVo.setGroupId(g.getId());
+                    pVo.setPackageName(p.getPackageName());
+                    pVo.setSortNum(p.getSortNum());
+                    packageVoList.add(pVo);
+                }
+                gVo.setPackageVoList(packageVoList);
+                groupVoList.add(gVo);
+            }
+            return new RespEntity(RespCode.SUCCESS, groupVoList);
         }
     }
 

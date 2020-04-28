@@ -1087,6 +1087,7 @@ public class DataacController {
             permitIdList.add(p.getId());
         }
         String userId = CurrentUserUtils.getUser().getUserId();
+//        String userId = "8a8080916d43ec07016d5d74da9a0110";
         List<TBAclDetail> resList = new ArrayList<>();
         for (String s : permitIdList) {
             resList.addAll(authorizationService.findByModulePermitUser("dataac", s, userId));
@@ -1100,8 +1101,9 @@ public class DataacController {
             }
             List<GroupVo> groupVoList = new ArrayList<>();
             List<TBDatasourceGroup> groupList = dataacGroupService.getListBySortNum();//排序过的组List
+            List<TBDatasourceGroup> realGroupList = new ArrayList<>();
             for (TBDatasourceGroup t : groupList) {
-                if (!groupIdList.contains(t.getId())) groupList.remove(t);
+                if (groupIdList.contains(t.getId())) realGroupList.add(t);
             }
             List<TBDatasourcePackage> packageList;
             for (TBDatasourceGroup g : groupList) {

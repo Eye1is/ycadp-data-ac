@@ -1106,7 +1106,7 @@ public class DataacController {
                 if (groupIdList.contains(t.getId())) realGroupList.add(t);
             }
             List<TBDatasourcePackage> packageList;
-            for (TBDatasourceGroup g : groupList) {
+            for (TBDatasourceGroup g : realGroupList) {
                 GroupVo gVo = new GroupVo();
                 gVo.setId(g.getId());
                 gVo.setGroupName(g.getGroupName());

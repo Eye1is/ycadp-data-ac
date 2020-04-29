@@ -1128,36 +1128,37 @@ public class DataacController {
         for (String s : permitIdList) {
             resList.addAll(authorizationService.findByModulePermitUser("dataac", s, userId));
         }
-        if (resList.size() < 1) {
-            return new RespEntity(RespCode.SUCCESS, new ArrayList<>());
-        } else {
-            List<String> groupIdList = new ArrayList<>();
-            for (TBAclDetail d : resList) {
-                groupIdList.add(d.getGroupId());
-            }
-            List<GroupVo> groupVoList = new ArrayList<>();
-            List<TBDatasourceGroup> groupList = dataacGroupService.getListBySortNum();//排序过的组List
-            List<TBDatasourceGroup> realGroupList = new ArrayList<>();
-            List<TBDatasourcePackage> packageList;
-            if (viewAllGroupAuth) {
-                for (TBDatasourceGroup g : groupList) {
-                    GroupVo gVo = new GroupVo();
-                    gVo.setId(g.getId());
-                    gVo.setGroupName(g.getGroupName());
-                    gVo.setSortNum(g.getSortNum());
-                    List<PackageVo> packageVoList = new ArrayList<>();
-                    packageList = dataacPackageService.getOrderedListByGroupId(g.getId());
-                    for (TBDatasourcePackage p : packageList) {
-                        PackageVo pVo = new PackageVo();
-                        pVo.setId(p.getId());
-                        pVo.setGroupId(g.getId());
-                        pVo.setPackageName(p.getPackageName());
-                        pVo.setSortNum(p.getSortNum());
-                        packageVoList.add(pVo);
-                    }
-                    gVo.setPackageVoList(packageVoList);
-                    groupVoList.add(gVo);
+        List<String> groupIdList = new ArrayList<>();
+        for (TBAclDetail d : resList) {
+            groupIdList.add(d.getGroupId());
+        }
+        List<GroupVo> groupVoList = new ArrayList<>();
+        List<TBDatasourceGroup> groupList = dataacGroupService.getListBySortNum();//排序过的组List
+        List<TBDatasourceGroup> realGroupList = new ArrayList<>();
+        List<TBDatasourcePackage> packageList;
+        if (viewAllGroupAuth) {
+            for (TBDatasourceGroup g : groupList) {
+                GroupVo gVo = new GroupVo();
+                gVo.setId(g.getId());
+                gVo.setGroupName(g.getGroupName());
+                gVo.setSortNum(g.getSortNum());
+                List<PackageVo> packageVoList = new ArrayList<>();
+                packageList = dataacPackageService.getOrderedListByGroupId(g.getId());
+                for (TBDatasourcePackage p : packageList) {
+                    PackageVo pVo = new PackageVo();
+                    pVo.setId(p.getId());
+                    pVo.setGroupId(g.getId());
+                    pVo.setPackageName(p.getPackageName());
+                    pVo.setSortNum(p.getSortNum());
+                    packageVoList.add(pVo);
                 }
+                gVo.setPackageVoList(packageVoList);
+                groupVoList.add(gVo);
+            }
+            return new RespEntity(RespCode.SUCCESS, groupVoList);
+        }else {
+            if (resList.size() < 1) {
+                return new RespEntity(RespCode.SUCCESS, new ArrayList<>());
             } else {
                 for (TBDatasourceGroup t : groupList) {
                     if (groupIdList.contains(t.getId())) realGroupList.add(t);
@@ -1180,8 +1181,8 @@ public class DataacController {
                     gVo.setPackageVoList(packageVoList);
                     groupVoList.add(gVo);
                 }
+                return new RespEntity(RespCode.SUCCESS, groupVoList);
             }
-            return new RespEntity(RespCode.SUCCESS, groupVoList);
         }
     }
 

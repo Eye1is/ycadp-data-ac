@@ -1210,6 +1210,35 @@ public class DataacController {
     }
 
     /**
+     * 开放给其他项目 获取有权限的组id列表
+     * @param moduleName
+     * @param userId
+     * @return
+     */
+    @GetMapping("/data/datasource/treeForOtherProject")
+    public RespEntity<List<String>> getGrantedGroups(String moduleName, String userId) {
+        List<TBPermitPolicy> permitPolicyByName = authorizationService.findPermitPolicyByName("管理员", "编辑者");
+        List<String> permitIdList = new ArrayList<>();
+        for (TBPermitPolicy p : permitPolicyByName) {
+            permitIdList.add(p.getId());
+        }
+        List<TBAclDetail> resList = new ArrayList<>();
+        for (String s : permitIdList) {
+            resList.addAll(authorizationService.findByModulePermitUser(moduleName, s, userId));
+        }
+        if (resList.size() < 1) {
+            return new RespEntity(RespCode.SUCCESS, new ArrayList<>());
+        } else {
+            List<String> groupIdList = new ArrayList<>();
+            for (TBAclDetail d : resList) {
+                groupIdList.add(d.getGroupId());
+            }
+            return new RespEntity<>(RespCode.SUCCESS, groupIdList);
+        }
+    }
+
+
+    /**
      * 解析Excel文件
      * 1.将其真实数据放入postgres数据库中，每个sheet对应一张表
      *

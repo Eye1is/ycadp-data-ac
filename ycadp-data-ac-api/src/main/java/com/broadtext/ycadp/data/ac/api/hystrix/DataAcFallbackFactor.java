@@ -105,6 +105,11 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi> {
             }
             @Override
             public RespEntity<Map> findDatasourceId(){return null;}
+
+            @Override
+            public RespEntity<List<String>> getGrantedGroups(String moduleName, String userId) {
+                return null;
+            }
         };
     }
 }

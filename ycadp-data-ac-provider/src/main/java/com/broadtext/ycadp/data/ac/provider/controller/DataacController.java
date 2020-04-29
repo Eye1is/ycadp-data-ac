@@ -14,6 +14,8 @@ import com.broadtext.ycadp.data.ac.provider.service.authorization.AuthorizationS
 import com.broadtext.ycadp.data.ac.provider.utils.AesUtil;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
 import com.broadtext.ycadp.data.ac.provider.utils.JDBCUtils;
+import com.broadtext.ycadp.role.api.RoleApi;
+import com.broadtext.ycadp.role.api.entity.Resource;
 import com.broadtext.ycadp.util.userutil.CurrentUserUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -71,6 +73,8 @@ public class DataacController {
     private AuthorizationService authorizationService;
     @Value("${crypt.seckey}")
     private String secretKey;
+    @Autowired
+    private RoleApi roleApi;
     /**
      * 上传接口测试(建议这样实现)
      * @param multipartFile
@@ -1081,13 +1085,22 @@ public class DataacController {
      */
     @GetMapping("/data/datasource/tree")
     public RespEntity viewTree() {
+        String userId = CurrentUserUtils.getUser().getUserId();
+//        String userId = "8a8080916d43ec07016d5d74da9a0110";
+        RespEntity<List<Resource>> byUserId = roleApi.findByUserId(userId);
+        List<Resource> data = byUserId.getData();
+        boolean viewAllGroupAuth = false;
+        for (Resource r : data) {
+            if (r.getResourceCode().equals("data.access.view")) {
+                viewAllGroupAuth = true;
+                break;
+            }
+        }
         List<TBPermitPolicy> permitPolicyByName = authorizationService.findPermitPolicyByName("管理员", "编辑者");
         List<String> permitIdList = new ArrayList<>();
         for (TBPermitPolicy p : permitPolicyByName) {
             permitIdList.add(p.getId());
         }
-        String userId = CurrentUserUtils.getUser().getUserId();
-//        String userId = "8a8080916d43ec07016d5d74da9a0110";
         List<TBAclDetail> resList = new ArrayList<>();
         for (String s : permitIdList) {
             resList.addAll(authorizationService.findByModulePermitUser("dataac", s, userId));
@@ -1102,27 +1115,48 @@ public class DataacController {
             List<GroupVo> groupVoList = new ArrayList<>();
             List<TBDatasourceGroup> groupList = dataacGroupService.getListBySortNum();//排序过的组List
             List<TBDatasourceGroup> realGroupList = new ArrayList<>();
-            for (TBDatasourceGroup t : groupList) {
-                if (groupIdList.contains(t.getId())) realGroupList.add(t);
-            }
             List<TBDatasourcePackage> packageList;
-            for (TBDatasourceGroup g : realGroupList) {
-                GroupVo gVo = new GroupVo();
-                gVo.setId(g.getId());
-                gVo.setGroupName(g.getGroupName());
-                gVo.setSortNum(g.getSortNum());
-                List<PackageVo> packageVoList = new ArrayList<>();
-                packageList = dataacPackageService.getOrderedListByGroupId(g.getId());
-                for (TBDatasourcePackage p : packageList) {
-                    PackageVo pVo = new PackageVo();
-                    pVo.setId(p.getId());
-                    pVo.setGroupId(g.getId());
-                    pVo.setPackageName(p.getPackageName());
-                    pVo.setSortNum(p.getSortNum());
-                    packageVoList.add(pVo);
+            if (viewAllGroupAuth) {
+                for (TBDatasourceGroup g : groupList) {
+                    GroupVo gVo = new GroupVo();
+                    gVo.setId(g.getId());
+                    gVo.setGroupName(g.getGroupName());
+                    gVo.setSortNum(g.getSortNum());
+                    List<PackageVo> packageVoList = new ArrayList<>();
+                    packageList = dataacPackageService.getOrderedListByGroupId(g.getId());
+                    for (TBDatasourcePackage p : packageList) {
+                        PackageVo pVo = new PackageVo();
+                        pVo.setId(p.getId());
+                        pVo.setGroupId(g.getId());
+                        pVo.setPackageName(p.getPackageName());
+                        pVo.setSortNum(p.getSortNum());
+                        packageVoList.add(pVo);
+                    }
+                    gVo.setPackageVoList(packageVoList);
+                    groupVoList.add(gVo);
                 }
-                gVo.setPackageVoList(packageVoList);
-                groupVoList.add(gVo);
+            } else {
+                for (TBDatasourceGroup t : groupList) {
+                    if (groupIdList.contains(t.getId())) realGroupList.add(t);
+                }
+                for (TBDatasourceGroup g : realGroupList) {
+                    GroupVo gVo = new GroupVo();
+                    gVo.setId(g.getId());
+                    gVo.setGroupName(g.getGroupName());
+                    gVo.setSortNum(g.getSortNum());
+                    List<PackageVo> packageVoList = new ArrayList<>();
+                    packageList = dataacPackageService.getOrderedListByGroupId(g.getId());
+                    for (TBDatasourcePackage p : packageList) {
+                        PackageVo pVo = new PackageVo();
+                        pVo.setId(p.getId());
+                        pVo.setGroupId(g.getId());
+                        pVo.setPackageName(p.getPackageName());
+                        pVo.setSortNum(p.getSortNum());
+                        packageVoList.add(pVo);
+                    }
+                    gVo.setPackageVoList(packageVoList);
+                    groupVoList.add(gVo);
+                }
             }
             return new RespEntity(RespCode.SUCCESS, groupVoList);
         }

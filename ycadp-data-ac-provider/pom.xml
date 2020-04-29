@@ -49,6 +49,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.broadtext</groupId>
+			<artifactId>ycadp-role-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.broadtext</groupId>
 			<artifactId>ycadp-fastdfs</artifactId>
 			<version>${ycadp-fastdfs.version}</version>
 		</dependency>

@@ -597,30 +597,53 @@ public class DataacController {
      */
     @GetMapping("/data/treeDatasource")
     public RespEntity getTreeDataResources(){
-        List<TreeGroupVo> resultList = new ArrayList<>();
-        List<TBDatasourceGroup> groups = dataacGroupService.getListBySortNum();
-        for (TBDatasourceGroup g : groups) {
-            List<TBDatasourcePackage> packages = dataacPackageService.getOrderedListByGroupId(g.getId());
-            TreeGroupVo groupVo = new TreeGroupVo();
-            List<TreePackageVo> packageVoList = new ArrayList<>();
-            for (TBDatasourcePackage p : packages) {
-                List<TBDatasourceConfig> datasources = dataacService.getDatasourceByPackageId(p.getId());
-                TreePackageVo packageVo = new TreePackageVo();
-                List<DataSourceListVo> dataSourceListVos = datasourceToDatasourceVo(datasources);
-                packageVo.setId(p.getId());
-                packageVo.setGroupId(p.getGroupId());
-                packageVo.setPackageName(p.getPackageName());
-                packageVo.setSortNum(p.getSortNum());
-                packageVo.setDataSourceVoList(dataSourceListVos);
-                packageVoList.add(packageVo);
-            }
-            groupVo.setId(g.getId());
-            groupVo.setGroupName(g.getGroupName());
-            groupVo.setSortNum(g.getSortNum());
-            groupVo.setPackageVoList(packageVoList);
-            resultList.add(groupVo);
+        String userId = CurrentUserUtils.getUser().getUserId();
+//        String userId = "8a8080916d43ec07016d5d74da9a0110";
+        List<TBPermitPolicy> permitPolicyByName = authorizationService.findPermitPolicyByName("管理员", "编辑者");
+        List<String> permitIdList = new ArrayList<>();
+        for (TBPermitPolicy p : permitPolicyByName) {
+            permitIdList.add(p.getId());
         }
-        return new RespEntity(RespCode.SUCCESS, resultList);
+        List<TBAclDetail> resList = new ArrayList<>();
+        for (String s : permitIdList) {
+            resList.addAll(authorizationService.findByModulePermitUser("dataac", s, userId));
+        }
+        if (resList.size() < 1) {
+            return new RespEntity(RespCode.SUCCESS, new ArrayList<>());
+        } else {
+            List<String> groupIdList = new ArrayList<>();
+            for (TBAclDetail d : resList) {
+                groupIdList.add(d.getGroupId());
+            }
+            List<TreeGroupVo> resultList = new ArrayList<>();
+            List<TBDatasourceGroup> groups = dataacGroupService.getListBySortNum();
+            List<TBDatasourceGroup> realGroupList = new ArrayList<>();
+            for (TBDatasourceGroup t : groups) {
+                if (groupIdList.contains(t.getId())) realGroupList.add(t);
+            }
+            for (TBDatasourceGroup g : realGroupList) {
+                List<TBDatasourcePackage> packages = dataacPackageService.getOrderedListByGroupId(g.getId());
+                TreeGroupVo groupVo = new TreeGroupVo();
+                List<TreePackageVo> packageVoList = new ArrayList<>();
+                for (TBDatasourcePackage p : packages) {
+                    List<TBDatasourceConfig> datasources = dataacService.getDatasourceByPackageId(p.getId());
+                    TreePackageVo packageVo = new TreePackageVo();
+                    List<DataSourceListVo> dataSourceListVos = datasourceToDatasourceVo(datasources);
+                    packageVo.setId(p.getId());
+                    packageVo.setGroupId(p.getGroupId());
+                    packageVo.setPackageName(p.getPackageName());
+                    packageVo.setSortNum(p.getSortNum());
+                    packageVo.setDataSourceVoList(dataSourceListVos);
+                    packageVoList.add(packageVo);
+                }
+                groupVo.setId(g.getId());
+                groupVo.setGroupName(g.getGroupName());
+                groupVo.setSortNum(g.getSortNum());
+                groupVo.setPackageVoList(packageVoList);
+                resultList.add(groupVo);
+            }
+            return new RespEntity(RespCode.SUCCESS, resultList);
+        }
     }
 
     /**

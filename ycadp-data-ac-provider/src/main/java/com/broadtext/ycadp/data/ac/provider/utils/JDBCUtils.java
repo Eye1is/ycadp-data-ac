@@ -156,7 +156,10 @@ public class JDBCUtils {
     public Connection getConnection(){
         Connection conn =null;
         try{
+            long starttime= System.currentTimeMillis();
             conn = datasourceInner.getConnection();
+            long endtime= System.currentTimeMillis();
+            System.out.println("usetime:"+(endtime-starttime)+"ms");
             System.out.println(Thread.currentThread().getName()+"连接已经开启......");
             container.set(conn);
             dsContainer.set(datasourceInner);

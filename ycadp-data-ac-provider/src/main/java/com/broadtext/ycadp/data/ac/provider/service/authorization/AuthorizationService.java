@@ -7,7 +7,9 @@
 
 package com.broadtext.ycadp.data.ac.provider.service.authorization;
 
+import com.broadtext.ycadp.data.ac.api.entity.TBAclDetail;
 import com.broadtext.ycadp.data.ac.api.entity.TBPermitContrast;
+import com.broadtext.ycadp.data.ac.api.entity.TBPermitPolicy;
 import com.broadtext.ycadp.data.ac.api.vo.AuthorizationVo;
 import com.broadtext.ycadp.data.ac.api.vo.PermitVo;
 
@@ -40,4 +42,21 @@ public interface AuthorizationService {
     List<Map<String, String>>  findAuthorizationListWithAccessor(String accessor, String groupId, String modularName);
 
     List<TBPermitContrast> findAllPermitList();
+
+    /**
+     *
+     * @param name1
+     * @param name2
+     * @return
+     */
+    List<TBPermitPolicy> findPermitPolicyByName(String name1, String name2);
+
+    /**
+     *
+     * @param moduleName
+     * @param permitId
+     * @param userId
+     * @return
+     */
+    List<TBAclDetail> findByModulePermitUser(String moduleName, String permitId, String userId);
 }

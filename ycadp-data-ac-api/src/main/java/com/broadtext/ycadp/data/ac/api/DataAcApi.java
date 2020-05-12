@@ -162,4 +162,13 @@ public interface DataAcApi {
      */
     @GetMapping("/data/datasource/datasourceName")
     RespEntity<Map> findDatasourceId();
+
+    /**
+     * 开放给其他项目
+     * @param moduleName
+     * @param userId
+     * @return
+     */
+    @GetMapping("/data/datasource/treeForOtherProject")
+    RespEntity<List<String>> getGrantedGroups(@RequestParam(value = "moduleName") String moduleName, @RequestParam(value = "userId") String userId);
 }

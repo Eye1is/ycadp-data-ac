@@ -10,9 +10,13 @@ import com.broadtext.ycadp.data.ac.api.entity.*;
 import com.broadtext.ycadp.data.ac.api.enums.DataacRespCode;
 import com.broadtext.ycadp.data.ac.api.vo.*;
 import com.broadtext.ycadp.data.ac.provider.service.*;
+import com.broadtext.ycadp.data.ac.provider.service.authorization.AuthorizationService;
 import com.broadtext.ycadp.data.ac.provider.utils.AesUtil;
 import com.broadtext.ycadp.data.ac.provider.utils.ArrayUtil;
 import com.broadtext.ycadp.data.ac.provider.utils.JDBCUtils;
+import com.broadtext.ycadp.role.api.RoleApi;
+import com.broadtext.ycadp.role.api.entity.Resource;
+import com.broadtext.ycadp.util.userutil.CurrentUserUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -65,8 +69,12 @@ public class DataacController {
     private FileUploadOrDownloadService fileUploadOrDownloadService;
     @Autowired
     private ImportRecordService importRecordService;
+    @Autowired
+    private AuthorizationService authorizationService;
     @Value("${crypt.seckey}")
     private String secretKey;
+    @Autowired
+    private RoleApi roleApi;
     /**
      * 上传接口测试(建议这样实现)
      * @param multipartFile
@@ -589,30 +597,53 @@ public class DataacController {
      */
     @GetMapping("/data/treeDatasource")
     public RespEntity getTreeDataResources(){
-        List<TreeGroupVo> resultList = new ArrayList<>();
-        List<TBDatasourceGroup> groups = dataacGroupService.getListBySortNum();
-        for (TBDatasourceGroup g : groups) {
-            List<TBDatasourcePackage> packages = dataacPackageService.getOrderedListByGroupId(g.getId());
-            TreeGroupVo groupVo = new TreeGroupVo();
-            List<TreePackageVo> packageVoList = new ArrayList<>();
-            for (TBDatasourcePackage p : packages) {
-                List<TBDatasourceConfig> datasources = dataacService.getDatasourceByPackageId(p.getId());
-                TreePackageVo packageVo = new TreePackageVo();
-                List<DataSourceListVo> dataSourceListVos = datasourceToDatasourceVo(datasources);
-                packageVo.setId(p.getId());
-                packageVo.setGroupId(p.getGroupId());
-                packageVo.setPackageName(p.getPackageName());
-                packageVo.setSortNum(p.getSortNum());
-                packageVo.setDataSourceVoList(dataSourceListVos);
-                packageVoList.add(packageVo);
-            }
-            groupVo.setId(g.getId());
-            groupVo.setGroupName(g.getGroupName());
-            groupVo.setSortNum(g.getSortNum());
-            groupVo.setPackageVoList(packageVoList);
-            resultList.add(groupVo);
+        String userId = CurrentUserUtils.getUser().getUserId();
+//        String userId = "8a8080916d43ec07016d5d74da9a0110";
+        List<TBPermitPolicy> permitPolicyByName = authorizationService.findPermitPolicyByName("管理员", "编辑者");
+        List<String> permitIdList = new ArrayList<>();
+        for (TBPermitPolicy p : permitPolicyByName) {
+            permitIdList.add(p.getId());
         }
-        return new RespEntity(RespCode.SUCCESS, resultList);
+        List<TBAclDetail> resList = new ArrayList<>();
+        for (String s : permitIdList) {
+            resList.addAll(authorizationService.findByModulePermitUser("dataac", s, userId));
+        }
+        if (resList.size() < 1) {
+            return new RespEntity(RespCode.SUCCESS, new ArrayList<>());
+        } else {
+            List<String> groupIdList = new ArrayList<>();
+            for (TBAclDetail d : resList) {
+                groupIdList.add(d.getGroupId());
+            }
+            List<TreeGroupVo> resultList = new ArrayList<>();
+            List<TBDatasourceGroup> groups = dataacGroupService.getListBySortNum();
+            List<TBDatasourceGroup> realGroupList = new ArrayList<>();
+            for (TBDatasourceGroup t : groups) {
+                if (groupIdList.contains(t.getId())) realGroupList.add(t);
+            }
+            for (TBDatasourceGroup g : realGroupList) {
+                List<TBDatasourcePackage> packages = dataacPackageService.getOrderedListByGroupId(g.getId());
+                TreeGroupVo groupVo = new TreeGroupVo();
+                List<TreePackageVo> packageVoList = new ArrayList<>();
+                for (TBDatasourcePackage p : packages) {
+                    List<TBDatasourceConfig> datasources = dataacService.getDatasourceByPackageId(p.getId());
+                    TreePackageVo packageVo = new TreePackageVo();
+                    List<DataSourceListVo> dataSourceListVos = datasourceToDatasourceVo(datasources);
+                    packageVo.setId(p.getId());
+                    packageVo.setGroupId(p.getGroupId());
+                    packageVo.setPackageName(p.getPackageName());
+                    packageVo.setSortNum(p.getSortNum());
+                    packageVo.setDataSourceVoList(dataSourceListVos);
+                    packageVoList.add(packageVo);
+                }
+                groupVo.setId(g.getId());
+                groupVo.setGroupName(g.getGroupName());
+                groupVo.setSortNum(g.getSortNum());
+                groupVo.setPackageVoList(packageVoList);
+                resultList.add(groupVo);
+            }
+            return new RespEntity(RespCode.SUCCESS, resultList);
+        }
     }
 
     /**
@@ -1077,31 +1108,81 @@ public class DataacController {
      */
     @GetMapping("/data/datasource/tree")
     public RespEntity viewTree() {
+        String userId = CurrentUserUtils.getUser().getUserId();
+//        String userId = "8a8080916d43ec07016d5d74da9a0110";
+        RespEntity<List<Resource>> byUserId = roleApi.findByUserId(userId);
+        List<Resource> data = byUserId.getData();
+        boolean viewAllGroupAuth = false;
+        for (Resource r : data) {
+            if (r.getResourceCode().equals("data.access.view")) {
+                viewAllGroupAuth = true;
+                break;
+            }
+        }
+        List<TBPermitPolicy> permitPolicyByName = authorizationService.findPermitPolicyByName("管理员", "编辑者");
+        List<String> permitIdList = new ArrayList<>();
+        for (TBPermitPolicy p : permitPolicyByName) {
+            permitIdList.add(p.getId());
+        }
+        List<TBAclDetail> resList = new ArrayList<>();
+        for (String s : permitIdList) {
+            resList.addAll(authorizationService.findByModulePermitUser("dataac", s, userId));
+        }
+        List<String> groupIdList = new ArrayList<>();
+        for (TBAclDetail d : resList) {
+            groupIdList.add(d.getGroupId());
+        }
         List<GroupVo> groupVoList = new ArrayList<>();
         List<TBDatasourceGroup> groupList = dataacGroupService.getListBySortNum();//排序过的组List
+        List<TBDatasourceGroup> realGroupList = new ArrayList<>();
         List<TBDatasourcePackage> packageList;
-        for (TBDatasourceGroup g : groupList) {
-            GroupVo gVo = new GroupVo();
-            gVo.setId(g.getId());
-            gVo.setGroupName(g.getGroupName());
-            gVo.setSortNum(g.getSortNum());
-            List<PackageVo> packageVoList = new ArrayList<>();
-            packageList = dataacPackageService.getOrderedListByGroupId(g.getId());
-            for (TBDatasourcePackage p : packageList) {
-                PackageVo pVo = new PackageVo();
-                pVo.setId(p.getId());
-                pVo.setGroupId(g.getId());
-                pVo.setPackageName(p.getPackageName());
-                pVo.setSortNum(p.getSortNum());
-                packageVoList.add(pVo);
+        if (viewAllGroupAuth) {
+            for (TBDatasourceGroup g : groupList) {
+                GroupVo gVo = new GroupVo();
+                gVo.setId(g.getId());
+                gVo.setGroupName(g.getGroupName());
+                gVo.setSortNum(g.getSortNum());
+                List<PackageVo> packageVoList = new ArrayList<>();
+                packageList = dataacPackageService.getOrderedListByGroupId(g.getId());
+                for (TBDatasourcePackage p : packageList) {
+                    PackageVo pVo = new PackageVo();
+                    pVo.setId(p.getId());
+                    pVo.setGroupId(g.getId());
+                    pVo.setPackageName(p.getPackageName());
+                    pVo.setSortNum(p.getSortNum());
+                    packageVoList.add(pVo);
+                }
+                gVo.setPackageVoList(packageVoList);
+                groupVoList.add(gVo);
             }
-            gVo.setPackageVoList(packageVoList);
-            groupVoList.add(gVo);
-        }
-        if (!ArrayUtil.isEmpty(groupVoList)) {
             return new RespEntity(RespCode.SUCCESS, groupVoList);
-        } else {
-            return new RespEntity(RespCode.SUCCESS, new ArrayList<>());
+        }else {
+            if (resList.size() < 1) {
+                return new RespEntity(RespCode.SUCCESS, new ArrayList<>());
+            } else {
+                for (TBDatasourceGroup t : groupList) {
+                    if (groupIdList.contains(t.getId())) realGroupList.add(t);
+                }
+                for (TBDatasourceGroup g : realGroupList) {
+                    GroupVo gVo = new GroupVo();
+                    gVo.setId(g.getId());
+                    gVo.setGroupName(g.getGroupName());
+                    gVo.setSortNum(g.getSortNum());
+                    List<PackageVo> packageVoList = new ArrayList<>();
+                    packageList = dataacPackageService.getOrderedListByGroupId(g.getId());
+                    for (TBDatasourcePackage p : packageList) {
+                        PackageVo pVo = new PackageVo();
+                        pVo.setId(p.getId());
+                        pVo.setGroupId(g.getId());
+                        pVo.setPackageName(p.getPackageName());
+                        pVo.setSortNum(p.getSortNum());
+                        packageVoList.add(pVo);
+                    }
+                    gVo.setPackageVoList(packageVoList);
+                    groupVoList.add(gVo);
+                }
+                return new RespEntity(RespCode.SUCCESS, groupVoList);
+            }
         }
     }
 
@@ -1128,6 +1209,35 @@ public class DataacController {
         }
         return new RespEntity(RespCode.SUCCESS);
     }
+
+    /**
+     * 开放给其他项目 获取有权限的组id列表
+     * @param moduleName
+     * @param userId
+     * @return
+     */
+    @GetMapping("/data/datasource/treeForOtherProject")
+    public RespEntity<List<String>> getGrantedGroups(String moduleName, String userId) {
+        List<TBPermitPolicy> permitPolicyByName = authorizationService.findPermitPolicyByName("管理员", "编辑者");
+        List<String> permitIdList = new ArrayList<>();
+        for (TBPermitPolicy p : permitPolicyByName) {
+            permitIdList.add(p.getId());
+        }
+        List<TBAclDetail> resList = new ArrayList<>();
+        for (String s : permitIdList) {
+            resList.addAll(authorizationService.findByModulePermitUser(moduleName, s, userId));
+        }
+        if (resList.size() < 1) {
+            return new RespEntity(RespCode.SUCCESS, new ArrayList<>());
+        } else {
+            List<String> groupIdList = new ArrayList<>();
+            for (TBAclDetail d : resList) {
+                groupIdList.add(d.getGroupId());
+            }
+            return new RespEntity<>(RespCode.SUCCESS, groupIdList);
+        }
+    }
+
 
     /**
      * 解析Excel文件

@@ -22,7 +22,7 @@ eureka:
     service-url:
       defaultZone:  http://${eurekaServerIp}:8761/eureka/
 crypt:
-  seckey: broadtext
+  seckey: aaaaaaaaaaaaaaaaaaaaaaaa
 
 dataac:
   datasourceIp: 192.168.16.202

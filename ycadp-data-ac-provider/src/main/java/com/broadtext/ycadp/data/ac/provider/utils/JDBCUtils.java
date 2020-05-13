@@ -48,7 +48,7 @@ public class JDBCUtils {
     public JDBCUtils(TBDatasourceConfig tbDatasourceConfig){
         String decrypt = "";
         if(tbDatasourceConfig.getId() != null && !"".equals(tbDatasourceConfig.getId())){
-            decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), "broadtext");
+            decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), "aaaaaaaaaaaaaaaaaaaaaaaa");
         }else{
             decrypt = tbDatasourceConfig.getDatasourcePasswd();
         }

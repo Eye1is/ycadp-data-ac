@@ -58,7 +58,7 @@ public class JDBCUtils {
                 datasourceInner.setJdbcUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp()
                         + ":" + tbDatasourceConfig.getConnectionPort() + "/"
                         + tbDatasourceConfig.getSchemaDesc()
-                        + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC");//url
+                        + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai");//url
                 //验证连接有效与否的SQL,不同的数据配置不同
                 //检验连接是否有效的查询语句。如果数据库Driver支持ping()方法,
                 //则优先使用ping()方法进行检查,否则使用validationQuery查询进行检查。(Oracle jdbc Driver目前不支持ping方法)

@@ -104,6 +104,7 @@ public class JDBCUtils {
         }
         //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
         datasourceInner.setUser(tbDatasourceConfig.getDatasourceUserName());//用户名
+
         //配置初始化大小、最小、最大
 //        datasourceInner.setInitialSize(30);
 //        datasourceInner.setMaxActive(maxActive);
@@ -135,6 +136,13 @@ public class JDBCUtils {
 //        //打开PSCache,并且指定每个连接上PSCache的大小
 //        //只要maxPoolPreparedStatementPerConnectionSize>0,poolPreparedStatements就会被自动设定为true,参照druid的源码
 //        datasourceInner.setMaxPoolPreparedStatementPerConnectionSize(maxPoolPsPerConnSize);
+        datasourceInner.setNumHelperThreads(10);
+        datasourceInner.setMaxIdleTime(60);
+        datasourceInner.setAcquireRetryAttempts(3);
+        datasourceInner.setAcquireRetryDelay(300);
+        datasourceInner.setCheckoutTimeout(3000);
+        datasourceInner.setTestConnectionOnCheckin(true);
+        datasourceInner.setUnreturnedConnectionTimeout(15);
     }
 
     /**

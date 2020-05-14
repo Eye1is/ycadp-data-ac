@@ -46,4 +46,7 @@ public interface AuthorizationRepository extends BaseRepository<TBAclDetail, Str
 
     @Query(value = "SELECT * FROM T_B_ACL_DETAIL WHERE MODULAR_NAME=:moduleName and PERMIT_POLICY_ID=:permitId and ACCESSOR=:userId", nativeQuery = true)
     List<TBAclDetail> findAllByModulePermitUser(@Param("moduleName") String moduleName, @Param("permitId") String permitId, @Param("userId") String userId);
+
+    @Query(value = "SELECT * FROM T_B_ACL_DETAIL WHERE MODULAR_NAME=:moduleName and GROUP_ID=:groupId and ACCESSOR=:userId", nativeQuery = true)
+    List<TBAclDetail> findByModuleGroupIdUser(@Param("moduleName") String moduleName, @Param("groupId") String groupId, @Param("userId") String userId);
 }

@@ -21,8 +21,6 @@ import javax.crypto.spec.SecretKeySpec;
  * Aes加密
  */
 public class AesUtil {
-    private static final String KEY_ALGORITHM = "AES";
-    private static final String DEFAULT_CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding";//默认的加密算法
 
     /**
      * AES 加密操作
@@ -33,7 +31,7 @@ public class AesUtil {
      */
     public static String encrypt(String content, String secKey) {
         try {
-            return SecureUtil.aes(Objects.requireNonNull(getSecretKey(secKey)).getEncoded()).encryptHex(content);
+            return SecureUtil.aes(secKey.getBytes()).encryptHex(content);
         } catch (Exception ex) {
             Logger.getLogger(AesUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -50,7 +48,7 @@ public class AesUtil {
      */
     public static String decrypt(String content, String secKey) {
         try {
-            return SecureUtil.aes(Objects.requireNonNull(getSecretKey(secKey)).getEncoded()).decryptStr(content);
+            return SecureUtil.aes(secKey.getBytes()).decryptStr(content);
         } catch (Exception ex) {
             Logger.getLogger(AesUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -58,24 +56,24 @@ public class AesUtil {
         return null;
     }
 
-    /**
-     * 生成加密秘钥
-     *
-     * @return
-     */
-    private static SecretKeySpec getSecretKey(final String password) {
-        //返回生成指定算法密钥生成器的 KeyGenerator 对象
-        KeyGenerator kg = null;
-        try {
-            kg = KeyGenerator.getInstance(KEY_ALGORITHM);
-            //AES 要求密钥长度为 128
-            kg.init(128, new SecureRandom(password.getBytes()));
-            //生成一个密钥
-            SecretKey secretKey = kg.generateKey();
-            return new SecretKeySpec(secretKey.getEncoded(), KEY_ALGORITHM);// 转换为AES专用密钥
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(AesUtil.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
+//    /**
+//     * 生成加密秘钥
+//     *
+//     * @return
+//     */
+//    private static SecretKeySpec getSecretKey(final String password) {
+//        //返回生成指定算法密钥生成器的 KeyGenerator 对象
+//        KeyGenerator kg = null;
+//        try {
+//            kg = KeyGenerator.getInstance("AES");
+//            //AES 要求密钥长度为 128
+//            kg.init(128, new SecureRandom(password.getBytes()));
+//            //生成一个密钥
+//            SecretKey secretKey = kg.generateKey();
+//            return new SecretKeySpec(secretKey.getEncoded(), "AES");// 转换为AES专用密钥
+//        } catch (NoSuchAlgorithmException ex) {
+//            Logger.getLogger(AesUtil.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return null;
+//    }
 }

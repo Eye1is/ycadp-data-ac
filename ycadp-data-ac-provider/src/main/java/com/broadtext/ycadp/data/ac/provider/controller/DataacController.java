@@ -1266,8 +1266,8 @@ public class DataacController {
     @GetMapping("/data/datasource/sort/judgeForOtherModule")
     public RespEntity judgeSortingAuthForOtherModule(String currentGroupId, String targetGroupId, String moduleName) {
         PackageSortJudgeVo judgeVo = new PackageSortJudgeVo();
-//        String userId = CurrentUserUtils.getUser().getUserId();
-        String userId = "8a8080916d43ec07016d5d74da9a0110";
+        String userId = CurrentUserUtils.getUser().getUserId();
+//        String userId = "8a8080916d43ec07016d5d74da9a0110";
         List<TBPermitPolicy> permitPolicyByName = authorizationService.getList();
         String editPolicyId = "";
         String adminPolicyId = "";

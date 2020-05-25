@@ -1613,6 +1613,10 @@ public class DataacController {
                 String errorMessage = "";//拼接所有的错误信息
                 for (int n = 0; n < numberOfSheets; n++) {
                     sheet = wb.getSheetAt(n);
+                    rownum = sheet.getPhysicalNumberOfRows();
+                    if (rownum == 0) {
+                        continue;//忽略空sheet页
+                    }
                     sheetName = sheet.getSheetName();
                     String tableName=dataExcelService.findByIdAndSheetName(id, sheetName).getSheetTableName();
                     rownum = sheet.getPhysicalNumberOfRows();

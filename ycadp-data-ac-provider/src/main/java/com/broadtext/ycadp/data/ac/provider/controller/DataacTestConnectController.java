@@ -1,11 +1,14 @@
 package com.broadtext.ycadp.data.ac.provider.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.api.annotation.DecryptMethod;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -69,10 +72,22 @@ public class DataacTestConnectController {
             	resultMessage = map.get(key);
             	break;
             }
+            Map<String, Object> messageMap;
+            if (resultMessage.contains(":")) {
+                String message = StringUtils.substringBefore(resultMessage, ":");
+                String detail = StringUtils.substringAfter(resultMessage, ":");
+                messageMap = new HashMap<>();
+                messageMap.put("messageMap",message);
+                messageMap.put("detailMap",detail);
+            } else {
+                messageMap = new HashMap<>();
+                messageMap.put("messageMap",resultMessage);
+                messageMap.put("detailMap","");
+            }
             if(result) {
-            	respEntity=new RespEntity(RespCode.SUCCESS,resultMessage);
+            	respEntity=new RespEntity(RespCode.SUCCESS,messageMap);
             }else {
-            	respEntity=new RespEntity(RespCode.SUCCESS,resultMessage);
+            	respEntity=new RespEntity(RespCode.SUCCESS,messageMap);
             }
             return respEntity;
         }catch (Exception e){

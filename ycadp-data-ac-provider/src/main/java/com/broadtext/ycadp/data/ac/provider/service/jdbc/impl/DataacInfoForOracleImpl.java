@@ -336,15 +336,15 @@ public class DataacInfoForOracleImpl extends BaseServiceImpl<TBDatasourceConfig,
             System.out.println(e.getErrorCode());
             int errorCode = e.getErrorCode();
             if (errorCode == OracleCheckErrorCode.ERROR_CONNECTION) {
-                checkMap.put(false, "网络异常,IP地址或者端口有误");
+                checkMap.put(false, "网络异常,IP地址或者端口有误:"+e.getMessage());
             } else if (errorCode == OracleCheckErrorCode.ERROR_DATASOURCE) {
-                checkMap.put(false, "连接失败,错误的数据库名");
+                checkMap.put(false, "连接失败,错误的数据库名:"+e.getMessage());
             } else if (errorCode == OracleCheckErrorCode.ERROR_USERORPW) {
-                checkMap.put(false, "连接失败,用户名或密码错误");
+                checkMap.put(false, "连接失败,用户名或密码错误:"+e.getMessage());
             } else if (errorCode == OracleCheckErrorCode.ERROR_ACCESS) {
-                checkMap.put(false, "连接失败,无权访问");
+                checkMap.put(false, "连接失败,无权访问:"+e.getMessage());
             } else {
-                checkMap.put(false, "连接失败,系统错误");
+                checkMap.put(false, "连接失败,系统错误:"+e.getMessage());
             }
             return checkMap;
         } finally {

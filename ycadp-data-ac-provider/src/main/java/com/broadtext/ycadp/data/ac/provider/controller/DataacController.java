@@ -754,6 +754,9 @@ public class DataacController {
             } else {
                 dasource.setDatasourcePasswd(AesUtil.encrypt(datasourceConfig.getDatasourcePasswd(),secretKey));
             }
+            if (StringUtils.isEmpty(datasourceConfig.getCode())){
+                dasource.setCode("AC_"+System.currentTimeMillis());
+            }
             dasource.setDictSql(datasourceConfig.getDictSql());
             dasource.setRemark(datasourceConfig.getRemark());
             dasource.setSchemaDesc(datasourceConfig.getSchemaDesc());

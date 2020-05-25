@@ -59,4 +59,19 @@ public interface AuthorizationService {
      * @return
      */
     List<TBAclDetail> findByModulePermitUser(String moduleName, String permitId, String userId);
+
+    /**
+     *
+     * @return
+     */
+    List<TBPermitPolicy> getList();
+
+    /**
+     * 模块名 组id 用户id
+     * @param moduleName
+     * @param groupId
+     * @param userId
+     * @return
+     */
+    List<TBAclDetail> findByModuleGroupIdUser(String moduleName, String groupId, String userId);
 }

@@ -1214,6 +1214,99 @@ public class DataacController {
     }
 
     /**
+     * 拖动包权限校验
+     * @param currentGroupId
+     * @param targetGroupId
+     * @return
+     */
+    @GetMapping("/data/datasource/sort/judge")
+    public RespEntity judgeSortingAuth(String currentGroupId, String targetGroupId) {
+        PackageSortJudgeVo judgeVo = new PackageSortJudgeVo();
+        String userId = CurrentUserUtils.getUser().getUserId();
+//        String userId = "8a8080916d43ec07016d5d74da9a0110";
+        List<TBPermitPolicy> permitPolicyByName = authorizationService.getList();
+        String editPolicyId = "";
+        String adminPolicyId = "";
+        for (TBPermitPolicy p : permitPolicyByName) {
+            if (p.getName().equals("管理员")) {
+                adminPolicyId = p.getId();
+            } else if (p.getName().equals("编辑者")) {
+                editPolicyId = p.getId();
+            }
+        }
+        List<TBAclDetail> resList = new ArrayList<>();
+        if (currentGroupId.equals(targetGroupId)) {
+            resList = authorizationService.findByModuleGroupIdUser("dataac", currentGroupId, userId);
+            judgeVo.setMoveType("0");
+            if (resList.isEmpty()) {
+                judgeVo.setAuthFlag(false);
+            } else {
+                judgeVo.setAuthFlag(true);
+            }
+        } else {
+            judgeVo.setMoveType("1");
+            resList = authorizationService.findByModuleGroupIdUser("dataac", currentGroupId, userId);
+            List<String> currentGroupAuthIds = new ArrayList<>();
+            for (TBAclDetail d : resList) {
+                currentGroupAuthIds.add(d.getPermitPolicyId());
+            }
+            if (currentGroupAuthIds.contains(adminPolicyId) || currentGroupAuthIds.contains(editPolicyId)) {
+                judgeVo.setAuthFlag(true);
+            } else {
+                judgeVo.setAuthFlag(false);
+            }
+        }
+        return new RespEntity(RespCode.SUCCESS, judgeVo);
+    }
+
+    /**
+     * 拖动包权限校验（开放给其他模块）
+     * @param currentGroupId
+     * @param targetGroupId
+     * @param moduleName
+     * @return
+     */
+    @GetMapping("/data/datasource/sort/judgeForOtherModule")
+    public RespEntity judgeSortingAuthForOtherModule(String currentGroupId, String targetGroupId, String moduleName) {
+        PackageSortJudgeVo judgeVo = new PackageSortJudgeVo();
+        String userId = CurrentUserUtils.getUser().getUserId();
+//        String userId = "8a8080916d43ec07016d5d74da9a0110";
+        List<TBPermitPolicy> permitPolicyByName = authorizationService.getList();
+        String editPolicyId = "";
+        String adminPolicyId = "";
+        for (TBPermitPolicy p : permitPolicyByName) {
+            if (p.getName().equals("管理员")) {
+                adminPolicyId = p.getId();
+            } else if (p.getName().equals("编辑者")) {
+                editPolicyId = p.getId();
+            }
+        }
+        List<TBAclDetail> resList = new ArrayList<>();
+        if (currentGroupId.equals(targetGroupId)) {
+            resList = authorizationService.findByModuleGroupIdUser(moduleName, currentGroupId, userId);
+            judgeVo.setMoveType("0");
+            if (resList.isEmpty()) {
+                judgeVo.setAuthFlag(false);
+            } else {
+                judgeVo.setAuthFlag(true);
+            }
+        } else {
+            judgeVo.setMoveType("1");
+            resList = authorizationService.findByModuleGroupIdUser(moduleName, currentGroupId, userId);
+            List<String> currentGroupAuthIds = new ArrayList<>();
+            for (TBAclDetail d : resList) {
+                currentGroupAuthIds.add(d.getPermitPolicyId());
+            }
+            if (currentGroupAuthIds.contains(adminPolicyId) || currentGroupAuthIds.contains(editPolicyId)) {
+                judgeVo.setAuthFlag(true);
+            } else {
+                judgeVo.setAuthFlag(false);
+            }
+        }
+        return new RespEntity(RespCode.SUCCESS, judgeVo);
+    }
+
+    /**
      * 开放给其他项目 获取有权限的组id列表
      * @param moduleName
      * @param userId

@@ -1347,7 +1347,7 @@ public class DataacController {
     public Map<String, String> analysisExcel(MultipartFile multipartFile) {
         //配置我们的postgreSql数据库链接信息
         PostgreConfigVo pVo = new PostgreConfigVo();
-        pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
+        pVo.setUrl("jdbc:postgresql://192.168.16.202:5432/postgres")
                 .setUser("postgres")
                 .setPwd("postgres");
         //开始处理MultipartFile

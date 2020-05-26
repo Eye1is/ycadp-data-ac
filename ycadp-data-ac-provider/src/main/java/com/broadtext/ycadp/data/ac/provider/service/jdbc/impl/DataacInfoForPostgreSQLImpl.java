@@ -619,6 +619,6 @@ public class DataacInfoForPostgreSQLImpl extends BaseServiceImpl<TBDatasourceCon
 
     @Override
     public String getLimitString(String sql, int skipResults, int maxResults) throws Exception {
-        return null;
+        return sql + " limit " + maxResults + " offset " + skipResults + ";";
     }
 }

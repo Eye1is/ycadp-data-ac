@@ -4,6 +4,7 @@ import com.broadtext.ycadp.base.entity.ListPager;
 import com.broadtext.ycadp.base.enums.RespCode;
 import com.broadtext.ycadp.base.enums.RespEntity;
 import com.broadtext.ycadp.core.common.listquery.Criteria;
+import com.broadtext.ycadp.core.common.listquery.Restrictions;
 import com.broadtext.ycadp.data.ac.api.annotation.EncryptMethod;
 import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.*;
@@ -495,22 +496,22 @@ public class DataacController {
 
     /**
      * 查询导入记录列表
-     *
-     * @param datasourceId
+     * @param excelVo
+     * @param pager
      * @return
      */
     @GetMapping("/data/datasource/importrecord")
-    public RespEntity getImportRecord(String datasourceId, String isPage, ListPager<TBImportRecord> pager) {
+    public RespEntity getImportRecord(LinkedExcelVo excelVo, ListPager<TBImportRecord> pager) {
         RespEntity respEntity = null;
-        Criteria<TBImportRecord> criteria = new Criteria<>();
+        Criteria<TBImportRecord> criteria = packCriteria(excelVo);
         try {
             if (StringUtils.isEmpty(pager.getSort())) {
                 pager.setSort("createdTime,desc");
             }
             ListPager<TBImportRecord> resultPager = new ListPager<>();
-            if ("false".equals(isPage)) {
+            if ("false".equals(excelVo.getIsPage())) {
                 //不分页
-                List<TBImportRecord> listOrderByTime = importRecordService.getListOrderByTime(datasourceId);
+                List<TBImportRecord> listOrderByTime = importRecordService.getListByFilter(criteria, pager.getSort());
                 resultPager.setList(listOrderByTime);
                 resultPager.setPages(listOrderByTime.size());
                 resultPager.setPageSize(listOrderByTime.size());
@@ -518,9 +519,9 @@ public class DataacController {
                 respEntity = new RespEntity(RespCode.SUCCESS, resultPager);
             } else {
                 //分页
-//                pager = importRecordService.getListByFilter(criteria, pager);
-//                List<TBImportRecord> list = pager.getList();
-                List<TBImportRecord> list = importRecordService.getListOrderByTime(datasourceId);
+                pager = importRecordService.getListByFilter(criteria, pager);
+                List<TBImportRecord> list = pager.getList();
+//                List<TBImportRecord> list = importRecordService.getListOrderByTime(excelVo.getDatasourceId());
                 resultPager.setList(list);
                 resultPager.setPages(pager.getPages());
                 resultPager.setPageSize(pager.getPageSize());
@@ -535,6 +536,33 @@ public class DataacController {
         return respEntity;
     }
 
+    private Criteria<TBImportRecord> packCriteria(LinkedExcelVo excelVo) {
+        //分页查询
+        Criteria<TBImportRecord> c = new Criteria<>();
+        try {
+            //封装分页条件 Restrictions  Criteria  为自己封装类，非hibernate类
+            if (StringUtils.isNotEmpty(excelVo.getFileName())) {
+                c.add(Restrictions.like("fileName", excelVo.getFileName(), true));
+            }
+            if (StringUtils.isNotEmpty(excelVo.getDatasourceId())) {
+                c.add(Restrictions.like("datasourceId", excelVo.getDatasourceId(), true));
+            }
+            if (excelVo.getCreatedTime() != null && !"".equals(excelVo.getCreatedTime())) {
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                if (excelVo.getCreatedTime().split(",")[0] != null && !"".equals(excelVo.getCreatedTime().split(",")[0])) {
+                    Date startTime = formatter.parse(excelVo.getCreatedTime().split(",")[0]);
+                    c.add(Restrictions.gte("createdTime", startTime, true));
+                }
+                if (excelVo.getCreatedTime().split(",")[1] != null && !"".equals(excelVo.getCreatedTime().split(",")[1])) {
+                    Date endTime = formatter.parse(excelVo.getCreatedTime().split(",")[1]);
+                    c.add(Restrictions.lte("createdTime", endTime, true));
+                }
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return c;
+    }
 
     /**
      * 查询数据源列表

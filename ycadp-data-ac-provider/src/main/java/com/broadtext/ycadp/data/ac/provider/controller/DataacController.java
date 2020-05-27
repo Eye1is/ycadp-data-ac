@@ -547,6 +547,9 @@ public class DataacController {
             if (StringUtils.isNotEmpty(excelVo.getDatasourceId())) {
                 c.add(Restrictions.like("datasourceId", excelVo.getDatasourceId(), true));
             }
+            if (StringUtils.isNotEmpty(excelVo.getCreatedName())) {
+                c.add(Restrictions.like("createdName", excelVo.getCreatedName(), true));
+            }
             if (excelVo.getCreatedTime() != null && !"".equals(excelVo.getCreatedTime())) {
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 if (excelVo.getCreatedTime().split(",")[0] != null && !"".equals(excelVo.getCreatedTime().split(",")[0])) {

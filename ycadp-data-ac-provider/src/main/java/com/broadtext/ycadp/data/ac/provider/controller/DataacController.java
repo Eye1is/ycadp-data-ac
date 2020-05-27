@@ -1482,12 +1482,16 @@ public class DataacController {
 //                        insertSql += "),";
 //                    }
                     boolean blankJudgeFlag = false;
+                    Cell cell = null;
                     for (int i = 1; i < rownum; i++) {
                         tempInsertSql = "";
                         row = sheet.getRow(i);
+                        if (row == null) {
+                            continue;
+                        }
                         insertSql += "(";
                         for (int j = 0; j < column; j++) {
-                            Cell cell = row.getCell(j);
+                            cell = row.getCell(j);
                             if (cell != null) {
                                 if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
                                     if (HSSFDateUtil.isCellDateFormatted(cell)) {//日期型
@@ -1504,8 +1508,9 @@ public class DataacController {
                                 } else {//文本
                                     cellValue = cell.getRichStringCellValue().getString();
                                     if (cellValue.equals("")) {
-                                        blankJudgeFlag = true;
-                                        break;
+//                                        blankJudgeFlag = true;
+                                        cellValue = "-";
+//                                        break;
                                     }
                                     if (cellValue.contains("'")) {
                                         cellValue = cellValue.replace("'", "“");
@@ -1521,13 +1526,25 @@ public class DataacController {
 //                                }
 //                                insertSql += "'" + cellValue + "',";
                             } else {
-                                tempInsertSql += "'" + cellValue + "',";
+                                cell = secondRow.getCell(j);
+                                if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    if (HSSFDateUtil.isCellDateFormatted(cell)) {
+                                        tempInsertSql += "null,";
+                                    } else {
+                                        tempInsertSql += "'" + 0 + "',";
+                                    }
+                                } else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+                                    tempInsertSql += "'" + "',";
+                                } else {
+                                    tempInsertSql += "'" + "-" + "',";
+                                }
+//                                tempInsertSql += "'" + cellValue + "',";
                             }
                         }
-                        if (blankJudgeFlag) {
-                            errorMessage += "第" + String.valueOf(n + 1) + "个sheet中第" + String.valueOf(i + 1) + "行数据不符合规范！";
-                            break;
-                        }
+//                        if (blankJudgeFlag) {
+//                            errorMessage += "第" + String.valueOf(n + 1) + "个sheet中第" + String.valueOf(i + 1) + "行数据不符合规范！";
+//                            break;
+//                        }
                         insertSql += tempInsertSql;
                         insertSql = insertSql.substring(0, insertSql.length() - 1);
                         insertSql += "),";

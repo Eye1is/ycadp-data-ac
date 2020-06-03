@@ -21,14 +21,5 @@ eureka:
   client:
     service-url:
       defaultZone:  http://${eurekaServerIp}:8761/eureka/
-crypt:
-  seckey: aaaaaaaaaaaaaaaaaaaaaaaa
-
-dataac:
-  datasourceIp: 192.168.16.202
-  datasourcePort: 5432
-  schemaDesc: postgres
-  datasourceUserName: postgres
-  datasourcePasswd: postgres
 
 YCKafkaProject: yc.kafka.project

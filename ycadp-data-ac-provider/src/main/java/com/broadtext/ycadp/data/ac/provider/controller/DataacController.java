@@ -74,6 +74,8 @@ public class DataacController {
     private AuthorizationService authorizationService;
     @Value("${crypt.seckey}")
     private String secretKey;
+    @Value("${dataac.datasourceIp}")
+    private String datasourceIpConfig;
     @Autowired
     private RoleApi roleApi;
     /**
@@ -314,7 +316,7 @@ public class DataacController {
         TBDatasourceExcel dSource = dataExcelService.findByIdAndSheetName(id, sheetName);
         String sheetTableName = dSource.getSheetTableName();
         PostgreConfigVo pVo = new PostgreConfigVo();
-        pVo.setUrl("jdbc:postgresql://192.168.16.202:5432/postgres")
+        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
                 .setUser("postgres")
                 .setPwd("postgres");
         Connection connection = null;
@@ -412,7 +414,7 @@ public class DataacController {
      */
     public int getDataCount(String sql) {
         PostgreConfigVo pVo = new PostgreConfigVo();
-        pVo.setUrl("jdbc:postgresql://192.168.16.202:5432/postgres")
+        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
                 .setUser("postgres")
                 .setPwd("postgres");
         Connection connection;
@@ -461,7 +463,7 @@ public class DataacController {
                 }
                 dropTableSql = dropTableSql.substring(0, dropTableSql.length() - 1);
                 PostgreConfigVo pVo = new PostgreConfigVo();
-                pVo.setUrl("jdbc:postgresql://192.168.16.202:5432/postgres")
+                pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
                         .setUser("postgres")
                         .setPwd("postgres");
                 boolean b = excelToolService.generateDataInPostgre(pVo, dropTableSql);
@@ -848,7 +850,7 @@ public class DataacController {
                 }
                 dropTableSql = dropTableSql.substring(0, dropTableSql.length() - 1);
                 PostgreConfigVo pVo = new PostgreConfigVo();
-                pVo.setUrl("jdbc:postgresql://192.168.16.202:5432/postgres")
+                pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
                         .setUser("postgres")
                         .setPwd("postgres");
                 boolean b = excelToolService.generateDataInPostgre(pVo, dropTableSql);
@@ -927,7 +929,7 @@ public class DataacController {
             }
             cleanTableSql = cleanTableSql.substring(0, cleanTableSql.length() - 1);
             PostgreConfigVo pVo = new PostgreConfigVo();
-            pVo.setUrl("jdbc:postgresql://192.168.16.202:5432/postgres")
+            pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
                     .setUser("postgres")
                     .setPwd("postgres");
             boolean b = excelToolService.generateDataInPostgre(pVo, cleanTableSql);
@@ -1378,7 +1380,7 @@ public class DataacController {
     public Map<String, String> analysisExcel(MultipartFile multipartFile) {
         //配置我们的postgreSql数据库链接信息
         PostgreConfigVo pVo = new PostgreConfigVo();
-        pVo.setUrl("jdbc:postgresql://192.168.16.202:5432/postgres")
+        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
                 .setUser("postgres")
                 .setPwd("postgres");
         //开始处理MultipartFile
@@ -1626,7 +1628,7 @@ public class DataacController {
     public Map<String, String> analysisExcelUpdate(MultipartFile multipartFile, String id) {
         //配置我们的postgreSql数据库链接信息
         PostgreConfigVo pVo = new PostgreConfigVo();
-        pVo.setUrl("jdbc:postgresql://192.168.16.202:5432/postgres")
+        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
                 .setUser("postgres")
                 .setPwd("postgres");
         //开始处理MultipartFile

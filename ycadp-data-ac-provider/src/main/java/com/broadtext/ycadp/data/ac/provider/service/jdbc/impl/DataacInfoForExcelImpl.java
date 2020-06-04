@@ -10,6 +10,7 @@ import com.broadtext.ycadp.data.ac.provider.repository.DataacRepository;
 import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.provider.utils.JDBCUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,8 @@ import java.util.*;
 public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, String, DataacRepository> implements DataacInfoService {
     @Autowired
     private DataacRepository dataacRepository;
+    @Value("${dataac.datasourceIp}")
+    private String datasourceIpConfig;
 
     @Override
     public List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig) throws Exception {
@@ -36,7 +39,7 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
     @Override
     public List getAllData(TBDatasourceConfig tbDatasourceConfig, String sql) throws Exception {
         System.out.println(" === " + sql);
-        tbDatasourceConfig.setConnectionIp("192.168.16.202");
+        tbDatasourceConfig.setConnectionIp(datasourceIpConfig);
         tbDatasourceConfig.setConnectionPort(5432);
         tbDatasourceConfig.setSchemaDesc("postgres");
         tbDatasourceConfig.setDatasourceUserName("postgres");
@@ -87,7 +90,7 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
         if (isNotNull) {
             TBDatasourceConfig tbDatasourceConfig = new TBDatasourceConfig();
             tbDatasourceConfig.setDatasourceType(DataSourceType.EXCEL);
-            tbDatasourceConfig.setConnectionIp("192.168.16.202");
+            tbDatasourceConfig.setConnectionIp(datasourceIpConfig);
             tbDatasourceConfig.setConnectionPort(5432);
             tbDatasourceConfig.setSchemaDesc("postgres");
             tbDatasourceConfig.setDatasourceUserName("postgres");
@@ -162,7 +165,7 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
 
     @Override
     public Integer getDataCount(TBDatasourceConfig tbDatasourceConfig, String sql) throws Exception {
-        tbDatasourceConfig.setConnectionIp("192.168.16.202");
+        tbDatasourceConfig.setConnectionIp(datasourceIpConfig);
         tbDatasourceConfig.setConnectionPort(5432);
         tbDatasourceConfig.setSchemaDesc("postgres");
         tbDatasourceConfig.setDatasourceUserName("postgres");
@@ -201,7 +204,7 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
 //            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
             TBDatasourceConfig tbDatasourceConfig = new TBDatasourceConfig();
             tbDatasourceConfig.setDatasourceType(DataSourceType.EXCEL);
-            tbDatasourceConfig.setConnectionIp("192.168.16.202");
+            tbDatasourceConfig.setConnectionIp(datasourceIpConfig);
             tbDatasourceConfig.setConnectionPort(5432);
             tbDatasourceConfig.setSchemaDesc("postgres");
             tbDatasourceConfig.setDatasourceUserName("postgres");
@@ -241,7 +244,7 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
 //            TBDatasourceConfig tbDatasourceConfig = dataacRepository.getOne(datasourceId);
             TBDatasourceConfig tbDatasourceConfig = new TBDatasourceConfig();
             tbDatasourceConfig.setDatasourceType(DataSourceType.EXCEL);
-            tbDatasourceConfig.setConnectionIp("192.168.16.202");
+            tbDatasourceConfig.setConnectionIp(datasourceIpConfig);
             tbDatasourceConfig.setConnectionPort(5432);
             tbDatasourceConfig.setSchemaDesc("postgres");
             tbDatasourceConfig.setDatasourceUserName("postgres");

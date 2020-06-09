@@ -30,6 +30,15 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
     private DataacRepository dataacRepository;
     @Value("${dataac.datasourceIp}")
     private String datasourceIpConfig;
+    @Value("${dataac.datasourcePort}")
+    private String datasourcePort;
+    @Value("${dataac.schemaDesc}")
+    private String schemaDesc;
+    @Value("${dataac.datasourceUserName}")
+    private String datasourceUserName;
+    @Value("${dataac.datasourcePasswd}")
+    private String datasourcePasswd;
+
 
     @Override
     public List<String> getAllTables(TBDatasourceConfig tbDatasourceConfig) throws Exception {
@@ -40,10 +49,10 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
     public List getAllData(TBDatasourceConfig tbDatasourceConfig, String sql) throws Exception {
         System.out.println(" === " + sql);
         tbDatasourceConfig.setConnectionIp(datasourceIpConfig);
-        tbDatasourceConfig.setConnectionPort(5432);
-        tbDatasourceConfig.setSchemaDesc("postgres");
-        tbDatasourceConfig.setDatasourceUserName("postgres");
-        tbDatasourceConfig.setDatasourcePasswd("postgres");
+        tbDatasourceConfig.setConnectionPort(datasourcePort == null || "".equals(datasourcePort) ? 5432 : Integer.parseInt(datasourcePort));
+        tbDatasourceConfig.setSchemaDesc(schemaDesc);
+        tbDatasourceConfig.setDatasourceUserName(datasourceUserName);
+        tbDatasourceConfig.setDatasourcePasswd(datasourcePasswd);
         JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
         Connection connection;
         PreparedStatement ps = null;
@@ -91,10 +100,10 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
             TBDatasourceConfig tbDatasourceConfig = new TBDatasourceConfig();
             tbDatasourceConfig.setDatasourceType(DataSourceType.EXCEL);
             tbDatasourceConfig.setConnectionIp(datasourceIpConfig);
-            tbDatasourceConfig.setConnectionPort(5432);
-            tbDatasourceConfig.setSchemaDesc("postgres");
-            tbDatasourceConfig.setDatasourceUserName("postgres");
-            tbDatasourceConfig.setDatasourcePasswd("postgres");
+            tbDatasourceConfig.setConnectionPort(datasourcePort == null || "".equals(datasourcePort) ? 5432 : Integer.parseInt(datasourcePort));
+            tbDatasourceConfig.setSchemaDesc(schemaDesc);
+            tbDatasourceConfig.setDatasourceUserName(datasourceUserName);
+            tbDatasourceConfig.setDatasourcePasswd(datasourcePasswd);
             JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
             Connection connection;
             PreparedStatement ps = null;
@@ -166,10 +175,10 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
     @Override
     public Integer getDataCount(TBDatasourceConfig tbDatasourceConfig, String sql) throws Exception {
         tbDatasourceConfig.setConnectionIp(datasourceIpConfig);
-        tbDatasourceConfig.setConnectionPort(5432);
-        tbDatasourceConfig.setSchemaDesc("postgres");
-        tbDatasourceConfig.setDatasourceUserName("postgres");
-        tbDatasourceConfig.setDatasourcePasswd("postgres");
+        tbDatasourceConfig.setConnectionPort(datasourcePort == null || "".equals(datasourcePort) ? 5432 : Integer.parseInt(datasourcePort));
+        tbDatasourceConfig.setSchemaDesc(schemaDesc);
+        tbDatasourceConfig.setDatasourceUserName(datasourceUserName);
+        tbDatasourceConfig.setDatasourcePasswd(datasourcePasswd);
         JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
         Connection connection;
         PreparedStatement ps = null;
@@ -205,10 +214,10 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
             TBDatasourceConfig tbDatasourceConfig = new TBDatasourceConfig();
             tbDatasourceConfig.setDatasourceType(DataSourceType.EXCEL);
             tbDatasourceConfig.setConnectionIp(datasourceIpConfig);
-            tbDatasourceConfig.setConnectionPort(5432);
-            tbDatasourceConfig.setSchemaDesc("postgres");
-            tbDatasourceConfig.setDatasourceUserName("postgres");
-            tbDatasourceConfig.setDatasourcePasswd("postgres");
+            tbDatasourceConfig.setConnectionPort(datasourcePort == null || "".equals(datasourcePort) ? 5432 : Integer.parseInt(datasourcePort));
+            tbDatasourceConfig.setSchemaDesc(schemaDesc);
+            tbDatasourceConfig.setDatasourceUserName(datasourceUserName);
+            tbDatasourceConfig.setDatasourcePasswd(datasourcePasswd);
             JDBCUtils jdbcUtils = new JDBCUtils(tbDatasourceConfig);
             Connection connection;
             PreparedStatement ps = null;
@@ -245,10 +254,10 @@ public class DataacInfoForExcelImpl extends BaseServiceImpl<TBDatasourceConfig, 
             TBDatasourceConfig tbDatasourceConfig = new TBDatasourceConfig();
             tbDatasourceConfig.setDatasourceType(DataSourceType.EXCEL);
             tbDatasourceConfig.setConnectionIp(datasourceIpConfig);
-            tbDatasourceConfig.setConnectionPort(5432);
-            tbDatasourceConfig.setSchemaDesc("postgres");
-            tbDatasourceConfig.setDatasourceUserName("postgres");
-            tbDatasourceConfig.setDatasourcePasswd("postgres");
+            tbDatasourceConfig.setConnectionPort(datasourcePort == null || "".equals(datasourcePort) ? 5432 : Integer.parseInt(datasourcePort));
+            tbDatasourceConfig.setSchemaDesc(schemaDesc);
+            tbDatasourceConfig.setDatasourceUserName(datasourceUserName);
+            tbDatasourceConfig.setDatasourcePasswd(datasourcePasswd);
 //            PostgreConfigVo pVo = new PostgreConfigVo();
 //            pVo.setUrl("jdbc:postgresql://192.168.16.171:5432/postgres")
 //                    .setUser("postgres")

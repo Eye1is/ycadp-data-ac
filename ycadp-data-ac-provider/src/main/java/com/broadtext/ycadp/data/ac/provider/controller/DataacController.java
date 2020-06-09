@@ -76,6 +76,14 @@ public class DataacController {
     private String secretKey;
     @Value("${dataac.datasourceIp}")
     private String datasourceIpConfig;
+    @Value("${dataac.datasourcePort}")
+    private String datasourcePort;
+    @Value("${dataac.schemaDesc}")
+    private String schemaDesc;
+    @Value("${dataac.datasourceUserName}")
+    private String datasourceUserName;
+    @Value("${dataac.datasourcePasswd}")
+    private String datasourcePasswd;
     @Autowired
     private RoleApi roleApi;
     /**
@@ -316,9 +324,9 @@ public class DataacController {
         TBDatasourceExcel dSource = dataExcelService.findByIdAndSheetName(id, sheetName);
         String sheetTableName = dSource.getSheetTableName();
         PostgreConfigVo pVo = new PostgreConfigVo();
-        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
-                .setUser("postgres")
-                .setPwd("postgres");
+        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":" + datasourcePort + "/" + schemaDesc)
+                .setUser(datasourceUserName)
+                .setPwd(datasourcePasswd);
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -414,9 +422,9 @@ public class DataacController {
      */
     public int getDataCount(String sql) {
         PostgreConfigVo pVo = new PostgreConfigVo();
-        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
-                .setUser("postgres")
-                .setPwd("postgres");
+        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":" + datasourcePort + "/" + schemaDesc)
+                .setUser(datasourceUserName)
+                .setPwd(datasourcePasswd);
         Connection connection;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -463,9 +471,9 @@ public class DataacController {
                 }
                 dropTableSql = dropTableSql.substring(0, dropTableSql.length() - 1);
                 PostgreConfigVo pVo = new PostgreConfigVo();
-                pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
-                        .setUser("postgres")
-                        .setPwd("postgres");
+                pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":" + datasourcePort + "/" + schemaDesc)
+                        .setUser(datasourceUserName)
+                        .setPwd(datasourcePasswd);
                 boolean b = excelToolService.generateDataInPostgre(pVo, dropTableSql);
                 //再删除原有的映射关系和excel数据
                 dataExcelService.deleteByDatasourceId(id);
@@ -850,9 +858,9 @@ public class DataacController {
                 }
                 dropTableSql = dropTableSql.substring(0, dropTableSql.length() - 1);
                 PostgreConfigVo pVo = new PostgreConfigVo();
-                pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
-                        .setUser("postgres")
-                        .setPwd("postgres");
+                pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":" + datasourcePort + "/" + schemaDesc)
+                        .setUser(datasourceUserName)
+                        .setPwd(datasourcePasswd);
                 boolean b = excelToolService.generateDataInPostgre(pVo, dropTableSql);
                 //再删除原有的映射关系和excel数据
                 dataExcelService.deleteByDatasourceId(id);
@@ -929,9 +937,9 @@ public class DataacController {
             }
             cleanTableSql = cleanTableSql.substring(0, cleanTableSql.length() - 1);
             PostgreConfigVo pVo = new PostgreConfigVo();
-            pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
-                    .setUser("postgres")
-                    .setPwd("postgres");
+            pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":" + datasourcePort + "/" + schemaDesc)
+                    .setUser(datasourceUserName)
+                    .setPwd(datasourcePasswd);
             boolean b = excelToolService.generateDataInPostgre(pVo, cleanTableSql);
 //            //再删除原有的映射关系和excel数据
 //            dataExcelService.deleteByDatasourceId(id);
@@ -1380,9 +1388,9 @@ public class DataacController {
     public Map<String, String> analysisExcel(MultipartFile multipartFile) {
         //配置我们的postgreSql数据库链接信息
         PostgreConfigVo pVo = new PostgreConfigVo();
-        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
-                .setUser("postgres")
-                .setPwd("postgres");
+        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":" + datasourcePort + "/" + schemaDesc)
+                .setUser(datasourceUserName)
+                .setPwd(datasourcePasswd);
         //开始处理MultipartFile
         File file = null;
         Map<String, String> headerValue = new LinkedHashMap<>(); //放表头数据Map,带单元格格式
@@ -1533,11 +1541,31 @@ public class DataacController {
                                         tempInsertSql += "'" + format + "',";
                                     } else {//数值型
                                         double numericCellValue = cell.getNumericCellValue();
-                                        tempInsertSql += "'" + numericCellValue + "',";
+                                        String value = String.valueOf(numericCellValue);
+                                        if(value != null && value.length() > 2){
+                                            String checkValue = value.substring(value.length() - 2,value.length());
+                                            if(checkValue != null && checkValue.equals(".0")){
+                                                value = value.substring(0,value.length()-2);
+                                            }
+                                            tempInsertSql += "'" + value + "',";
+                                        }else{
+                                            tempInsertSql += "'" + numericCellValue + "',";
+                                        }
+//                                        tempInsertSql += "'" + numericCellValue + "',";
                                     }
                                 } else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
                                     double formulaCellValue = cell.getNumericCellValue();
-                                    tempInsertSql += "'" + formulaCellValue + "',";
+                                    String value = String.valueOf(formulaCellValue);
+                                    if(value != null && value.length() > 2){
+                                        String checkValue = value.substring(value.length() - 2,value.length());
+                                        if(checkValue != null && checkValue.equals(".0")){
+                                            value = value.substring(0,value.length()-2);
+                                        }
+                                        tempInsertSql += "'" + value + "',";
+                                    }else{
+                                        tempInsertSql += "'" + formulaCellValue + "',";
+                                    }
+//                                    tempInsertSql += "'" + formulaCellValue + "',";
                                 } else {//文本
                                     cellValue = cell.getRichStringCellValue().getString();
 //                                    if (cellValue.equals("")) {
@@ -1548,6 +1576,14 @@ public class DataacController {
                                     if (cellValue.contains("'")) {
                                         cellValue = cellValue.replace("'", "“");
                                     }
+
+                                    if(cellValue != null && cellValue.length() > 2){
+                                        String checkValue = cellValue.substring(cellValue.length() - 2,cellValue.length());
+                                        if(checkValue != null && checkValue.equals(".0")){
+                                            cellValue = cellValue.substring(0,cellValue.length()-2);
+                                        }
+                                    }
+
                                     tempInsertSql += "'" + cellValue + "',";
                                 }
 //                                cell.setCellType(Cell.CELL_TYPE_STRING);
@@ -1628,9 +1664,9 @@ public class DataacController {
     public Map<String, String> analysisExcelUpdate(MultipartFile multipartFile, String id) {
         //配置我们的postgreSql数据库链接信息
         PostgreConfigVo pVo = new PostgreConfigVo();
-        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":5432/postgres")
-                .setUser("postgres")
-                .setPwd("postgres");
+        pVo.setUrl("jdbc:postgresql://" + datasourceIpConfig + ":" + datasourcePort + "/" + schemaDesc)
+                .setUser(datasourceUserName)
+                .setPwd(datasourcePasswd);
         //开始处理MultipartFile
         File file = null;
         Map<String, String> sheetAndTableName = new HashMap<>();//放最终返回的执行结果状态
@@ -1690,11 +1726,33 @@ public class DataacController {
                                         tempInsertSql += "'" + format + "',";
                                     } else {//数值型
                                         double numericCellValue = cell.getNumericCellValue();
-                                        tempInsertSql += "'" + numericCellValue + "',";
+                                        //如果值内容后两位为.0，截取掉
+                                        String value = String.valueOf(numericCellValue);
+                                        if(value != null && value.length() > 2){
+                                            String checkValue = value.substring(value.length() - 2,value.length());
+                                            if(checkValue != null && checkValue.equals(".0")){
+                                                value = value.substring(0,value.length()-2);
+                                            }
+                                            tempInsertSql += "'" + value + "',";
+                                        }else{
+                                            tempInsertSql += "'" + numericCellValue + "',";
+                                        }
+//                                        tempInsertSql += "'" + numericCellValue + "',";
                                     }
                                 } else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
                                     double formulaCellValue = cell.getNumericCellValue();
-                                    tempInsertSql += "'" + formulaCellValue + "',";
+                                    //如果值内容后两位为.0，截取掉
+                                    String value = String.valueOf(formulaCellValue);
+                                    if(value != null && value.length() > 2){
+                                        String checkValue = value.substring(value.length() - 2,value.length());
+                                        if(checkValue != null && checkValue.equals(".0")){
+                                            value = value.substring(0,value.length()-2);
+                                        }
+                                        tempInsertSql += "'" + value + "',";
+                                    }else{
+                                        tempInsertSql += "'" + formulaCellValue + "',";
+                                    }
+//                                    tempInsertSql += "'" + formulaCellValue + "',";
                                 } else {//文本
                                     cellValue = cell.getRichStringCellValue().getString();
 //                                    if (cellValue.equals("")) {
@@ -1703,6 +1761,13 @@ public class DataacController {
 //                                    }
                                     if (cellValue.contains("'")) {
                                         cellValue = cellValue.replace("'", "“");
+                                    }
+                                    //如果值内容后两位为.0，截取掉
+                                    if(cellValue != null && cellValue.length() > 2){
+                                        String checkValue = cellValue.substring(cellValue.length() - 2,cellValue.length());
+                                        if(checkValue != null && checkValue.equals(".0")){
+                                            cellValue = cellValue.substring(0,cellValue.length()-2);
+                                        }
                                     }
                                     tempInsertSql += "'" + cellValue + "',";
                                 }

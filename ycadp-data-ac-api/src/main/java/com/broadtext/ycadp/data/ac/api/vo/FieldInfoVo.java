@@ -27,6 +27,10 @@ public class FieldInfoVo {
     private java.lang.String treeId;
 
     private java.lang.String treeType;
+
+    private java.lang.String tableName;
+
+    private java.lang.String tableComment;
 }
 
 

@@ -21,6 +21,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collector;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * MYSQL数据源连接的具体实现
@@ -247,6 +250,9 @@ public class DataacInfoForMySQLImpl extends BaseServiceImpl<TBDatasourceConfig, 
             Connection connection;
             PreparedStatement ps = null;
             ResultSet rs = null;
+
+            PreparedStatement psTableName = null;
+            ResultSet rsTableName = null;
             try {
                 connection = jdbcUtils.getConnection();
                 ps = connection.prepareStatement("SHOW FULL FIELDS FROM " + table);
@@ -260,18 +266,36 @@ public class DataacInfoForMySQLImpl extends BaseServiceImpl<TBDatasourceConfig, 
                     field.setFieldDesign(rs.getString(9));
                     list.add(field);
                 }
+
+
+                psTableName = connection.prepareStatement("SELECT TABLE_NAME,TABLE_COMMENT FROM information_schema.TABLES WHERE table_schema= '" + tbDatasourceConfig.getSchemaDesc() +"' AND TABLE_NAME = '"+ table+"'");
+                rsTableName = psTableName.executeQuery();
+                List<FieldInfoVo> listTable = new ArrayList<FieldInfoVo>();
+                while (rsTableName.next()) {
+                    field = new FieldInfoVo();
+                    field.setTableName(rsTableName.getString(1));
+                    field.setTableComment(rsTableName.getString(2));
+                    listTable.add(field);
+                }
+                if(listTable.size()>0 ){
+                    list.parallelStream().forEach(item->{
+                        item.setTableComment(listTable.get(0).getTableComment());
+                        item.setTableName(listTable.get(0).getTableName());
+                    });
+                }
                 return list;
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 JdbcUtils.closeResultSet(rs);
                 JdbcUtils.closeStatement(ps);
+                JdbcUtils.closeResultSet(rsTableName);
+                JdbcUtils.closeStatement(psTableName);
                 jdbcUtils.close();
             }
         }
         return null;
     }
-
     @Override
     public void crateTable(String datasourceId, String sql) throws Exception {
 

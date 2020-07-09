@@ -872,7 +872,7 @@ public class DataacController {
                     return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, analysisMap.get("errorValue"));
                 } else if (analysisMap.containsKey("exceptionValue")) {
                     System.out.println("解析excel文件过程出现异常！！");
-                    return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！");
+                    return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！表头存在空数据或单元格数据类型不匹配！");
                 }
                 dasource.setDatasourceName(infoVo.getDatasourceName())
                         .setRemark(infoVo.getRemark())
@@ -952,7 +952,7 @@ public class DataacController {
                 return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, analysisMap.get("errorValue"));
             } else if (analysisMap.containsKey("exceptionValue")) {
                 System.out.println("解析excel文件过程出现异常！！");
-                return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！");
+                return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！!");
             }
             //上传新excel文件到fastdfs
             String fileKey = "";
@@ -1788,11 +1788,15 @@ public class DataacController {
                     }
                     insertSql = insertSql.substring(0, insertSql.length() - 1);
                     System.out.println("----------插入数据sql为：" + insertSql);
-                    dataSqlFlag = excelToolService.generateDataInPostgre(pVo, insertSql);
+//                    dataSqlFlag = excelToolService.generateDataInPostgre(pVo, insertSql);
+                    Map<String,Object> rMap = excelToolService.generateDataInPostgreMessage(pVo,insertSql);
+                    dataSqlFlag = (boolean) rMap.get("check");
+                    String message = (String) rMap.get("message");
+
                     if (dataSqlFlag) {
                         tableDataSuccessValue += 1;
                     } else {
-                        errorMessage += "第" + String.valueOf(tableDataSuccessValue + 1) + "个sheet插入数据失败\n";
+                        errorMessage += "第" + String.valueOf(tableDataSuccessValue + 1) + "个sheet插入数据失败;sql错误信息：" + message + "\n";
                         break;
                     }
                 }

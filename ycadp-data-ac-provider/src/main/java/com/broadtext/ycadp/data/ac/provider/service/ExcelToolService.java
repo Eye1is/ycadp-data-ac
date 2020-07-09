@@ -3,6 +3,7 @@ package com.broadtext.ycadp.data.ac.provider.service;
 import com.broadtext.ycadp.data.ac.api.vo.PostgreConfigVo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 解析excel相关的方法服务
@@ -36,6 +37,14 @@ public interface ExcelToolService {
      * @return
      */
     boolean generateDataInPostgre(PostgreConfigVo pVo, String sql);
+
+    /**
+     * 在postgre中执行sql（获取错误信息）
+     * @param pVo
+     * @param sql
+     * @return
+     */
+    Map<String,Object> generateDataInPostgreMessage(PostgreConfigVo pVo, String sql);
 
     /**
      * 在postgre中生成表头

@@ -12,7 +12,9 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Service;
 
 import java.sql.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -182,6 +184,63 @@ public class ExcelToolServiceImpl implements ExcelToolService {
             }
         }
         return true;
+    }
+
+    @Override
+    public Map<String, Object> generateDataInPostgreMessage(PostgreConfigVo pVo, String sql) {
+        Map<String,Object> resultMap = new HashMap<>();
+        boolean check = true;
+        String message = "";
+        Connection coon = null;
+        ResultSet rs = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.postgresql.Driver");
+            coon = DriverManager.getConnection(pVo.getUrl(), pVo.getUser(), pVo.getPwd());
+            coon.setAutoCommit(false);
+            System.out.println("开启postgre数据库成功");
+            stmt = coon.createStatement();
+            stmt.executeUpdate(sql);
+            stmt.close();
+            coon.commit();
+            coon.close();
+        } catch (ClassNotFoundException e) {
+            System.out.println("装载jdbc驱动失败");
+            e.printStackTrace();
+            message = e.getMessage();
+            try {
+                coon.rollback();//回滚
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+                message = e1.getMessage();
+            }
+            check = false;
+        } catch (SQLException e) {
+            System.out.println("无法连接数据库");
+            e.printStackTrace();
+            message = e.getMessage();
+            try {
+                coon.rollback();//回滚
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+                message = e1.getMessage();
+            }
+            check = false;
+        } finally {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(stmt);
+            if (coon != null) {
+                try {
+                    coon.close();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                    message = e1.getMessage();
+                }
+            }
+        }
+        resultMap.put("check",check);
+        resultMap.put("message",message);
+        return resultMap;
     }
 
     @Override

@@ -259,7 +259,7 @@ public class DataacController {
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, analysisMap.get("errorValue"));
         } else if (analysisMap.containsKey("exceptionValue")) {
             System.out.println("解析excel文件过程出现异常！！");
-            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！");
+            return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！！表头存在空数据或单元格数据类型不匹配！");
         }
         TBDatasourceConfig datasourceConfig = new TBDatasourceConfig();
         datasourceConfig.setDatasourceName(checkDataSourceName(infoVo.getDatasourceName(), 0))
@@ -952,7 +952,7 @@ public class DataacController {
                 return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, analysisMap.get("errorValue"));
             } else if (analysisMap.containsKey("exceptionValue")) {
                 System.out.println("解析excel文件过程出现异常！！");
-                return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！!");
+                return new RespEntity(DataacRespCode.DATAAC_RESP_CODE, "解析excel文件过程出现异常！!表头为空或数据类型不匹配！");
             }
             //上传新excel文件到fastdfs
             String fileKey = "";
@@ -1617,13 +1617,13 @@ public class DataacController {
                         tableSuccessValue += 1;
                         sheetAndTableName.put(sheetName, tableName);
                     } else {
-                        errorMessage += "第" + String.valueOf(tableSuccessValue + 1) + "个sheet建表失败\n";
+                        errorMessage += "第" + String.valueOf(tableSuccessValue + 1) + "个sheet建表失败,请检查表头是否为空，单元格数据类型是否匹配\n";
                         break;
                     }
                     if (dataSqlFlag) {
                         tableDataSuccessValue += 1;
                     } else {
-                        errorMessage += "第" + String.valueOf(tableDataSuccessValue + 1) + "个sheet建表之后插入数据失败\n";
+                        errorMessage += "第" + String.valueOf(tableDataSuccessValue + 1) + "个sheet建表之后插入数据失败，请检查数据类型是否匹配！\n";
                         break;
                     }
                 }
@@ -1650,7 +1650,7 @@ public class DataacController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            sheetAndTableName.put("exceptionValue", e.getMessage());
+            sheetAndTableName.put("exceptionValue", e.getMessage() + "程序报错！");
         }
         return sheetAndTableName;
     }
@@ -1796,7 +1796,7 @@ public class DataacController {
                     if (dataSqlFlag) {
                         tableDataSuccessValue += 1;
                     } else {
-                        errorMessage += "第" + String.valueOf(tableDataSuccessValue + 1) + "个sheet插入数据失败;sql错误信息：" + message + "\n";
+                        errorMessage += "第" + String.valueOf(tableDataSuccessValue + 1) + "个sheet插入数据失败;sql错误信息：" + message + "，请检查数据类型是否匹配！\n";
                         break;
                     }
                 }

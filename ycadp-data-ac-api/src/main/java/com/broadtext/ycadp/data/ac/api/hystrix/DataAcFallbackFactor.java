@@ -8,6 +8,7 @@ import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.TBDatasourceConfigVo;
+import com.broadtext.ycadp.data.ac.api.vo.TreeGroupVo;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -108,6 +109,11 @@ public class DataAcFallbackFactor implements FallbackFactory<DataAcApi> {
 
             @Override
             public RespEntity<List<String>> getGrantedGroups(String moduleName, String userId) {
+                return null;
+            }
+
+            @Override
+            public RespEntity<List<TreeGroupVo>> getTreeDataResources() {
                 return null;
             }
         };

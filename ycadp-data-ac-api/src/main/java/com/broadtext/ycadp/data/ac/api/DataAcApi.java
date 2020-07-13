@@ -8,6 +8,7 @@ import com.broadtext.ycadp.data.ac.api.vo.DatasourceDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictMapVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.TBDatasourceConfigVo;
+import com.broadtext.ycadp.data.ac.api.vo.TreeGroupVo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -171,4 +172,8 @@ public interface DataAcApi {
      */
     @GetMapping("/data/datasource/treeForOtherProject")
     RespEntity<List<String>> getGrantedGroups(@RequestParam(value = "moduleName") String moduleName, @RequestParam(value = "userId") String userId);
+
+
+    @GetMapping("/data/treeDatasource")
+    RespEntity<List<TreeGroupVo>> getTreeDataResources();
 }

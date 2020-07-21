@@ -29,6 +29,10 @@ public final class DataSourceType {
      */
     public static final String DB2 = "3";
     /**
+     * 常量:SQLServer
+     */
+    public static final String SQLServer = "4";
+    /**
      * 常量:EXCEL
      */
     public static final String EXCEL = "14";

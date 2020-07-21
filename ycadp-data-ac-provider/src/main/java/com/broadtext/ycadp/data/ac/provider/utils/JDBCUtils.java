@@ -12,6 +12,7 @@ import com.broadtext.ycadp.data.ac.api.constants.DataSourceType;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -53,55 +54,7 @@ public class JDBCUtils {
             decrypt = tbDatasourceConfig.getDatasourcePasswd();
         }
 //        String decrypt = AesUtil.decrypt(tbDatasourceConfig.getDatasourcePasswd(), "broadtext");
-        switch(tbDatasourceConfig.getDatasourceType()){
-            case DataSourceType.MYSQL:
-                datasourceInner.setJdbcUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp()
-                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
-                        + tbDatasourceConfig.getSchemaDesc()
-                        + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai");//url
-                //验证连接有效与否的SQL,不同的数据配置不同
-                //检验连接是否有效的查询语句。如果数据库Driver支持ping()方法,
-                //则优先使用ping()方法进行检查,否则使用validationQuery查询进行检查。(Oracle jdbc Driver目前不支持ping方法)
-//                datasourceInner.setValidationQuery("select 1");
-                datasourceInner.setPassword(decrypt);//密码
-                break;
-            case DataSourceType.ORACLE:
-                datasourceInner.setJdbcUrl("jdbc:oracle:thin:@" + tbDatasourceConfig.getConnectionIp()
-                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
-                        + tbDatasourceConfig.getSchemaDesc());//url
-                //Oracle的验证语句
-//                datasourceInner.setValidationQuery("select 1 FROM DUAL");
-                datasourceInner.setPassword(decrypt);//密码
-                break;
-            case DataSourceType.DB2:
-                datasourceInner.setJdbcUrl("jdbc:db2://" + tbDatasourceConfig.getConnectionIp()
-                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
-                        + tbDatasourceConfig.getSchemaDesc() + ":currentSchema=" + tbDatasourceConfig.getDb2Schema()+";");//url
-//                datasourceInner.setDriverClassName("com.ibm.db2.jcc.DB2Driver");//db2要指定驱动名不然就默认COM.ibm.db2.jdbc.app.DB2Driver
-                //DB2的验证语句
-//                datasourceInner.setValidationQuery("select 1 from sysibm.sysdummy1;");
-                datasourceInner.setPassword(decrypt);//密码
-                break;
-            case DataSourceType.PostgreSQL:
-                datasourceInner.setJdbcUrl("jdbc:postgresql://" + tbDatasourceConfig.getConnectionIp()
-                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
-                        + tbDatasourceConfig.getSchemaDesc());//url
-                //PostgreSQL的验证语句
-//                datasourceInner.setValidationQuery("select version();");
-                datasourceInner.setPassword(decrypt);//密码
-                break;
-            case DataSourceType.EXCEL:
-                datasourceInner.setJdbcUrl("jdbc:postgresql://" + tbDatasourceConfig.getConnectionIp()
-                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
-                        + tbDatasourceConfig.getSchemaDesc());//url
-                //PostgreSQL的验证语句
-//                datasourceInner.setValidationQuery("select version();");
-                datasourceInner.setPassword(tbDatasourceConfig.getDatasourcePasswd());//密码
-                break;
-            default:
-                datasourceInner.setJdbcUrl(null);
-                break;
-        }
+        setUrl(tbDatasourceConfig, decrypt);
         //    private final String driverClass = "com.mysql.cj.jdbc.Driver"; 默认驱动url可辨别
         datasourceInner.setUser(tbDatasourceConfig.getDatasourceUserName());//用户名
 
@@ -143,6 +96,64 @@ public class JDBCUtils {
         datasourceInner.setCheckoutTimeout(3000);
         datasourceInner.setTestConnectionOnCheckin(true);
         datasourceInner.setUnreturnedConnectionTimeout(15);
+        datasourceInner.setAcquireIncrement(5);
+    }
+
+    private void setUrl(TBDatasourceConfig tbDatasourceConfig, String decrypt) {
+        switch(tbDatasourceConfig.getDatasourceType()){
+            case DataSourceType.MYSQL:
+                datasourceInner.setJdbcUrl("jdbc:mysql://" + tbDatasourceConfig.getConnectionIp()
+                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                        + tbDatasourceConfig.getSchemaDesc()
+                        + "?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai");//url
+                //验证连接有效与否的SQL,不同的数据配置不同
+                //检验连接是否有效的查询语句。如果数据库Driver支持ping()方法,
+                //则优先使用ping()方法进行检查,否则使用validationQuery查询进行检查。(Oracle jdbc Driver目前不支持ping方法)
+//                datasourceInner.setValidationQuery("select 1");
+                datasourceInner.setPassword(decrypt);//密码
+                break;
+            case DataSourceType.ORACLE:
+                datasourceInner.setJdbcUrl("jdbc:oracle:thin:@" + tbDatasourceConfig.getConnectionIp()
+                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                        + tbDatasourceConfig.getSchemaDesc());//url
+                //Oracle的验证语句
+//                datasourceInner.setValidationQuery("select 1 FROM DUAL");
+                datasourceInner.setPassword(decrypt);//密码
+                break;
+            case DataSourceType.DB2:
+                datasourceInner.setJdbcUrl("jdbc:db2://" + tbDatasourceConfig.getConnectionIp()
+                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                        + tbDatasourceConfig.getSchemaDesc() + ":currentSchema=" + tbDatasourceConfig.getDb2Schema()+";");//url
+//                datasourceInner.setDriverClassName("com.ibm.db2.jcc.DB2Driver");//db2要指定驱动名不然就默认COM.ibm.db2.jdbc.app.DB2Driver
+                try {
+                    datasourceInner.setDriverClass("com.ibm.db2.jcc.DB2Driver");
+                } catch (PropertyVetoException e) {
+                    e.printStackTrace();
+                }
+                //DB2的验证语句
+//                datasourceInner.setValidationQuery("select 1 from sysibm.sysdummy1;");
+                datasourceInner.setPassword(decrypt);//密码
+                break;
+            case DataSourceType.PostgreSQL:
+                datasourceInner.setJdbcUrl("jdbc:postgresql://" + tbDatasourceConfig.getConnectionIp()
+                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                        + tbDatasourceConfig.getSchemaDesc());//url
+                //PostgreSQL的验证语句
+//                datasourceInner.setValidationQuery("select version();");
+                datasourceInner.setPassword(decrypt);//密码
+                break;
+            case DataSourceType.EXCEL:
+                datasourceInner.setJdbcUrl("jdbc:postgresql://" + tbDatasourceConfig.getConnectionIp()
+                        + ":" + tbDatasourceConfig.getConnectionPort() + "/"
+                        + tbDatasourceConfig.getSchemaDesc());//url
+                //PostgreSQL的验证语句
+//                datasourceInner.setValidationQuery("select version();");
+                datasourceInner.setPassword(tbDatasourceConfig.getDatasourcePasswd());//密码
+                break;
+            default:
+                datasourceInner.setJdbcUrl(null);
+                break;
+        }
     }
 
     /**
@@ -241,4 +252,5 @@ public class JDBCUtils {
             }
         }
     }
+
 }

@@ -1,7 +1,6 @@
 package com.broadtext.ycadp.data.ac.provider.service.jdbc.impl;
 
 import com.broadtext.ycadp.core.common.service.BaseServiceImpl;
-import com.broadtext.ycadp.data.ac.api.constants.MysqlCheckErrorCode;
 import com.broadtext.ycadp.data.ac.api.entity.TBDatasourceConfig;
 import com.broadtext.ycadp.data.ac.api.vo.FieldDictVo;
 import com.broadtext.ycadp.data.ac.api.vo.FieldInfoVo;
@@ -9,7 +8,6 @@ import com.broadtext.ycadp.data.ac.provider.repository.DataacRepository;
 import com.broadtext.ycadp.data.ac.provider.service.jdbc.DataacInfoService;
 import com.broadtext.ycadp.data.ac.provider.utils.AesUtil;
 import com.broadtext.ycadp.data.ac.provider.utils.DruidUtil;
-import com.broadtext.ycadp.data.ac.provider.utils.JDBCUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Service;
@@ -262,7 +260,7 @@ public class DataacInfoForSqlServerImpl extends BaseServiceImpl<TBDatasourceConf
             ResultSet rs1 = null;
             try {
                 connection = jdbcUtils.getConnection();
-                ps = connection.prepareStatement("select table_name,column_name,data_type from information_schema.columns where table_name = '"+table+"';");
+                ps = connection.prepareStatement("select table_name,column_name,data_type from information_schema.columns where table_name = '" + table + "';");
                 rs = ps.executeQuery();
                 List<FieldInfoVo> list = new ArrayList<FieldInfoVo>();
                 FieldInfoVo field;
@@ -278,7 +276,7 @@ public class DataacInfoForSqlServerImpl extends BaseServiceImpl<TBDatasourceConf
                         "from sys.tables a\n" +
                         "inner join sys.columns b on b.object_id = a.object_id\n" +
                         "left join sys.extended_properties c on c.major_id = b.object_id and c.minor_id = b.column_id\n" +
-                        "where a.name = '"+table+"';");
+                        "where a.name = '" + table + "';");
                 rs1 = ps1.executeQuery();
                 List<FieldInfoVo> list1 = new ArrayList<FieldInfoVo>();
                 while (rs1.next()) {
@@ -375,7 +373,7 @@ public class DataacInfoForSqlServerImpl extends BaseServiceImpl<TBDatasourceConf
 //            } else if (errorCode == MysqlCheckErrorCode.ERROR_ACCESS) {
 //                checkMap.put(false, "连接失败,无权访问:" + e.getMessage());
 //            } else {
-                checkMap.put(false, "连接失败,系统错误:" + e.getMessage());
+            checkMap.put(false, "连接失败,系统错误:" + e.getMessage());
 //            }
             return checkMap;
         } finally {
@@ -421,12 +419,6 @@ public class DataacInfoForSqlServerImpl extends BaseServiceImpl<TBDatasourceConf
 
     @Override
     public String getLimitString(String sql, int skipResults, int maxResults) {
-        String limitSql;
-        if (skipResults > 0) {
-            limitSql = sql + " limit " + skipResults + ',' + maxResults + ";";
-        } else {
-            limitSql = sql + " limit " + maxResults + ";";
-        }
-        return limitSql;
+        return "select top " + maxResults + " * from (select row_number() over(order by id asc) as rownumber,* from " + sql + ") temp_row where rownumber>" + skipResults;
     }
 }

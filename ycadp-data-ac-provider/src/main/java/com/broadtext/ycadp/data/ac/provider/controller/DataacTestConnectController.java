@@ -37,6 +37,8 @@ public class DataacTestConnectController {
     private DataacInfoService db2;
     @Autowired
     private DataacInfoService postgresql;
+    @Autowired
+    private DataacInfoService sqlServer;
 
     /**
      * 测试数据源连接
@@ -63,6 +65,9 @@ public class DataacTestConnectController {
                     break;
                 case DataSourceType.PostgreSQL:
                     map = postgresql.check(datasourceConfig);
+                    break;
+                case DataSourceType.SQLServer:
+                    map = sqlServer.check(datasourceConfig);
                     break;
                 default:
                     break;

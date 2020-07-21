@@ -40,6 +40,8 @@ public class DataacSearchController {
     @Autowired
     private DataacInfoService postgresql;
     @Autowired
+    private DataacInfoService sqlServer;
+    @Autowired
     private DataacService dataacService;
     @Autowired
     private DataExcelService excelService;
@@ -56,119 +58,143 @@ public class DataacSearchController {
         TBDatasourceConfig datasource=dataacService.findById(id);
         List<String> list=new ArrayList<String>();
         List<String> listContains=new ArrayList<String>();
-        Map map =new HashMap();
+        Map<String,Object> map =new HashMap<>();
         try {
             String datasourceType = dataacService.getFieldTypeById(id);
-            switch (datasourceType) {
-                case DataSourceType.MYSQL:
-                    if (tableName == null) {//无筛选条件查询所有
-                        list = mysql.getAllTables(datasource);
-                        map.put("list", list);
-                    } else if (!"".equals(tableName)) {//有筛选条件
-                        list = mysql.getAllTables(datasource);
-                        if (list.size() > 0) {
-                            for (String str : list) {
-                                if (str.contains(tableName)) {
-                                    listContains.add(str);
-                                }
-                            }
-                        }
-                        map.put("list", listContains);
-                    } else {//无筛选条件查询所有
-                        list = mysql.getAllTables(datasource);
-                        map.put("list", list);
-                    }
-                    break;
-                case DataSourceType.ORACLE:
-                    if (tableName == null) {//无筛选条件查询所有
-                        list = oracle.getAllTables(datasource);
-                        map.put("list", list);
-                    } else if (!"".equals(tableName)) {//有筛选条件
-                        list = oracle.getAllTables(datasource);
-                        if (list.size() > 0) {
-                            for (String str : list) {
-                                if (str.contains(tableName)) {
-                                    listContains.add(str);
-                                }
-                            }
-                        }
-                        map.put("list", listContains);
-                    } else {//无筛选条件查询所有
-                        list = oracle.getAllTables(datasource);
-                        map.put("list", list);
-                    }
-                    break;
-                case DataSourceType.DB2:
-                    if (tableName == null) {//无筛选条件查询所有
-                        list = db2.getAllTables(datasource);
-                        map.put("list", list);
-                    } else if (!"".equals(tableName)) {//有筛选条件
-                        list = db2.getAllTables(datasource);
-                        if (list.size() > 0) {
-                            for (String str : list) {
-                                if (str.contains(tableName)) {
-                                    listContains.add(str);
-                                }
-                            }
-                        }
-                        map.put("list", listContains);
-                    } else {//无筛选条件查询所有
-                        list = db2.getAllTables(datasource);
-                        map.put("list", list);
-                    }
-                    break;
-                case DataSourceType.PostgreSQL:
-                    if (tableName == null) {//无筛选条件查询所有
-                        list = postgresql.getAllTables(datasource);
-                        map.put("list", list);
-                    } else if (!"".equals(tableName)) {//有筛选条件
-                        list = postgresql.getAllTables(datasource);
-                        if (list.size() > 0) {
-                            for (String str : list) {
-                                if (str.contains(tableName)) {
-                                    listContains.add(str);
-                                }
-                            }
-                        }
-                        map.put("list", listContains);
-                    } else {//无筛选条件查询所有
-                        list = postgresql.getAllTables(datasource);
-                        map.put("list", list);
-                    }
-                    break;
-                case DataSourceType.EXCEL:
-                    List<TBDatasourceExcel> listByDataSourceId = excelService.getListByDataSourceId(id);
-                    if (tableName == null) {//无筛选条件查询所有
-//                        List<String> sheetTableNameList = new ArrayList<>();
-//                        List<String> sheetNameList = new ArrayList<>();
-                        for (TBDatasourceExcel e : listByDataSourceId) {
-//                            sheetTableNameList.add(e.getSheetTableName());
-                            list.add(e.getSheetTableName());
-                        }
-                        map.put("list", list);
-                    } else if (!"".equals(tableName)) {//有筛选条件
-                        for (TBDatasourceExcel e : listByDataSourceId) {
-                            if (e.getSheetTableName().contains(tableName)) {
-                                list.add(e.getSheetTableName());
-                            }
-                        }
-                        map.put("list", list);
-                    } else {//无筛选条件查询所有
-                        for (TBDatasourceExcel e : listByDataSourceId) {
-                            list.add(e.getSheetTableName());
-                        }
-                        map.put("list", list);
-                    }
-                    break;
-                default:
-                    break;
-            }
+            searchTable(id, tableName, datasource, list, listContains, map, datasourceType);
             return new RespEntity(RespCode.SUCCESS,map);
         } catch (Exception e) {
             e.printStackTrace();
             return new RespEntity(DataacRespCode.DATAAC_RESP_CODE);
         }
     }
+
+    private void searchTable(@PathVariable("id") String id, String tableName, TBDatasourceConfig datasource, List<String> list, List<String> listContains, Map<String,Object> map, String datasourceType) throws Exception {
+        switch (datasourceType) {
+            case DataSourceType.MYSQL:
+                if (tableName == null) {//无筛选条件查询所有
+                    list = mysql.getAllTables(datasource);
+                    map.put("list", list);
+                } else if (!"".equals(tableName)) {//有筛选条件
+                    list = mysql.getAllTables(datasource);
+                    if (list.size() > 0) {
+                        for (String str : list) {
+                            if (str.contains(tableName)) {
+                                listContains.add(str);
+                            }
+                        }
+                    }
+                    map.put("list", listContains);
+                } else {//无筛选条件查询所有
+                    list = mysql.getAllTables(datasource);
+                    map.put("list", list);
+                }
+                break;
+            case DataSourceType.ORACLE:
+                if (tableName == null) {//无筛选条件查询所有
+                    list = oracle.getAllTables(datasource);
+                    map.put("list", list);
+                } else if (!"".equals(tableName)) {//有筛选条件
+                    list = oracle.getAllTables(datasource);
+                    if (list.size() > 0) {
+                        for (String str : list) {
+                            if (str.contains(tableName)) {
+                                listContains.add(str);
+                            }
+                        }
+                    }
+                    map.put("list", listContains);
+                } else {//无筛选条件查询所有
+                    list = oracle.getAllTables(datasource);
+                    map.put("list", list);
+                }
+                break;
+            case DataSourceType.DB2:
+                if (tableName == null) {//无筛选条件查询所有
+                    list = db2.getAllTables(datasource);
+                    map.put("list", list);
+                } else if (!"".equals(tableName)) {//有筛选条件
+                    list = db2.getAllTables(datasource);
+                    if (list.size() > 0) {
+                        for (String str : list) {
+                            if (str.contains(tableName)) {
+                                listContains.add(str);
+                            }
+                        }
+                    }
+                    map.put("list", listContains);
+                } else {//无筛选条件查询所有
+                    list = db2.getAllTables(datasource);
+                    map.put("list", list);
+                }
+                break;
+            case DataSourceType.PostgreSQL:
+                if (tableName == null) {//无筛选条件查询所有
+                    list = postgresql.getAllTables(datasource);
+                    map.put("list", list);
+                } else if (!"".equals(tableName)) {//有筛选条件
+                    list = postgresql.getAllTables(datasource);
+                    if (list.size() > 0) {
+                        for (String str : list) {
+                            if (str.contains(tableName)) {
+                                listContains.add(str);
+                            }
+                        }
+                    }
+                    map.put("list", listContains);
+                } else {//无筛选条件查询所有
+                    list = postgresql.getAllTables(datasource);
+                    map.put("list", list);
+                }
+                break;
+            case DataSourceType.SQLServer:
+                if (tableName == null) {//无筛选条件查询所有
+                    list = sqlServer.getAllTables(datasource);
+                    map.put("list", list);
+                } else if (!"".equals(tableName)) {//有筛选条件
+                    list = sqlServer.getAllTables(datasource);
+                    if (list.size() > 0) {
+                        for (String str : list) {
+                            if (str.contains(tableName)) {
+                                listContains.add(str);
+                            }
+                        }
+                    }
+                    map.put("list", listContains);
+                } else {//无筛选条件查询所有
+                    list = sqlServer.getAllTables(datasource);
+                    map.put("list", list);
+                }
+                break;
+            case DataSourceType.EXCEL:
+                List<TBDatasourceExcel> listByDataSourceId = excelService.getListByDataSourceId(id);
+                if (tableName == null) {//无筛选条件查询所有
+//                        List<String> sheetTableNameList = new ArrayList<>();
+//                        List<String> sheetNameList = new ArrayList<>();
+                    for (TBDatasourceExcel e : listByDataSourceId) {
+//                            sheetTableNameList.add(e.getSheetTableName());
+                        list.add(e.getSheetTableName());
+                    }
+                    map.put("list", list);
+                } else if (!"".equals(tableName)) {//有筛选条件
+                    for (TBDatasourceExcel e : listByDataSourceId) {
+                        if (e.getSheetTableName().contains(tableName)) {
+                            list.add(e.getSheetTableName());
+                        }
+                    }
+                    map.put("list", list);
+                } else {//无筛选条件查询所有
+                    for (TBDatasourceExcel e : listByDataSourceId) {
+                        list.add(e.getSheetTableName());
+                    }
+                    map.put("list", list);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     /**
      * 查询数据库表数据
      * @param id 对象id
@@ -206,6 +232,9 @@ public class DataacSearchController {
                 case DataSourceType.PostgreSQL:
                     sql = postgresql.getLimitString(sql, skipResults, maxResults);
                     break;
+                case DataSourceType.SQLServer:
+                    sql = sqlServer.getLimitString(sql, skipResults, maxResults);
+                    break;
                 default:
                     break;
             }
@@ -232,6 +261,10 @@ public class DataacSearchController {
                 case DataSourceType.PostgreSQL:
                     allData = postgresql.getAllData(datasource, sql);
                     count = postgresql.getDataCount(datasource, sqlTotal);
+                    break;
+                case DataSourceType.SQLServer:
+                    allData = sqlServer.getAllData(datasource, sql);
+                    count = sqlServer.getDataCount(datasource, sqlTotal);
                     break;
                 default:
                     break;
